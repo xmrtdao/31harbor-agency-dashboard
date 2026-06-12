@@ -22,7 +22,6 @@
         .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
         .status-live { background: #22c55e; color: #000; }
         .status-pending { background: #f59e0b; color: #000; }
-        .status-setup { background: #6b7280; color: #fff; }
         .metric { font-size: 2.5rem; font-weight: 700; color: #0066cc; margin: 10px 0; }
         .metric-label { color: #888; font-size: 0.9rem; }
         .progress-bar { background: #333; height: 8px; border-radius: 4px; overflow: hidden; margin: 10px 0; }
@@ -41,6 +40,9 @@
         .log-success { color: #22c55e; }
         .log-pending { color: #f59e0b; }
         footer { text-align: center; padding: 30px; color: #666; border-top: 1px solid #333; margin-top: 40px; }
+        .stat-box { background: #252525; padding: 15px; border-radius: 8px; margin: 10px 0; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #fff; }
+        .stat-label { color: #888; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -48,49 +50,12 @@
         <header>
             <h1>🏢 31 Harbor Agency Dashboard</h1>
             <p class="subtitle">Centralized tracking for 31 Harbor, Party Favor Photo, and XMRT DAO</p>
+            <p class="subtitle" id="last-update">Last Updated: Loading...</p>
         </header>
 
         <!-- Company Overview -->
-        <div class="grid">
-            <div class="card">
-                <h2>🏠 31 Harbor</h2>
-                <div class="metric">🟢 Live</div>
-                <p class="metric-label">Status</p>
-                <table>
-                    <tr><td>Domain</td><td>31harbor.com</td></tr>
-                    <tr><td>Email</td><td>david@31harbor.com</td></tr>
-                    <tr><td>Phone</td><td>(631) 997-8503</td></tr>
-                    <tr><td>Website</td><td><a href="https://31harbor.com" target="_blank">31harbor.com</a></td></tr>
-                </table>
-                <a href="https://github.com/xmrtdao/sea-hampton-house" class="btn">GitHub Repo</a>
-                <a href="https://resend.com/domains/0b0b6d4b-de1d-4119-9ed6-f67fae6434f4" class="btn">Resend Dashboard</a>
-            </div>
-
-            <div class="card">
-                <h2>📸 Party Favor Photo</h2>
-                <div class="metric">🟡 Setup</div>
-                <p class="metric-label">Status</p>
-                <table>
-                    <tr><td>Domain</td><td>partyfavorphoto.com</td></tr>
-                    <tr><td>Email</td><td>[Configure]</td></tr>
-                    <tr><td>Website</td><td><a href="https://partyfavorphoto.com" target="_blank">partyfavorphoto.com</a></td></tr>
-                    <tr><td>Leads</td><td>2 active</td></tr>
-                </table>
-                <a href="#" class="btn">Configure Resend</a>
-            </div>
-
-            <div class="card">
-                <h2>🔐 XMRT DAO</h2>
-                <div class="metric">🟢 Active</div>
-                <p class="metric-label">Status</p>
-                <table>
-                    <tr><td>Domain</td><td>mobilemonero.com</td></tr>
-                    <tr><td>Products</td><td>Zero-Claw, Atlas, PaperHawk</td></tr>
-                    <tr><td>Website</td><td><a href="https://mobilemonero.com" target="_blank">mobilemonero.com</a></td></tr>
-                    <tr><td>Fleet</td><td>Vex + Alice + Hermes</td></tr>
-                </table>
-                <a href="https://github.com/xmrtdao" class="btn">GitHub Org</a>
-            </div>
+        <div class="grid" id="company-grid">
+            <!-- Populated by JS -->
         </div>
 
         <!-- Email Traffic -->
@@ -98,60 +63,26 @@
             <div class="card">
                 <h2>📧 Email Traffic Dashboard</h2>
                 <div class="grid" style="margin-top: 20px;">
-                    <div>
-                        <div class="metric-label">Emails Sent (Today)</div>
-                        <div class="metric" id="emails-today">1</div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Emails Today</div>
+                        <div class="stat-value" id="total-today">-</div>
                     </div>
-                    <div>
-                        <div class="metric-label">Emails Sent (Week)</div>
-                        <div class="metric" id="emails-week">1</div>
+                    <div class="stat-box">
+                        <div class="stat-label">Total Emails (All Time)</div>
+                        <div class="stat-value" id="total-all">-</div>
                     </div>
-                    <div>
-                        <div class="metric-label">Delivery Rate</div>
-                        <div class="metric">100%</div>
+                    <div class="stat-box">
+                        <div class="stat-label">Active Domains</div>
+                        <div class="stat-value" id="active-domains">-</div>
                     </div>
                 </div>
-                <h3>Recent Activity</h3>
+                <h3>Recent Activity (Last 10)</h3>
                 <table id="email-table">
                     <thead>
-                        <tr><th>Time</th><th>From</th><th>To</th><th>Subject</th><th>Status</th></tr>
+                        <tr><th>Time</th><th>Company</th><th>From</th><th>To</th><th>Subject</th><th>Status</th></tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>2026-06-12 14:05</td>
-                            <td>david@31harbor.com</td>
-                            <td>dvdelze@gmail.com</td>
-                            <td>31 Harbor Live ✓</td>
-                            <td><span class="status status-live">Delivered</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- GitHub Repositories -->
-        <div class="section">
-            <div class="card">
-                <h2>📦 GitHub Repositories</h2>
-                <table id="repo-table">
-                    <thead>
-                        <tr><th>Repository</th><th>Company</th><th>Last Commit</th><th>Pages URL</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>sea-hampton-house</td>
-                            <td><span class="badge badge-31h">31 Harbor</span></td>
-                            <td id="commit-31h">Loading...</td>
-                            <td><a href="https://31harbor.com" target="_blank">31harbor.com</a></td>
-                            <td><span class="status status-live">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>31harbor-agency-dashboard</td>
-                            <td><span class="badge badge-31h">Agency</span></td>
-                            <td id="commit-dash">Just now</td>
-                            <td><a href="https://xmrtdao.github.io/31harbor-agency-dashboard" target="_blank">View Dashboard</a></td>
-                            <td><span class="status status-live">New</span></td>
-                        </tr>
+                    <tbody id="email-tbody">
+                        <tr><td colspan="6">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -172,21 +103,14 @@
                             <td><span class="badge badge-31h">31 Harbor</span></td>
                             <td>Email</td>
                             <td><span class="status status-live">Complete</span></td>
-                            <td>1 sent, 0 opened</td>
+                            <td>1 sent, delivered</td>
                         </tr>
-                    </tbody>
-                </table>
-                <h3 style="margin-top: 20px;">Campaign Pipeline</h3>
-                <table>
-                    <thead>
-                        <tr><th>Campaign</th><th>Company</th><th>Planned</th><th>Priority</th></tr>
-                    </thead>
-                    <tbody>
                         <tr>
-                            <td>Open House Invite</td>
-                            <td><span class="badge badge-31h">31 Harbor</span></td>
-                            <td>2026-06-20</td>
-                            <td>High</td>
+                            <td>DSLR vs Tablet Campaign</td>
+                            <td><span class="badge badge-pfp">Party Favor Photo</span></td>
+                            <td>Email</td>
+                            <td><span class="status status-live">Active</span></td>
+                            <td>20 sent today</td>
                         </tr>
                     </tbody>
                 </table>
@@ -197,30 +121,9 @@
         <div class="section">
             <div class="card">
                 <h2>🎯 Q3 2026 Goals Tracker</h2>
-                <h3>31 Harbor</h3>
-                <div class="progress-bar"><div class="progress-fill" style="width: 20%"></div></div>
-                <p>1 of 5 goals complete</p>
-                <ul style="margin: 15px 0 15px 20px;">
-                    <li style="color: #22c55e;">✓ Launch email marketing program</li>
-                    <li>⏳ Generate 10 qualified leads</li>
-                    <li>⏳ Schedule 5 property showings</li>
-                    <li>⏳ Close sale at $750,000</li>
-                    <li>⏳ Achieve 95% email deliverability</li>
-                </ul>
-
-                <h3>Party Favor Photo</h3>
-                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-                <p>0 of 5 goals complete</p>
-                <ul style="margin: 15px 0 15px 20px; color: #888;">
-                    <li>⏳ [Add goals]</li>
-                </ul>
-
-                <h3>XMRT DAO</h3>
-                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-                <p>0 of 5 goals complete</p>
-                <ul style="margin: 15px 0 15px 20px; color: #888;">
-                    <li>⏳ [Add goals]</li>
-                </ul>
+                <div id="goals-container">
+                    <!-- Populated by JS -->
+                </div>
             </div>
         </div>
 
@@ -229,18 +132,17 @@
             <div class="card">
                 <h2>📝 Activity Log</h2>
                 <div class="log" id="activity-log">
-                    <div class="log-entry"><span class="log-success">✓</span> Dashboard created - 2026-06-12 14:30</div>
-                    <div class="log-entry"><span class="log-success">✓</span> GitHub repo initialized - 31harbor-agency-dashboard</div>
-                    <div class="log-entry"><span class="log-success">✓</span> Email sent to dvdelze@gmail.com - 14:05</div>
-                    <div class="log-entry"><span class="log-pending">⏳</span> Inbound forwarding pending DNS verification</div>
-                    <div class="log-entry"><span class="log-pending">⏳</span> SSL certificate issuing for 31harbor.com</div>
+                    <div class="log-entry"><span class="log-success">✓</span> Dashboard created - 2026-06-12</div>
+                    <div class="log-entry"><span class="log-success">✓</span> 31 Harbor launched - david@31harbor.com active</div>
+                    <div class="log-entry"><span class="log-success">✓</span> Party Favor Photo integrated - 20 emails today</div>
+                    <div class="log-entry"><span class="log-pending">⏳</span> XMRT DAO - Pending integration</div>
                 </div>
             </div>
         </div>
 
         <footer>
-            <p>31 Harbor Agency Dashboard v1.0.0</p>
-            <p>Last Updated: <span id="last-update">2026-06-12 14:30</span></p>
+            <p>31 Harbor Agency Dashboard v1.1.0</p>
+            <p>Last Updated: <span id="footer-update">-</span></p>
             <p style="margin-top: 10px;">
                 <a href="https://github.com/xmrtdao/31harbor-agency-dashboard">GitHub</a> •
                 <a href="https://resend.com">Resend</a> •
@@ -250,28 +152,104 @@
     </div>
 
     <script>
-        // Auto-update timestamp
-        document.getElementById('last-update').textContent = new Date().toLocaleString();
-
-        // Fetch GitHub commit info
-        async function fetchCommitInfo(repo, elementId) {
+        // Load live data
+        async function loadDashboard() {
             try {
-                const resp = await fetch(`https://api.github.com/repos/xmrtdao/${repo}/commits?per_page=1`);
+                const resp = await fetch('data.json?' + Date.now());
                 const data = await resp.json();
-                if (data[0]) {
-                    const date = new Date(data[0].commit.author.date).toLocaleDateString();
-                    document.getElementById(elementId).textContent = `${data[0].commit.message.split('\n')[0].substring(0, 40)}... (${date})`;
+                
+                document.getElementById('last-update').textContent = 'Last Updated: ' + new Date(data.updated).toLocaleString();
+                document.getElementById('footer-update').textContent = new Date(data.updated).toLocaleString();
+                
+                // Company cards
+                const companyGrid = document.getElementById('company-grid');
+                let totalToday = 0;
+                let totalAll = 0;
+                let activeDomains = 0;
+                
+                for (const [name, company] of Object.entries(data.companies)) {
+                    totalToday += company.emails_today;
+                    totalAll += company.emails_total;
+                    if (company.dns_verified) activeDomains++;
+                    
+                    const badgeClass = name.includes('31 Harbor') ? 'badge-31h' : 
+                                      name.includes('Party Favor') ? 'badge-pfp' : 'badge-xmrt';
+                    const statusClass = company.dns_verified ? 'status-live' : 'status-pending';
+                    const statusText = company.dns_verified ? '✓ Live' : '⏳ Setup';
+                    
+                    companyGrid.innerHTML += `
+                        <div class="card">
+                            <h2>${name.includes('31 Harbor') ? '🏠' : name.includes('Party Favor') ? '📸' : '🔐'} ${name}</h2>
+                            <div class="metric ${statusClass}">${statusText}</div>
+                            <p class="metric-label">Status</p>
+                            <table>
+                                <tr><td>Domain</td><td>${company.domain}</td></tr>
+                                <tr><td>Email</td><td>${company.email}</td></tr>
+                                <tr><td>Today</td><td>${company.emails_today} emails</td></tr>
+                                <tr><td>Webhooks</td><td>${company.webhooks}</td></tr>
+                            </table>
+                            <a href="https://resend.com/domains" class="btn" target="_blank">Resend Dashboard</a>
+                        </div>
+                    `;
                 }
+                
+                // Summary stats
+                document.getElementById('total-today').textContent = totalToday;
+                document.getElementById('total-all').textContent = totalAll;
+                document.getElementById('active-domains').textContent = activeDomains;
+                
+                // Recent emails table
+                const emailTbody = document.getElementById('email-tbody');
+                let allEmails = [];
+                for (const [name, company] of Object.entries(data.companies)) {
+                    company.recent_emails.forEach(email => {
+                        allEmails.push({
+                            ...email,
+                            company: name,
+                            badgeClass: name.includes('31 Harbor') ? 'badge-31h' : 'badge-pfp'
+                        });
+                    });
+                }
+                allEmails.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
+                emailTbody.innerHTML = allEmails.slice(0, 10).map(email => `
+                    <tr>
+                        <td>${new Date(email.created_at).toLocaleString()}</td>
+                        <td><span class="badge ${email.badgeClass}">${email.company}</span></td>
+                        <td>${email.from}</td>
+                        <td>${email.to[0]}</td>
+                        <td>${email.subject.substring(0, 40)}${email.subject.length > 40 ? '...' : ''}</td>
+                        <td><span class="status status-live">${email.last_event || 'sent'}</span></td>
+                    </tr>
+                `).join('');
+                
+                // Goals
+                const goalsContainer = document.getElementById('goals-container');
+                for (const [name, company] of Object.entries(data.companies)) {
+                    const progress = company.dns_verified ? 20 : 0;
+                    goalsContainer.innerHTML += `
+                        <h3>${name}</h3>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
+                        <p>${company.dns_verified ? '1 of 5' : '0 of 5'} goals complete</p>
+                        <ul style="margin: 15px 0 15px 20px;">
+                            ${company.dns_verified ? '<li style="color: #22c55e;">✓ Email system live</li>' : ''}
+                            <li>⏳ Generate 10 qualified leads</li>
+                            <li>⏳ Schedule 5 showings/bookings</li>
+                            <li>⏳ Close deals</li>
+                            <li>⏳ Achieve 95% deliverability</li>
+                        </ul>
+                    `;
+                }
+                
             } catch (e) {
-                document.getElementById(elementId).textContent = 'Unable to fetch';
+                console.error('Failed to load dashboard:', e);
+                document.getElementById('email-tbody').innerHTML = '<tr><td colspan="6">Failed to load data. Refresh page.</td></tr>';
             }
         }
-
-        fetchCommitInfo('sea-hampton-house', 'commit-31h');
-        fetchCommitInfo('31harbor-agency-dashboard', 'commit-dash');
-
-        // Auto-refresh every 5 minutes
-        setTimeout(() => location.reload(), 300000);
+        
+        loadDashboard();
+        // Auto-refresh every 2 minutes
+        setInterval(loadDashboard, 120000);
     </script>
 </body>
 </html>
