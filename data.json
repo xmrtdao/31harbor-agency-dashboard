@@ -1,0 +1,119 @@
+{
+  "updated": "2026-06-12T16:51:22.121154",
+  "companies": {
+    "31 Harbor": {
+      "domain": "31harbor.com",
+      "email": "david@31harbor.com",
+      "dns_verified": true,
+      "emails_today": 1,
+      "emails_total": 1,
+      "webhooks": 0,
+      "recent_emails": [
+        {
+          "id": "076d0ba1-4982-4608-ba6a-4a2863f02463",
+          "to": [
+            "dvdelze@gmail.com"
+          ],
+          "from": "david@31harbor.com",
+          "created_at": "2026-06-12 19:59:00.923132+00",
+          "subject": "31 Harbor Live \u2713",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [],
+          "last_event": "delivered",
+          "scheduled_at": null
+        }
+      ]
+    },
+    "Party Favor Photo": {
+      "domain": "partyfavorphoto.com",
+      "email": "bookings@partyfavorphoto.com",
+      "dns_verified": true,
+      "emails_today": 20,
+      "emails_total": 20,
+      "webhooks": 2,
+      "recent_emails": [
+        {
+          "id": "34817291-96cb-48b6-b78e-cd09635fe2b0",
+          "to": [
+            "jackie.trevor1121@gmail.com"
+          ],
+          "from": "Party Favor Photo <bookings@partyfavorphoto.com>",
+          "created_at": "2026-06-12 22:00:32.910345+00",
+          "subject": "The difference: DSLR + strobe vs tablet + ring light",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [
+            "joe@partyfavorphoto.com"
+          ],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "714881ae-cd5c-48ca-9892-208968c314ee",
+          "to": [
+            "hsuannh@gmail.com"
+          ],
+          "from": "Party Favor Photo <bookings@partyfavorphoto.com>",
+          "created_at": "2026-06-12 22:00:32.271583+00",
+          "subject": "The difference: DSLR + strobe vs tablet + ring light",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [
+            "joe@partyfavorphoto.com"
+          ],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "ddba8d2f-6dcd-4a0c-bcff-0cc849de0428",
+          "to": [
+            "geekatoids.luv.robots@gmail.com"
+          ],
+          "from": "Party Favor Photo <bookings@partyfavorphoto.com>",
+          "created_at": "2026-06-12 22:00:31.589555+00",
+          "subject": "The difference: DSLR + strobe vs tablet + ring light",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [
+            "joe@partyfavorphoto.com"
+          ],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "bfb8902e-062a-4831-88c8-0d3a37c6f772",
+          "to": [
+            "tess.horn@yahoo.com"
+          ],
+          "from": "Party Favor Photo <bookings@partyfavorphoto.com>",
+          "created_at": "2026-06-12 22:00:30.236968+00",
+          "subject": "The difference: DSLR + strobe vs tablet + ring light",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [
+            "joe@partyfavorphoto.com"
+          ],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "acc7251b-bd42-4287-9801-3264bc34077a",
+          "to": [
+            "artie@uprootedpest.com"
+          ],
+          "from": "Party Favor Photo <bookings@partyfavorphoto.com>",
+          "created_at": "2026-06-12 22:00:28.969594+00",
+          "subject": "The difference: DSLR + strobe vs tablet + ring light",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [
+            "joe@partyfavorphoto.com"
+          ],
+          "last_event": "delivered",
+          "scheduled_at": null
+        }
+      ]
+    }
+  }
+}
