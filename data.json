@@ -1,10 +1,11 @@
 {
-  "updated": "2026-06-12T16:51:22.121154",
+  "updated": "2026-06-12T16:54:08.999297",
   "companies": {
     "31 Harbor": {
       "domain": "31harbor.com",
       "email": "david@31harbor.com",
       "dns_verified": true,
+      "dns_count": "4/4",
       "emails_today": 1,
       "emails_total": 1,
       "webhooks": 0,
@@ -29,6 +30,7 @@
       "domain": "partyfavorphoto.com",
       "email": "bookings@partyfavorphoto.com",
       "dns_verified": true,
+      "dns_count": "4/4",
       "emails_today": 20,
       "emails_total": 20,
       "webhooks": 2,
@@ -110,6 +112,87 @@
           "reply_to": [
             "joe@partyfavorphoto.com"
           ],
+          "last_event": "delivered",
+          "scheduled_at": null
+        }
+      ]
+    },
+    "XMRT DAO": {
+      "domain": "mobilemonero.com",
+      "email": "alice@mobilemonero.com",
+      "dns_verified": false,
+      "dns_count": "3/4",
+      "emails_today": 0,
+      "emails_total": 20,
+      "webhooks": 1,
+      "recent_emails": [
+        {
+          "id": "f48e0f11-b2f6-4c08-a3bd-9528dbacd40b",
+          "to": [
+            "hermes@mobilemonero.com"
+          ],
+          "from": "Alice <alice@mobilemonero.com>",
+          "created_at": "2026-06-10 20:06:54.465804+00",
+          "subject": "\u26a0\ufe0f MUAPI Balance Low",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "70438994-b1c3-4d2b-86bc-cb9bf539b8fb",
+          "to": [
+            "hermes@mobilemonero.com"
+          ],
+          "from": "Alice <alice@mobilemonero.com>",
+          "created_at": "2026-06-10 20:06:53.888752+00",
+          "subject": "\u26a0\ufe0f MUAPI Balance Low",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "c9fa877c-6515-4df7-9553-ddf7083b1736",
+          "to": [
+            "hermes@mobilemonero.com"
+          ],
+          "from": "Alice <alice@mobilemonero.com>",
+          "created_at": "2026-06-10 20:01:50.046636+00",
+          "subject": "\u26a0\ufe0f MUAPI Balance Low",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "9c005ba6-c076-4086-a959-f083485114d1",
+          "to": [
+            "hermes@mobilemonero.com"
+          ],
+          "from": "Alice <alice@mobilemonero.com>",
+          "created_at": "2026-06-10 20:01:49.209498+00",
+          "subject": "\u26a0\ufe0f MUAPI Balance Low",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [],
+          "last_event": "delivered",
+          "scheduled_at": null
+        },
+        {
+          "id": "927101b6-ace7-401d-a17a-74e32fa259b5",
+          "to": [
+            "hermes@mobilemonero.com"
+          ],
+          "from": "Alice <alice@mobilemonero.com>",
+          "created_at": "2026-06-10 19:45:37.339721+00",
+          "subject": "\u26a0\ufe0f MUAPI Balance Low",
+          "bcc": [],
+          "cc": [],
+          "reply_to": [],
           "last_event": "delivered",
           "scheduled_at": null
         }
