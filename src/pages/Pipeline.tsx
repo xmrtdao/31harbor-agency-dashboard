@@ -14,9 +14,7 @@ import {
   CheckCircle,
   X,
   ChevronRight,
-  Zap,
   Clock,
-  AlertTriangle,
   Eye,
 } from 'lucide-react';
 import {

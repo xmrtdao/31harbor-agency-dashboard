@@ -5,7 +5,6 @@ import {
   RefreshCw,
   Search,
   Cpu,
-  Hand,
   Globe,
   DollarSign,
   Users,
@@ -16,11 +15,8 @@ import {
   Trash2,
   X,
   Check,
-  ChevronDown,
   MoreHorizontal,
-  GitBranch as BranchIcon,
   Filter,
-  Zap,
 } from 'lucide-react';
 import {
   PieChart,
