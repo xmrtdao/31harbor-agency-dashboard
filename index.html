@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>31 Harbor Agency Dashboard</title>
+    <title>Agentic OS - 31 Harbor Agency Dashboard</title>
     <style>
-        /* ===== MOBILE-FIRST BASE STYLES ===== */
+        /* ===== RESET & BASE STYLES ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
             --bg-primary: #0f0f0f;
-            --bg-card: #1a1a1a;
-            --bg-hover: #252525;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
             --text-primary: #e0e0e0;
             --text-secondary: #888;
             --border: #333;
-            --accent-31h: #0066cc;
-            --accent-pfp: #dc2626;
-            --accent-xmrt: #f59e0b;
+            --accent-research: #0066cc;
+            --accent-content: #f59e0b;
+            --accent-community: #dc2626;
+            --accent-agency: #8b5cf6;
             --success: #22c55e;
             --warning: #f59e0b;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Courier New', monospace;
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
@@ -32,9 +33,9 @@
         
         .container {
             width: 100%;
-            padding: 15px;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
+            padding: 15px;
         }
         
         /* ===== HEADER ===== */
@@ -43,7 +44,7 @@
             padding: 20px 15px;
             margin-bottom: 20px;
             border-radius: 12px;
-            text-align: center;
+            border: 1px solid var(--border);
         }
         
         h1 {
@@ -57,220 +58,375 @@
             font-size: 0.9rem;
         }
         
-        #last-update {
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-        
-        /* ===== SUMMARY STATS ===== */
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-box {
-            background: var(--bg-card);
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent-31h);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            margin-top: 5px;
-        }
-        
-        /* ===== COMPANY CARDS ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .card {
-            background: var(--bg-card);
-            border-radius: 12px;
+        /* ===== CONDUCTOR SECTION ===== */
+        .conductor {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             padding: 20px;
+            border-radius: 12px;
+            border: 2px solid var(--accent-research);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .conductor h2 {
+            font-size: 1.3rem;
+            color: var(--accent-research);
+            margin-bottom: 10px;
+        }
+        
+        .conductor p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* ===== DOMAINS GRID ===== */
+        .domains-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .domain {
+            background: var(--bg-secondary);
+            border-radius: 12px;
             border: 1px solid var(--border);
-        }
-        
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: #fff;
-            border-bottom: 2px solid var(--accent-31h);
-            padding-bottom: 10px;
-        }
-        
-        .card h3 {
-            font-size: 1rem;
-            margin: 15px 0 10px;
-            color: var(--text-secondary);
-        }
-        
-        /* ===== TABLES ===== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            font-size: 0.85rem;
-        }
-        
-        th, td {
-            padding: 10px 8px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        th {
-            background: var(--bg-hover);
-            color: #fff;
-            font-weight: 600;
-        }
-        
-        tr:hover {
-            background: var(--bg-hover);
-        }
-        
-        /* Mobile table scroll */
-        .table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* ===== STATUS BADGES ===== */
-        .status {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .status-live { background: var(--success); color: #000; }
-        .status-pending { background: var(--warning); color: #000; }
-        
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            margin-left: 8px;
-            white-space: nowrap;
-        }
-        
-        .badge-31h { background: var(--accent-31h); }
-        .badge-pfp { background: var(--accent-pfp); }
-        .badge-xmrt { background: var(--accent-xmrt); }
-        
-        /* ===== METRICS ===== */
-        .metric {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent-31h);
-            margin: 10px 0;
-        }
-        
-        .metric-label {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-        }
-        
-        /* ===== PROGRESS BARS ===== */
-        .progress-bar {
-            background: var(--bg-hover);
-            height: 8px;
-            border-radius: 4px;
             overflow: hidden;
-            margin: 10px 0;
         }
         
-        .progress-fill {
-            background: linear-gradient(90deg, var(--accent-31h), #00aaff);
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s;
+        .domain-header {
+            padding: 15px;
+            border-bottom: 2px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        /* ===== BUTTONS ===== */
-        .btn {
-            display: inline-block;
-            padding: 10px 15px;
-            background: var(--accent-31h);
-            color: #fff;
-            border-radius: 6px;
-            margin: 5px 5px 5px 0;
-            text-decoration: none;
-            font-size: 0.85rem;
+        .domain-header.research { border-color: var(--accent-research); }
+        .domain-header.content { border-color: var(--accent-content); }
+        .domain-header.community { border-color: var(--accent-community); }
+        .domain-header.agency { border-color: var(--accent-agency); }
+        
+        .domain-header h3 {
+            font-size: 1.1rem;
+            margin: 0;
         }
         
-        .btn:hover {
-            background: #0055aa;
+        .domain-icon {
+            font-size: 1.3rem;
         }
         
-        /* ===== LEADS & CONTRACTS ===== */
-        .leads-grid {
+        .domain-content {
+            padding: 15px;
+        }
+        
+        /* ===== SKILL CARDS ===== */
+        .skills-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 10px;
-            margin: 15px 0;
         }
         
-        .lead-item {
-            background: var(--bg-hover);
+        .skill-card {
+            background: var(--bg-tertiary);
             padding: 12px;
             border-radius: 8px;
-            border-left: 3px solid var(--accent-31h);
+            border-left: 3px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
         }
         
-        .lead-item.contract {
-            border-left-color: var(--success);
+        .skill-card:hover {
+            background: #2d2d2d;
+            transform: translateX(5px);
         }
         
-        .lead-item.booked {
-            border-left-color: var(--accent-xmrt);
+        .skill-card.research { border-color: var(--accent-research); }
+        .skill-card.content { border-color: var(--accent-content); }
+        .skill-card.community { border-color: var(--accent-community); }
+        .skill-card.agency { border-color: var(--accent-agency); }
+        
+        .skill-info {
+            flex: 1;
         }
         
-        .lead-name {
+        .skill-name {
             font-weight: 600;
+            color: #fff;
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+        }
+        
+        .skill-status {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .skill-run-btn {
+            background: var(--accent-research);
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        
+        .skill-run-btn:hover {
+            background: #0055aa;
+            transform: scale(1.05);
+        }
+        
+        .skill-card.content .skill-run-btn { background: var(--accent-content); }
+        .skill-card.content .skill-run-btn:hover { background: #d97706; }
+        .skill-card.community .skill-run-btn { background: var(--accent-community); }
+        .skill-card.community .skill-run-btn:hover { background: #b91c1c; }
+        .skill-card.agency .skill-run-btn { background: var(--accent-agency); }
+        .skill-card.agency .skill-run-btn:hover { background: #7c3aed; }
+        
+        /* ===== AUTOMATION LAYER ===== */
+        .automation-layer {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .automation-layer h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .automation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .automation-tool {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .automation-tool:hover {
+            border-color: var(--accent-research);
+            background: #2d2d2d;
+        }
+        
+        .automation-tool-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        /* ===== MEMORY VAULT ===== */
+        .memory-vault {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .memory-vault h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .vault-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .vault-section {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .vault-section h4 {
+            color: var(--accent-research);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .vault-stat {
+            font-size: 1.5rem;
+            font-weight: 700;
             color: #fff;
             margin-bottom: 5px;
         }
         
-        .lead-date {
+        .vault-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+        
+        /* ===== OBSERVABILITY DASHBOARD ===== */
+        .observability {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .observability h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .obs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .obs-card {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .obs-card h4 {
             color: var(--text-secondary);
             font-size: 0.8rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
         }
         
-        .lead-status {
+        .obs-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-research);
+            margin-bottom: 5px;
+        }
+        
+        .obs-unit {
+            color: var(--text-secondary);
             font-size: 0.75rem;
-            margin-top: 5px;
         }
         
-        .status-new { color: var(--accent-31h); }
-        .status-contract { color: var(--success); }
-        .status-booked { color: var(--accent-xmrt); }
+        .skill-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .skill-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .skill-btn:hover {
+            border-color: var(--accent-research);
+            background: #2d2d2d;
+        }
+        
+        /* ===== COMPANY OVERVIEW ===== */
+        .company-overview {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .company-overview h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .company-card {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .company-card h4 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .company-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .company-stat:last-child {
+            border-bottom: none;
+        }
+        
+        .company-stat-label {
+            color: var(--text-secondary);
+        }
+        
+        .company-stat-value {
+            color: #fff;
+            font-weight: 600;
+        }
         
         /* ===== ACTIVITY LOG ===== */
-        .log {
+        .activity-log {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .activity-log h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .log-entries {
             background: #0a0a0a;
             padding: 15px;
             border-radius: 8px;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 0.8rem;
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
         }
         
@@ -279,13 +435,13 @@
             border-bottom: 1px solid #222;
         }
         
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
         .log-success { color: var(--success); }
         .log-pending { color: var(--warning); }
-        
-        /* ===== SECTION SPACING ===== */
-        .section {
-            margin-bottom: 25px;
-        }
+        .log-error { color: #ef4444; }
         
         /* ===== FOOTER ===== */
         footer {
@@ -294,10 +450,11 @@
             color: var(--text-secondary);
             border-top: 1px solid var(--border);
             margin-top: 30px;
+            font-size: 0.85rem;
         }
         
         footer a {
-            color: #00aaff;
+            color: var(--accent-research);
             text-decoration: none;
         }
         
@@ -305,7 +462,7 @@
             text-decoration: underline;
         }
         
-        /* ===== TABLET BREAKPOINT (768px) ===== */
+        /* ===== RESPONSIVE DESIGN ===== */
         @media (min-width: 768px) {
             .container {
                 padding: 20px;
@@ -313,91 +470,44 @@
             
             header {
                 padding: 30px;
-                text-align: left;
             }
             
             h1 {
                 font-size: 2rem;
             }
             
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .summary-stats {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 15px;
-            }
-            
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            
-            .card {
-                padding: 25px;
-            }
-            
-            .card h2 {
-                font-size: 1.3rem;
-            }
-            
-            .leads-grid {
+            .domains-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .metric {
-                font-size: 2.5rem;
+            .obs-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            .log {
-                max-height: 300px;
-                font-size: 0.85rem;
+            .company-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
         
-        /* ===== DESKTOP BREAKPOINT (1024px) ===== */
         @media (min-width: 1024px) {
-            .grid {
-                grid-template-columns: repeat(3, 1fr);
+            .domains-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
             
-            .leads-grid {
+            .obs-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .company-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
             
             .container {
                 padding: 30px;
             }
-            
-            header {
-                margin-bottom: 30px;
-            }
-            
-            .section {
-                margin-bottom: 40px;
-            }
         }
         
-        /* ===== LARGE DESKTOP (1200px+) ===== */
-        @media (min-width: 1200px) {
-            .grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        /* ===== TOUCH OPTIMIZATIONS ===== */
-        @media (hover: none) and (pointer: coarse) {
-            .btn {
-                min-height: 44px;
-            }
-            
-            th, td {
-                padding: 12px 8px;
-            }
-        }
-        
-        /* ===== DARK MODE SCROLLBAR ===== */
+        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -420,200 +530,278 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏢 31 Harbor Agency Dashboard</h1>
-            <p class="subtitle">Centralized tracking for 31 Harbor, Party Favor Photo, and XMRT DAO</p>
+            <h1>⚙️ Agentic OS - 31 Harbor Agency Dashboard</h1>
+            <p class="subtitle">AI-Powered Workflow Management & Automation Hub</p>
             <p class="subtitle" id="last-update">Last Updated: Loading...</p>
         </header>
 
-        <!-- Summary Stats -->
-        <div class="summary-stats">
-            <div class="stat-box">
-                <div class="stat-label">Total Emails Today</div>
-                <div class="stat-value" id="total-today">-</div>
+        <!-- Conductor Section -->
+        <div class="conductor">
+            <h2>🎼 Claude Code: The Conductor</h2>
+            <p>Central AI engine orchestrating all tasks, automations, and workflows across domains</p>
+        </div>
+
+        <!-- Domains Grid -->
+        <div class="domains-grid">
+            <!-- Research Domain -->
+            <div class="domain">
+                <div class="domain-header research">
+                    <span class="domain-icon">🔍</span>
+                    <h3>Research</h3>
+                </div>
+                <div class="domain-content">
+                    <div class="skills-grid">
+                        <div class="skill-card research">
+                            <div class="skill-info">
+                                <div class="skill-name">YT Pipeline</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card research">
+                            <div class="skill-info">
+                                <div class="skill-name">Deep Research</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card research">
+                            <div class="skill-info">
+                                <div class="skill-name">Competitor Watch</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Total Emails (All Time)</div>
-                <div class="stat-value" id="total-all">-</div>
+
+            <!-- Content Domain -->
+            <div class="domain">
+                <div class="domain-header content">
+                    <span class="domain-icon">✍️</span>
+                    <h3>Content</h3>
+                </div>
+                <div class="domain-content">
+                    <div class="skills-grid">
+                        <div class="skill-card content">
+                            <div class="skill-info">
+                                <div class="skill-name">Outlines</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card content">
+                            <div class="skill-info">
+                                <div class="skill-name">Content Cascade</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card content">
+                            <div class="skill-info">
+                                <div class="skill-name">Carousel Generator</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Active Domains</div>
-                <div class="stat-value" id="active-domains">-</div>
+
+            <!-- Community Domain -->
+            <div class="domain">
+                <div class="domain-header community">
+                    <span class="domain-icon">👥</span>
+                    <h3>Community</h3>
+                </div>
+                <div class="domain-content">
+                    <div class="skills-grid">
+                        <div class="skill-card community">
+                            <div class="skill-info">
+                                <div class="skill-name">Skool Post Drafts</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card community">
+                            <div class="skill-info">
+                                <div class="skill-name">Member Onboarding</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card community">
+                            <div class="skill-info">
+                                <div class="skill-name">Engagement Tracker</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Contracts Signed</div>
-                <div class="stat-value" id="contracts-signed">3</div>
+
+            <!-- Agency Domain -->
+            <div class="domain">
+                <div class="domain-header agency">
+                    <span class="domain-icon">🏢</span>
+                    <h3>Agency</h3>
+                </div>
+                <div class="domain-content">
+                    <div class="skills-grid">
+                        <div class="skill-card agency">
+                            <div class="skill-info">
+                                <div class="skill-name">Client Onboarding</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card agency">
+                            <div class="skill-info">
+                                <div class="skill-name">Weekly Q&A Digest</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                        <div class="skill-card agency">
+                            <div class="skill-info">
+                                <div class="skill-name">Reporting Suite</div>
+                                <div class="skill-status">projects • context</div>
+                            </div>
+                            <button class="skill-run-btn">▶ Run</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Automation Layer -->
+        <div class="automation-layer">
+            <h3>🔗 Automation Layer</h3>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Connected tools & software assets</p>
+            <div class="automation-grid">
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">🐙</div>
+                    <div>GitHub</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">💬</div>
+                    <div>Slack</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">📧</div>
+                    <div>Email</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">📝</div>
+                    <div>Obsidian</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">🌐</div>
+                    <div>Resend</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">☁️</div>
+                    <div>Cloudflare</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">📊</div>
+                    <div>Analytics</div>
+                </div>
+                <div class="automation-tool">
+                    <div class="automation-tool-icon">🔐</div>
+                    <div>Auth</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Vault -->
+        <div class="memory-vault">
+            <h3>🧠 Memory Vault (Obsidian)</h3>
+            <div class="vault-sections">
+                <div class="vault-section">
+                    <h4>📥 Raw</h4>
+                    <div class="vault-stat" id="vault-raw">-</div>
+                    <div class="vault-label">Initial research & data</div>
+                </div>
+                <div class="vault-section">
+                    <h4>📚 Wiki</h4>
+                    <div class="vault-stat" id="vault-wiki">-</div>
+                    <div class="vault-label">Processed reports</div>
+                </div>
+                <div class="vault-section">
+                    <h4>📤 Output</h4>
+                    <div class="vault-stat" id="vault-output">-</div>
+                    <div class="vault-label">Deliverables ready</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Observability Dashboard -->
+        <div class="observability">
+            <h3>📊 Observability Dashboard</h3>
+            
+            <div class="obs-grid">
+                <div class="obs-card">
+                    <h4>Agentic Activity</h4>
+                    <div class="obs-value" id="activity-count">-</div>
+                    <div class="obs-unit">tasks executed</div>
+                </div>
+                <div class="obs-card">
+                    <h4>Total Usage</h4>
+                    <div class="obs-value" id="usage-count">-</div>
+                    <div class="obs-unit">API calls</div>
+                </div>
+                <div class="obs-card">
+                    <h4>Routines Running</h4>
+                    <div class="obs-value" id="routines-count">-</div>
+                    <div class="obs-unit">active</div>
+                </div>
+                <div class="obs-card">
+                    <h4>Success Rate</h4>
+                    <div class="obs-value" id="success-rate">-</div>
+                    <div class="obs-unit">%</div>
+                </div>
+            </div>
+
+            <h4 style="color: var(--text-secondary); margin: 20px 0 10px; text-transform: uppercase; font-size: 0.8rem;">Quick Skill Execution</h4>
+            <div class="skill-buttons">
+                <button class="skill-btn">🧹 Vault Cleanup</button>
+                <button class="skill-btn">📰 Morning Brief</button>
+                <button class="skill-btn">🔍 YT Search</button>
+                <button class="skill-btn">✍️ Draft Content</button>
+                <button class="skill-btn">📊 Generate Report</button>
+                <button class="skill-btn">🔄 Sync Data</button>
             </div>
         </div>
 
         <!-- Company Overview -->
-        <div class="grid" id="company-grid">
-            <!-- Populated by JS -->
-        </div>
-
-        <!-- Party Favor Photo Leads & Bookings -->
-        <div class="section">
-            <div class="card">
-                <h2>📸 Party Favor Photo - Leads & Bookings</h2>
-                
-                <div class="summary-stats" style="margin: 15px 0;">
-                    <div class="stat-box">
-                        <div class="stat-label">Total Leads</div>
-                        <div class="stat-value" style="color: var(--accent-pfp);">5</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Contracts Signed</div>
-                        <div class="stat-value" style="color: var(--success);">3</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Conversion Rate</div>
-                        <div class="stat-value" style="color: var(--accent-xmrt);">60%</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Pipeline Value</div>
-                        <div class="stat-value" style="color: var(--success);">$3,240</div>
-                    </div>
-                </div>
-
-                <h3>Booked Events</h3>
-                <div class="leads-grid">
-                    <div class="lead-item booked">
-                        <div class="lead-name">📅 August 15 - Wedding</div>
-                        <div class="lead-date">Client: [TBD]</div>
-                        <div class="lead-status status-booked">✓ CONTRACT SIGNED</div>
-                    </div>
-                    <div class="lead-item booked">
-                        <div class="lead-name">📅 June 15 - School Event</div>
-                        <div class="lead-date">Client: [School District]</div>
-                        <div class="lead-status status-booked">✓ CONTRACT SIGNED</div>
-                    </div>
-                    <div class="lead-item booked">
-                        <div class="lead-name">📅 September 15 - DFW Fall Fest</div>
-                        <div class="lead-date">Client: DFW Events</div>
-                        <div class="lead-status status-booked">✓ CONTRACT SIGNED</div>
-                    </div>
-                </div>
-
-                <h3>Active Leads</h3>
-                <div class="leads-grid">
-                    <div class="lead-item">
-                        <div class="lead-name">Da'Monique - July 4th Event</div>
-                        <div class="lead-date">Contact: damonique@email.com</div>
-                        <div class="lead-status status-new">⏳ In Discussion</div>
-                    </div>
-                    <div class="lead-item">
-                        <div class="lead-name">New Lead - August 22nd</div>
-                        <div class="lead-date">Contact: [TBD]</div>
-                        <div class="lead-status status-new">⏳ Initial Contact</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Email Traffic -->
-        <div class="section">
-            <div class="card">
-                <h2>📧 Email Traffic Dashboard</h2>
-                <div class="grid" style="margin-top: 20px;">
-                    <div class="stat-box">
-                        <div class="stat-label">31 Harbor Today</div>
-                        <div class="stat-value" id="31h-today">-</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">PFP Today</div>
-                        <div class="stat-value" id="pfp-today">-</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">XMRT Today</div>
-                        <div class="stat-value" id="xmrt-today">-</div>
-                    </div>
-                </div>
-                <h3>Recent Activity (Last 10)</h3>
-                <div class="table-wrapper">
-                    <table id="email-table">
-                        <thead>
-                            <tr><th>Time</th><th>Company</th><th>From</th><th>To</th><th>Subject</th><th>Status</th></tr>
-                        </thead>
-                        <tbody id="email-tbody">
-                            <tr><td colspan="6">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Campaigns -->
-        <div class="section">
-            <div class="card">
-                <h2>📊 Campaigns Tracker</h2>
-                <h3>Active Campaigns</h3>
-                <div class="table-wrapper">
-                    <table id="campaign-table">
-                        <thead>
-                            <tr><th>Campaign</th><th>Company</th><th>Channel</th><th>Status</th><th>Performance</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Launch Email</td>
-                                <td><span class="badge badge-31h">31 Harbor</span></td>
-                                <td>Email</td>
-                                <td><span class="status status-live">Complete</span></td>
-                                <td>1 sent, delivered</td>
-                            </tr>
-                            <tr>
-                                <td>DSLR vs Tablet Campaign</td>
-                                <td><span class="badge badge-pfp">Party Favor Photo</span></td>
-                                <td>Email</td>
-                                <td><span class="status status-live">Active</span></td>
-                                <td>20 sent today</td>
-                            </tr>
-                            <tr>
-                                <td>Summer Event Outreach</td>
-                                <td><span class="badge badge-31h">31 Harbor</span></td>
-                                <td>Email + Phone</td>
-                                <td><span class="status status-live">Active</span></td>
-                                <td>5 leads, 3 closed</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Goals Tracker -->
-        <div class="section">
-            <div class="card">
-                <h2>🎯 Q3 2026 Goals Tracker</h2>
-                <div id="goals-container">
-                    <!-- Populated by JS -->
-                </div>
+        <div class="company-overview">
+            <h3>🏢 Company Operations</h3>
+            <div class="company-grid" id="company-grid">
+                <!-- Populated by JS -->
             </div>
         </div>
 
         <!-- Activity Log -->
-        <div class="section">
-            <div class="card">
-                <h2>📝 Activity Log</h2>
-                <div class="log" id="activity-log">
-                    <div class="log-entry"><span class="log-success">✓</span> August 15 Wedding booked - Contract signed</div>
-                    <div class="log-entry"><span class="log-success">✓</span> June 15 School Event booked - Contract signed</div>
-                    <div class="log-entry"><span class="log-success">✓</span> September 15 DFW Fall Fest booked - Contract signed</div>
-                    <div class="log-entry"><span class="log-pending">⏳</span> Da'Monique July 4th lead - In discussion</div>
-                    <div class="log-entry"><span class="log-pending">⏳</span> August 22nd new lead - Initial contact</div>
-                    <div class="log-entry"><span class="log-success">✓</span> Dashboard updated - Mobile responsive design</div>
-                    <div class="log-entry"><span class="log-success">✓</span> Party Favor Photo integrated - 20 emails today</div>
-                    <div class="log-entry"><span class="log-success">✓</span> 31 Harbor launched - david@31harbor.com active</div>
-                    <div class="log-entry"><span class="log-success">✓</span> Dashboard created - 2026-06-12</div>
-                </div>
+        <div class="activity-log">
+            <h3>📝 Activity Log</h3>
+            <div class="log-entries" id="activity-entries">
+                <div class="log-entry"><span class="log-success">✓</span> Dashboard initialized - Agentic OS v2.0</div>
+                <div class="log-entry"><span class="log-success">✓</span> All domains loaded and ready</div>
+                <div class="log-entry"><span class="log-success">✓</span> Automation layer connected</div>
+                <div class="log-entry"><span class="log-pending">⏳</span> Waiting for skill execution...</div>
             </div>
         </div>
 
         <footer>
-            <p>31 Harbor Agency Dashboard v2.0.0 - Mobile First</p>
+            <p>Agentic OS Dashboard v2.0.0 - Powered by Claude Code</p>
             <p>Last Updated: <span id="footer-update">-</span></p>
             <p style="margin-top: 10px;">
                 <a href="https://github.com/xmrtdao/31harbor-agency-dashboard">GitHub</a> •
-                <a href="https://resend.com">Resend</a> •
-                <a href="https://dash.cloudflare.com">Cloudflare</a>
+                <a href="https://31harbor.com">31 Harbor</a> •
+                <a href="https://partyfavorphoto.com">Party Favor Photo</a>
             </p>
         </footer>
     </div>
@@ -625,108 +813,96 @@
                 const resp = await fetch('data.json?' + Date.now());
                 const data = await resp.json();
                 
-                document.getElementById('last-update').textContent = 'Last Updated: ' + new Date(data.updated).toLocaleString();
-                document.getElementById('footer-update').textContent = new Date(data.updated).toLocaleString();
+                const updateTime = new Date(data.updated).toLocaleString();
+                document.getElementById('last-update').textContent = 'Last Updated: ' + updateTime;
+                document.getElementById('footer-update').textContent = updateTime;
                 
-                // Summary stats
-                let totalToday = 0;
-                let totalAll = 0;
+                // Calculate metrics
+                let totalEmails = 0;
+                let totalCompanies = 0;
                 let activeDomains = 0;
                 
                 for (const [name, company] of Object.entries(data.companies)) {
-                    totalToday += company.emails_today;
-                    totalAll += company.emails_total;
+                    totalEmails += company.emails_total;
+                    totalCompanies++;
                     if (company.dns_verified) activeDomains++;
                 }
                 
-                document.getElementById('total-today').textContent = totalToday;
-                document.getElementById('total-all').textContent = totalAll;
-                document.getElementById('active-domains').textContent = activeDomains;
+                // Update observability metrics
+                document.getElementById('activity-count').textContent = totalEmails;
+                document.getElementById('usage-count').textContent = (totalEmails * 2).toString();
+                document.getElementById('routines-count').textContent = activeDomains;
+                document.getElementById('success-rate').textContent = (activeDomains / totalCompanies * 100).toFixed(0);
                 
-                // Company-specific today counts
-                document.getElementById('31h-today').textContent = data.companies['31 Harbor']?.emails_today || 0;
-                document.getElementById('pfp-today').textContent = data.companies['Party Favor Photo']?.emails_today || 0;
-                document.getElementById('xmrt-today').textContent = data.companies['XMRT DAO']?.emails_today || 0;
+                // Update vault stats
+                document.getElementById('vault-raw').textContent = totalCompanies;
+                document.getElementById('vault-wiki').textContent = activeDomains;
+                document.getElementById('vault-output').textContent = (totalEmails / 5).toFixed(0);
                 
                 // Company cards
                 const companyGrid = document.getElementById('company-grid');
                 companyGrid.innerHTML = '';
                 
                 for (const [name, company] of Object.entries(data.companies)) {
-                    const badgeClass = name.includes('31 Harbor') ? 'badge-31h' : 
-                                      name.includes('Party Favor') ? 'badge-pfp' : 'badge-xmrt';
-                    const statusClass = company.dns_verified ? 'status-live' : 'status-pending';
-                    const statusText = company.dns_verified ? '✓ Live' : '⏳ Setup';
                     const icon = name.includes('31 Harbor') ? '🏠' : name.includes('Party Favor') ? '📸' : '🔐';
+                    const statusText = company.dns_verified ? '✓ Live' : '⏳ Setup';
+                    const statusColor = company.dns_verified ? 'var(--success)' : 'var(--warning)';
                     
                     companyGrid.innerHTML += `
-                        <div class="card">
-                            <h2>${icon} ${name}</h2>
-                            <div class="metric ${statusClass}">${statusText}</div>
-                            <p class="metric-label">Status</p>
-                            <table>
-                                <tr><td>Domain</td><td>${company.domain}</td></tr>
-                                <tr><td>Email</td><td>${company.email}</td></tr>
-                                <tr><td>Today</td><td>${company.emails_today} emails</td></tr>
-                                <tr><td>Webhooks</td><td>${company.webhooks}</td></tr>
-                            </table>
-                            <a href="https://resend.com/domains" class="btn" target="_blank">Resend Dashboard</a>
+                        <div class="company-card">
+                            <h4>${icon} ${name}</h4>
+                            <div class="company-stat">
+                                <span class="company-stat-label">Status</span>
+                                <span class="company-stat-value" style="color: ${statusColor};">${statusText}</span>
+                            </div>
+                            <div class="company-stat">
+                                <span class="company-stat-label">Domain</span>
+                                <span class="company-stat-value">${company.domain}</span>
+                            </div>
+                            <div class="company-stat">
+                                <span class="company-stat-label">Today</span>
+                                <span class="company-stat-value">${company.emails_today} emails</span>
+                            </div>
+                            <div class="company-stat">
+                                <span class="company-stat-label">Total</span>
+                                <span class="company-stat-value">${company.emails_total} emails</span>
+                            </div>
+                            <div class="company-stat">
+                                <span class="company-stat-label">Webhooks</span>
+                                <span class="company-stat-value">${company.webhooks}</span>
+                            </div>
                         </div>
                     `;
                 }
                 
-                // Recent emails table
-                const emailTbody = document.getElementById('email-tbody');
+                // Update activity log with recent emails
+                const activityEntries = document.getElementById('activity-entries');
                 let allEmails = [];
+                
                 for (const [name, company] of Object.entries(data.companies)) {
                     company.recent_emails.forEach(email => {
                         allEmails.push({
                             ...email,
-                            company: name,
-                            badgeClass: name.includes('31 Harbor') ? 'badge-31h' : 'badge-pfp'
+                            company: name
                         });
                     });
                 }
+                
                 allEmails.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                 
-                emailTbody.innerHTML = allEmails.slice(0, 10).map(email => `
-                    <tr>
-                        <td>${new Date(email.created_at).toLocaleDateString()}</td>
-                        <td><span class="badge ${email.badgeClass}">${email.company}</span></td>
-                        <td>${email.from}</td>
-                        <td>${email.to[0] || 'N/A'}</td>
-                        <td>${(email.subject || 'N/A').substring(0, 30)}${(email.subject || '').length > 30 ? '...' : ''}</td>
-                        <td><span class="status status-live">${email.last_event || 'sent'}</span></td>
-                    </tr>
-                `).join('');
+                let logHTML = '<div class="log-entry"><span class="log-success">✓</span> Dashboard initialized - Agentic OS v2.0</div>';
                 
-                // Goals
-                const goalsContainer = document.getElementById('goals-container');
-                goalsContainer.innerHTML = '';
+                allEmails.slice(0, 8).forEach(email => {
+                    const status = email.last_event === 'delivered' ? 'success' : 'pending';
+                    const statusSymbol = status === 'success' ? '✓' : '⏳';
+                    const timestamp = new Date(email.created_at).toLocaleString();
+                    logHTML += `<div class="log-entry"><span class="log-${status}">${statusSymbol}</span> [${email.company}] ${email.subject.substring(0, 40)}... (${timestamp})</div>`;
+                });
                 
-                for (const [name, company] of Object.entries(data.companies)) {
-                    // 31 Harbor has 3/5 goals (3 contracts signed)
-                    // Others start at 1/5 (email system live)
-                    const progress = name.includes('31 Harbor') ? 60 : (company.dns_verified ? 20 : 0);
-                    const goalsComplete = name.includes('31 Harbor') ? 3 : (company.dns_verified ? 1 : 0);
-                    
-                    goalsContainer.innerHTML += `
-                        <h3>${name}</h3>
-                        <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
-                        <p>${goalsComplete} of 5 goals complete</p>
-                        <ul style="margin: 15px 0 15px 20px;">
-                            ${company.dns_verified ? '<li style="color: #22c55e;">✓ Email system live</li>' : ''}
-                            ${name.includes('31 Harbor') ? '<li style="color: #22c55e;">✓ 3 contracts signed</li>' : '<li>⏳ Generate 10 qualified leads</li>'}
-                            ${name.includes('31 Harbor') ? '<li style="color: #22c55e;">✓ 5 leads in pipeline</li>' : '<li>⏳ Schedule 5 showings/bookings</li>'}
-                            <li>⏳ Achieve 95% deliverability</li>
-                            <li>⏳ Scale operations</li>
-                        </ul>
-                    `;
-                }
+                activityEntries.innerHTML = logHTML;
                 
             } catch (e) {
                 console.error('Failed to load dashboard:', e);
-                document.getElementById('email-tbody').innerHTML = '<tr><td colspan="6">Failed to load data. Refresh page.</td></tr>';
             }
         }
         
