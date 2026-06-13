@@ -5,7 +5,7 @@ import { Search, Bell, ChevronRight } from 'lucide-react';
 import { useDashboardStore } from '@/store/dashboardStore';
 
 const routeTitles: Record<string, { title: string; breadcrumb: string }> = {
-  '/': { title: 'SuiteAI Command Center', breadcrumb: 'Overview' },
+  '/': { title: 'AgenticOS Command Center', breadcrumb: 'Overview' },
   '/leads': { title: 'Lead Router', breadcrumb: 'Lead Router' },
   '/pipeline': { title: 'Pipeline Manager', breadcrumb: 'Pipeline' },
   '/marketing': { title: 'Marketing Center', breadcrumb: 'Marketing' },
@@ -26,7 +26,7 @@ export default function TopBar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const routeInfo = routeTitles[location.pathname] || { title: 'SuiteAI', breadcrumb: 'Page' };
+  const routeInfo = routeTitles[location.pathname] || { title: 'AgenticOS', breadcrumb: 'Page' };
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {

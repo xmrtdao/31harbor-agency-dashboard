@@ -229,7 +229,7 @@ export default function Home() {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6"
         >
           <div>
-            <h1 className="text-[28px] font-bold text-text-primary tracking-tight">SuiteAI Command Center</h1>
+            <h1 className="text-[28px] font-bold text-text-primary tracking-tight">AgenticOS Command Center</h1>
             <p className="text-[14px] text-text-secondary mt-0.5">
               Unified intelligence for 31 Harbor · Party Favor Photo · XMRT DAO
             </p>

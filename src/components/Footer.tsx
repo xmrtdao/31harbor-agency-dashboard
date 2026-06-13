@@ -7,7 +7,7 @@ export default function Footer() {
         <Activity className="w-3 h-3 text-success" />
         <span>All systems operational</span>
         <span className="text-border-default mx-1">|</span>
-        <span>SuiteAI v0.1.0</span>
+        <span>AgenticOS v0.1.0</span>
       </div>
       <div className="flex items-center gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" />
