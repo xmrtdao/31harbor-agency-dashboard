@@ -74,3 +74,5 @@ export default defineConfig([
 
 
 _Deployed: 2026-06-14_
+
+_CNAME restored for Cloudflare routing_
