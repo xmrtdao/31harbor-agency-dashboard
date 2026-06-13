@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -20,11 +20,8 @@ import {
   Mail,
   Key,
   TestTubes,
-  Shield,
-  ArrowRight,
 } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { useDashboardStore } from '@/store/dashboardStore';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -372,36 +369,12 @@ function getIntegrationBorderColor(status: string) {
 // ─── Section: Companies ─────────────────────────────────────────────────────
 
 function CompaniesSection() {
-  const [companies, setCompanies] = useState(() => {
-    const saved = localStorage.getItem('suiteai-company-settings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return companyData.map((c) => ({ ...c, ...parsed[c.id] }));
-      } catch { /* fall through */ }
-    }
-    return companyData;
-  });
+  const [companies, setCompanies] = useState(companyData);
 
   const updateCompany = (id: string, field: string, value: unknown) => {
-    setCompanies((prev) => {
-      const next = prev.map((c) => (c.id === id ? { ...c, [field]: value } : c));
-      const toSave: Record<string, Record<string, unknown>> = {};
-      next.forEach((c) => {
-        toSave[c.id] = {
-          displayName: c.displayName,
-          industrySelect: c.industrySelect,
-          color: c.color,
-          scoreThreshold: c.scoreThreshold,
-          email: c.email,
-          domain: c.domain,
-          webhook: c.webhook,
-          autoRouting: c.autoRouting,
-        };
-      });
-      localStorage.setItem('suiteai-company-settings', JSON.stringify(toSave));
-      return next;
-    });
+    setCompanies((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+    );
   };
 
   return (
@@ -610,173 +583,6 @@ function CompaniesSection() {
             </div>
           </motion.div>
         ))}
-      </div>
-
-      {/* ─── Lead Sharing Matrix ────────────────────────────────────────── */}
-      <LeadSharingMatrix />
-    </motion.div>
-  );
-}
-
-// ─── Lead Sharing Matrix ────────────────────────────────────────────────────
-
-const companyMatrix = [
-  { id: 'harbor', name: '31 Harbor', color: '#0A84FF' },
-  { id: 'party', name: 'Party Favor', color: '#F5A623' },
-  { id: 'xmrt', name: 'XMRT DAO', color: '#7B61FF' },
-];
-
-function LeadSharingMatrix() {
-  const store = useDashboardStore();
-  const [rules, setRules] = useState<Record<string, number>>(() => {
-    const initial: Record<string, number> = {};
-    store.sharingRules.forEach((r) => {
-      initial[`${r.from_company}-${r.to_company}`] = r.allowed;
-    });
-    return initial;
-  });
-
-  const isAllowed = (from: string, to: string) => {
-    if (from === to) return true;
-    const key = `${from}-${to}`;
-    const val = rules[key];
-    // Default to allowed (1) if not explicitly set
-    return val !== undefined ? val === 1 : store.canShareLead(from, to);
-  };
-
-  const toggleRule = (from: string, to: string) => {
-    if (from === to) return;
-    const nextAllowed = !isAllowed(from, to);
-    store.setSharingRule(from, to, nextAllowed);
-    setRules((prev) => ({
-      ...prev,
-      [`${from}-${to}`]: nextAllowed ? 1 : 0,
-    }));
-  };
-
-  return (
-    <motion.div
-      variants={staggerItem}
-      className="mt-8 bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden"
-    >
-      {/* Top accent strip */}
-      <div className="h-1" style={{ backgroundColor: '#22C55E' }} />
-
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-success/15">
-            <Shield className="w-5 h-5 text-success" />
-          </div>
-          <div>
-            <h3 className="text-[18px] font-bold text-text-primary">Lead Sharing Matrix</h3>
-            <p className="text-[12px] text-text-secondary">
-              Control which companies can receive leads from each other
-            </p>
-          </div>
-        </div>
-
-        {/* Explanatory text */}
-        <p className="text-[12px] text-text-tertiary mb-5 ml-12">
-          Blocked routes will show a warning in the Lead Router. Self-routing is always enabled.
-        </p>
-
-        {/* Matrix Grid */}
-        <div className="ml-0 sm:ml-12">
-          {/* Header row */}
-          <div className="grid grid-cols-[120px_1fr_1fr_1fr] gap-2 mb-3 items-center">
-            <div className="flex items-center justify-end pr-2">
-              <span className="text-[11px] text-text-tertiary uppercase tracking-wider">FROM \ TO</span>
-            </div>
-            {companyMatrix.map((to) => (
-              <div key={to.id} className="text-center">
-                <div className="flex items-center justify-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: to.color }} />
-                  <span className="text-[12px] font-semibold" style={{ color: to.color }}>
-                    {to.name}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Matrix rows */}
-          <div className="space-y-2">
-            {companyMatrix.map((from) => (
-              <div key={from.id} className="grid grid-cols-[120px_1fr_1fr_1fr] gap-2 items-center">
-                {/* Row label */}
-                <div className="flex items-center justify-end pr-2 gap-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: from.color }} />
-                  <span className="text-[12px] font-medium text-text-primary">{from.name}</span>
-                </div>
-
-                {/* Cells */}
-                {companyMatrix.map((to) => {
-                  const allowed = isAllowed(from.id, to.id);
-                  const isSelf = from.id === to.id;
-
-                  return (
-                    <div key={to.id} className="flex items-center justify-center">
-                      {isSelf ? (
-                        <div
-                          className="flex items-center gap-1.5 px-3 py-2 rounded-md border border-border-subtle bg-bg-hover"
-                          title="Always enabled (self-routing)"
-                        >
-                          <Check className="w-3.5 h-3.5 text-success" />
-                          <span className="text-[11px] text-text-secondary font-medium">Self</span>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => toggleRule(from.id, to.id)}
-                          className={`flex items-center gap-1.5 px-3 py-2 rounded-md border transition-all duration-200 cursor-pointer ${
-                            allowed
-                              ? 'border-success/40 bg-success/10 hover:bg-success/20'
-                              : 'border-danger/40 bg-danger/10 hover:bg-danger/20'
-                          }`}
-                          title={`${from.name} ${allowed ? 'can' : 'cannot'} route to ${to.name}`}
-                        >
-                          {allowed ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 text-success" />
-                              <span className="text-[11px] text-success font-medium">Allow</span>
-                            </>
-                          ) : (
-                            <>
-                              <X className="w-3.5 h-3.5 text-danger" />
-                              <span className="text-[11px] text-danger font-medium">Block</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-
-          {/* Arrow indicators */}
-          <div className="flex items-center justify-center gap-2 mt-4 text-text-tertiary">
-            <ArrowRight className="w-3.5 h-3.5" />
-            <span className="text-[11px]">Direction indicates lead flow (FROM source TO destination)</span>
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border-subtle">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-success/40" />
-              <span className="text-[11px] text-text-secondary">Allowed</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-danger/40" />
-              <span className="text-[11px] text-text-secondary">Blocked</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-bg-hover border border-border-subtle" />
-              <span className="text-[11px] text-text-secondary">Self (always on)</span>
-            </div>
-          </div>
-        </div>
       </div>
     </motion.div>
   );
@@ -1264,17 +1070,7 @@ function UsersSection() {
 // ─── Section: Notifications ─────────────────────────────────────────────────
 
 function NotificationsSection() {
-  const loadSaved = () => {
-    try {
-      const saved = localStorage.getItem('suiteai-notification-settings');
-      if (saved) return JSON.parse(saved);
-    } catch { /* ignore */ }
-    return null;
-  };
-
-  const saved = loadSaved();
-
-  const [categories, setCategories] = useState(saved?.categories ?? {
+  const [categories, setCategories] = useState({
     lead: {
       enabled: true,
       items: { newLead: true, routed: true, rejected: true, summary: false },
@@ -1293,33 +1089,14 @@ function NotificationsSection() {
     },
   });
 
-  const [channels, setChannels] = useState(saved?.channels ?? {
+  const [channels, setChannels] = useState({
     email: true,
     slack: true,
     inApp: true,
   });
 
-  const persist = (nextCat: typeof categories, nextCh: typeof channels) => {
-    localStorage.setItem('suiteai-notification-settings', JSON.stringify({
-      categories: nextCat,
-      channels: nextCh,
-    }));
-  };
-
   const updateCategory = (cat: string, enabled: boolean) => {
-    setCategories((prev: typeof categories) => {
-      const next = { ...prev, [cat]: { ...prev[cat as keyof typeof prev], enabled } };
-      persist(next, channels);
-      return next;
-    });
-  };
-
-  const updateChannel = (key: keyof typeof channels, value: boolean) => {
-    setChannels((prev: typeof channels) => {
-      const next = { ...prev, [key]: value };
-      persist(categories, next);
-      return next;
-    });
+    setCategories((prev) => ({ ...prev, [cat]: { ...prev[cat as keyof typeof prev], enabled } }));
   };
 
   return (
@@ -1343,13 +1120,13 @@ function NotificationsSection() {
               {Object.entries(categories.lead.items).map(([key, value]) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <div className="w-4 h-4 rounded border border-border-default flex items-center justify-center bg-bg-input">
-                    {Boolean(value) && <Check className="w-3 h-3 text-success" />}
+                    {value && <Check className="w-3 h-3 text-success" />}
                   </div>
                   <span className="text-[13px] text-text-secondary capitalize">
-                    {key === 'newLead' ? 'New lead received' :
-                     key === 'routed' ? 'Lead routed (low confidence)' :
-                     key === 'rejected' ? 'Lead rejected' :
-                     key === 'summary' ? 'Daily lead summary' : key}
+                    {key === 'newLead' && 'New lead received'}
+                    {key === 'routed' && 'Lead routed (low confidence)'}
+                    {key === 'rejected' && 'Lead rejected'}
+                    {key === 'summary' && 'Daily lead summary'}
                   </span>
                 </label>
               ))}
@@ -1368,13 +1145,13 @@ function NotificationsSection() {
               {Object.entries(categories.pipeline.items).map(([key, value]) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <div className="w-4 h-4 rounded border border-border-default flex items-center justify-center bg-bg-input">
-                    {Boolean(value) && <Check className="w-3 h-3 text-success" />}
+                    {value && <Check className="w-3 h-3 text-success" />}
                   </div>
                   <span className="text-[13px] text-text-secondary capitalize">
-                    {key === 'approval' ? 'Approval required' :
-                     key === 'timeout' ? 'Stage timeout' :
-                     key === 'completed' ? 'Pipeline completed' :
-                     key === 'payment' ? 'Payment received' : key}
+                    {key === 'approval' && 'Approval required'}
+                    {key === 'timeout' && 'Stage timeout'}
+                    {key === 'completed' && 'Pipeline completed'}
+                    {key === 'payment' && 'Payment received'}
                   </span>
                 </label>
               ))}
@@ -1393,12 +1170,12 @@ function NotificationsSection() {
               {Object.entries(categories.marketing.items).map(([key, value]) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <div className="w-4 h-4 rounded border border-border-default flex items-center justify-center bg-bg-input">
-                    {Boolean(value) && <Check className="w-3 h-3 text-success" />}
+                    {value && <Check className="w-3 h-3 text-success" />}
                   </div>
                   <span className="text-[13px] text-text-secondary capitalize">
-                    {key === 'spend' ? 'Campaign spend threshold (80%)' :
-                     key === 'review' ? 'Content ready for review' :
-                     key === 'summary' ? 'Weekly performance summary' : key}
+                    {key === 'spend' && 'Campaign spend threshold (80%)'}
+                    {key === 'review' && 'Content ready for review'}
+                    {key === 'summary' && 'Weekly performance summary'}
                   </span>
                 </label>
               ))}
@@ -1417,12 +1194,12 @@ function NotificationsSection() {
               {Object.entries(categories.system.items).map(([key, value]) => (
                 <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                   <div className="w-4 h-4 rounded border border-border-default flex items-center justify-center bg-bg-input">
-                    {Boolean(value) && <Check className="w-3 h-3 text-success" />}
+                    {value && <Check className="w-3 h-3 text-success" />}
                   </div>
                   <span className="text-[13px] text-text-secondary capitalize">
-                    {key === 'downtime' ? 'Agent downtime' :
-                     key === 'errors' ? 'Integration errors' :
-                     key === 'rateLimit' ? 'API rate limit warning' : key}
+                    {key === 'downtime' && 'Agent downtime'}
+                    {key === 'errors' && 'Integration errors'}
+                    {key === 'rateLimit' && 'API rate limit warning'}
                   </span>
                 </label>
               ))}
@@ -1437,7 +1214,7 @@ function NotificationsSection() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Switch checked={channels.email} onCheckedChange={(v) => updateChannel('email', v)} />
+              <Switch checked={channels.email} onCheckedChange={(v) => setChannels((p) => ({ ...p, email: v }))} />
               <div>
                 <span className="text-[13px] text-text-primary">Email notifications</span>
                 <p className="text-[11px] text-text-tertiary">alex@agenticos.com</p>
@@ -1446,7 +1223,7 @@ function NotificationsSection() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Switch checked={channels.slack} onCheckedChange={(v) => updateChannel('slack', v)} />
+              <Switch checked={channels.slack} onCheckedChange={(v) => setChannels((p) => ({ ...p, slack: v }))} />
               <div>
                 <span className="text-[13px] text-text-primary">Slack notifications</span>
                 <p className="text-[11px] text-text-tertiary">#agenticos-alerts</p>
@@ -1471,28 +1248,13 @@ function NotificationsSection() {
 // ─── Section: Appearance ────────────────────────────────────────────────────
 
 function AppearanceSection() {
-  const loadAppearance = () => {
-    try {
-      const saved = localStorage.getItem('suiteai-appearance-settings');
-      if (saved) return JSON.parse(saved);
-    } catch { /* ignore */ }
-    return null;
-  };
-
-  const saved = loadAppearance();
-  const [theme, setTheme] = useState<'dark' | 'light'>(saved?.theme ?? 'dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const density = 'comfortable' as const;
-  const [accentIntensity, setAccentIntensity] = useState(saved?.accentIntensity ?? 75);
-  const [animations, setAnimations] = useState(saved?.animations ?? true);
-  const [reducedMotion, setReducedMotion] = useState(saved?.reducedMotion ?? false);
+  const [accentIntensity, setAccentIntensity] = useState(75);
+  const [animations, setAnimations] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const sidebarDefault = 'expanded' as const;
-  const [showCompanySelector, setShowCompanySelector] = useState(saved?.showCompanySelector ?? true);
-
-  useEffect(() => {
-    localStorage.setItem('suiteai-appearance-settings', JSON.stringify({
-      theme, accentIntensity, animations, reducedMotion, showCompanySelector,
-    }));
-  }, [theme, accentIntensity, animations, reducedMotion, showCompanySelector]);
+  const [showCompanySelector, setShowCompanySelector] = useState(true);
 
   return (
     <motion.div variants={staggerContainer} initial="initial" animate="animate">

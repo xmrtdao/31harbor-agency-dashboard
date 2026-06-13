@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart3,
@@ -36,7 +36,6 @@ import {
   Cell,
 } from 'recharts';
 import Layout from '@/components/Layout';
-import { useDashboardStore } from '@/store/dashboardStore';
 
 /* ─── Animation Constants ─────────────────────────────────────────────────── */
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
@@ -44,17 +43,90 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const staggerContainer = { hidden: {}, visible: { transition: { staggerChildren: 0.06 } } };
 const cardTransition = { duration: 0.4, ease };
 
-/* ─── Date Range Config ───────────────────────────────────────────────────── */
+/* ─── Mock Data ───────────────────────────────────────────────────────────── */
 
-const dateRanges = ['Today', '7D', '30D', '90D', '1Y'];
+const dateRanges = ['Today', '7D', '30D', '90D', '1Y', 'Custom'];
 
-const rangeToDays: Record<string, number> = {
-  'Today': 1,
-  '7D': 7,
-  '30D': 30,
-  '90D': 90,
-  '1Y': 365,
-};
+const dailyRevenueData = Array.from({ length: 30 }, (_, i) => {
+  const d = i + 1;
+  const baseH = 1200 + Math.sin(d * 0.4) * 800 + d * 60;
+  const baseP = 800 + Math.cos(d * 0.35) * 500 + d * 45;
+  const baseX = 500 + Math.sin(d * 0.3) * 400 + d * 35;
+  return {
+    day: `Jan ${d.toString().padStart(2, '0')}`,
+    harbor: Math.round(baseH),
+    party: Math.round(baseP),
+    xmrt: Math.round(baseX),
+    total: Math.round(baseH + baseP + baseX),
+  };
+});
+
+const radarData = [
+  { metric: 'Revenue', harbor: 85, party: 72, xmrt: 65 },
+  { metric: 'Leads', harbor: 78, party: 82, xmrt: 58 },
+  { metric: 'Conversion', harbor: 65, party: 70, xmrt: 55 },
+  { metric: 'ROI', harbor: 90, party: 85, xmrt: 60 },
+  { metric: 'Efficiency', harbor: 88, party: 75, xmrt: 82 },
+];
+
+const funnelData = [
+  { stage: 'Leads', count: 1247, fill: '#0EA5E9', width: 100 },
+  { stage: 'Qualified', count: 892, fill: '#7B61FF', width: 72 },
+  { stage: 'Quoted', count: 534, fill: '#F5A623', width: 43 },
+  { stage: 'Contracted', count: 312, fill: '#22C55E', width: 25 },
+  { stage: 'Converted', count: 407, fill: '#22C55E', width: 33 },
+];
+
+const funnelConversions = [
+  { from: 'Leads', to: 'Qualified', rate: 71.5 },
+  { from: 'Qualified', to: 'Quoted', rate: 59.9 },
+  { from: 'Quoted', to: 'Contracted', rate: 58.4 },
+  { from: 'Contracted', to: 'Converted', rate: 100 },
+];
+
+const leadSourceData = [
+  { name: 'Organic', value: 474, color: '#22C55E' },
+  { name: 'Paid Ads', value: 362, color: '#0A84FF' },
+  { name: 'Referral', value: 224, color: '#F5A623' },
+  { name: 'Scraped', value: 125, color: '#7B61FF' },
+  { name: 'Manual', value: 62, color: '#8B95A5' },
+];
+
+const agents = [
+  { id: 'CBLR', name: 'Cross-Business Lead Router', icon: GitBranch, color: '#0EA5E9', description: 'Lead routing & classification', tasks: '1,847', success: '94.2%', time: '1.2s' },
+  { id: 'ABBA', name: 'Autonomous Business Agent', icon: Workflow, color: '#22C55E', description: 'Pipeline orchestration', tasks: '892', success: '91.7%', time: '4.2d' },
+  { id: 'AMA', name: 'Autonomous Marketing Agency', icon: Sparkles, color: '#7B61FF', description: 'Campaign & content management', tasks: '2,341', success: '88.3%', time: '2.1h' },
+];
+
+const healthMonitors = [
+  { name: 'Lead Ingestion API', status: 'Operational', uptime: '99.97%', latency: '45ms', color: '#22C55E' },
+  { name: 'AI Classification Model', status: 'Operational', uptime: '99.91%', latency: '120ms', color: '#22C55E' },
+  { name: 'Pipeline Orchestrator', status: 'Operational', uptime: '99.85%', latency: '80ms', color: '#22C55E' },
+  { name: 'Content Generator', status: 'Operational', uptime: '99.78%', latency: '340ms', color: '#22C55E' },
+  { name: 'Campaign Manager', status: 'Operational', uptime: '99.94%', latency: '55ms', color: '#22C55E' },
+  { name: 'Database', status: 'Operational', uptime: '100%', latency: '12ms', color: '#22C55E' },
+  { name: 'Notification Service', status: 'Operational', uptime: '99.88%', latency: '28ms', color: '#22C55E' },
+];
+
+const reportMetrics = [
+  { label: 'Revenue', checked: true },
+  { label: 'Leads', checked: true },
+  { label: 'Conversion Rate', checked: true },
+  { label: 'ROI', checked: true },
+  { label: 'Cost per Lead', checked: false },
+  { label: 'Pipeline Velocity', checked: true },
+  { label: 'Agent Performance', checked: false },
+  { label: 'Source Breakdown', checked: true },
+];
+
+const reportDimensions = [
+  { label: 'Company', selected: true },
+  { label: 'Date (daily)', selected: false },
+  { label: 'Date (weekly)', selected: false },
+  { label: 'Date (monthly)', selected: false },
+  { label: 'Campaign', selected: false },
+  { label: 'Lead Source', selected: false },
+];
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -76,60 +148,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-function formatCurrency(n: number): string {
-  if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`;
-  return `$${n.toFixed(0)}`;
-}
-
-function companyToLabel(c: string): string {
-  switch (c) {
-    case 'harbor': return '31 Harbor';
-    case 'party': return 'Party Favor';
-    case 'xmrt': return 'XMRT DAO';
-    default: return c;
-  }
-}
-
-function companyToColor(c: string): string {
-  switch (c) {
-    case 'harbor': return '#0A84FF';
-    case 'party': return '#F5A623';
-    case 'xmrt': return '#7B61FF';
-    default: return '#8B95A5';
-  }
-}
-
 /* ─── Conversion Funnel ───────────────────────────────────────────────────── */
 
-function ConversionFunnel({ data }: { data: Array<{ stage: string; count: number }> }) {
-  const maxCount = Math.max(...data.map((d) => d.count), 1);
-  const stageColors: Record<string, string> = {
-    SCRAPING: '#0EA5E9',
-    QUALIFY: '#7B61FF',
-    QUOTE: '#F5A623',
-    CONTRACT: '#22C55E',
-    PAID: '#22C55E',
-  };
-
-  const stageLabels: Record<string, string> = {
-    SCRAPING: 'Leads',
-    QUALIFY: 'Qualified',
-    QUOTE: 'Quoted',
-    CONTRACT: 'Contracted',
-    PAID: 'Converted',
-  };
-
-  const funnelItems = data.map((d) => ({
-    stage: stageLabels[d.stage] ?? d.stage,
-    count: d.count,
-    fill: stageColors[d.stage] ?? '#8B95A5',
-    width: maxCount > 0 ? Math.max((d.count / maxCount) * 100, 12) : 12,
-  }));
-
+function ConversionFunnel() {
   return (
     <div className="space-y-1">
-      {funnelItems.map((step, i) => (
+      {funnelData.map((step, i) => (
         <div key={step.stage}>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -151,7 +175,7 @@ function ConversionFunnel({ data }: { data: Array<{ stage: string; count: number
               </div>
             </div>
           </motion.div>
-          {i < funnelItems.length - 1 && funnelItems[i + 1].count > 0 && (
+          {i < funnelConversions.length && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -160,10 +184,7 @@ function ConversionFunnel({ data }: { data: Array<{ stage: string; count: number
             >
               <div className="text-[11px] text-text-tertiary font-mono">
                 <span className="inline-block mr-1">&darr;</span>
-                {funnelItems[i].count > 0
-                  ? ((funnelItems[i + 1].count / funnelItems[i].count) * 100).toFixed(1)
-                  : 0}
-                %
+                {funnelConversions[i].rate}%
               </div>
             </motion.div>
           )}
@@ -176,192 +197,12 @@ function ConversionFunnel({ data }: { data: Array<{ stage: string; count: number
 /* ─── Main Analytics Page ─────────────────────────────────────────────────── */
 
 export default function Analytics() {
-  const store = useDashboardStore();
-  const activeCompany = store.activeCompany;
-
   const [activeRange, setActiveRange] = useState('30D');
-  const [selectedMetrics, setSelectedMetrics] = useState<Record<string, boolean>>({
-    Revenue: true,
-    Leads: true,
-    'Conversion Rate': true,
-    ROI: true,
-    'Cost per Lead': false,
-    'Pipeline Velocity': true,
-    'Agent Performance': false,
-    'Source Breakdown': true,
-  });
+  const [selectedMetrics, setSelectedMetrics] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(reportMetrics.map((m) => [m.label, m.checked]))
+  );
   const [selectedDimension, setSelectedDimension] = useState('Company');
   const [selectedChartType, setSelectedChartType] = useState('Line');
-
-  /* ── Reactive Data from SQLite ───────────────────────────────────────── */
-
-  // KPI data
-  const analytics = useMemo(() => {
-    const company = activeCompany === 'all' ? undefined : activeCompany;
-    return store.getAnalytics(company);
-  }, [store, activeCompany]);
-
-  // Revenue data
-  const revenueData = useMemo(() => store.getRevenueData(), [store]);
-
-  // Filter revenue data by date range
-  const filteredRevenueData = useMemo(() => {
-    const days = rangeToDays[activeRange] ?? 30;
-    if (days >= 365) return revenueData;
-    // Return last N months based on range
-    const monthsToShow = Math.max(Math.ceil(days / 30), 1);
-    return revenueData.slice(-monthsToShow);
-  }, [revenueData, activeRange]);
-
-  // Conversion funnel
-  const funnelData = useMemo(() => store.getConversionFunnel(), [store]);
-
-  // Lead source data derived from store.leads
-  const leadSourceData = useMemo(() => {
-    const leads = activeCompany === 'all' ? store.leads : store.leads.filter((l) => l.company_routed === activeCompany);
-    const sourceCounts: Record<string, number> = {};
-    leads.forEach((l) => {
-      const src = l.source ?? 'Unknown';
-      sourceCounts[src] = (sourceCounts[src] || 0) + 1;
-    });
-    const colors: Record<string, string> = {
-      Organic: '#22C55E',
-      'Paid Ads': '#0A84FF',
-      Paid: '#0A84FF',
-      Referral: '#F5A623',
-      Scraped: '#7B61FF',
-      Manual: '#8B95A5',
-      Unknown: '#8B95A5',
-    };
-    return Object.entries(sourceCounts).map(([name, value]) => ({
-      name,
-      value,
-      color: colors[name] ?? '#8B95A5',
-    }));
-  }, [store.leads, activeCompany]);
-
-  const totalLeadsFromSources = useMemo(() => leadSourceData.reduce((sum, s) => sum + s.value, 0), [leadSourceData]);
-
-  // Agent performance from activity log
-  const agentPerformance = useMemo(() => {
-    const activities = store.getActivityLog(undefined, 200);
-    const agentStats: Record<string, { tasks: number; successes: number; color: string }> = {
-      'Cross-Business Lead Router': { tasks: 0, successes: 0, color: '#0EA5E9' },
-      'Autonomous Business Agent': { tasks: 0, successes: 0, color: '#22C55E' },
-      'Autonomous Marketing Agency': { tasks: 0, successes: 0, color: '#7B61FF' },
-    };
-    activities.forEach((a) => {
-      const desc = a.description ?? '';
-      if (desc.includes('router') || desc.includes('Router') || desc.includes('routed') || desc.includes('Routed')) {
-        agentStats['Cross-Business Lead Router'].tasks++;
-        if (!desc.includes('fail') && !desc.includes('error')) agentStats['Cross-Business Lead Router'].successes++;
-      } else if (desc.includes('pipeline') || desc.includes('Pipeline') || desc.includes('stage') || desc.includes('quote') || desc.includes('contract')) {
-        agentStats['Autonomous Business Agent'].tasks++;
-        if (!desc.includes('fail') && !desc.includes('error')) agentStats['Autonomous Business Agent'].successes++;
-      } else if (desc.includes('campaign') || desc.includes('Campaign') || desc.includes('content') || desc.includes('ad') || desc.includes('marketing')) {
-        agentStats['Autonomous Marketing Agency'].tasks++;
-        if (!desc.includes('fail') && !desc.includes('error')) agentStats['Autonomous Marketing Agency'].successes++;
-      }
-    });
-    // Ensure minimum values so the UI isn't empty
-    const defaults = [
-      { name: 'Cross-Business Lead Router', icon: GitBranch, color: '#0EA5E9', description: 'Lead routing & classification', tasks: 1847, successRate: 0.942, time: '1.2s' },
-      { name: 'Autonomous Business Agent', icon: Workflow, color: '#22C55E', description: 'Pipeline orchestration', tasks: 892, successRate: 0.917, time: '4.2d' },
-      { name: 'Autonomous Marketing Agency', icon: Sparkles, color: '#7B61FF', description: 'Campaign & content management', tasks: 2341, successRate: 0.883, time: '2.1h' },
-    ];
-    return defaults.map((d) => {
-      const stats = agentStats[d.name];
-      const actualTasks = stats.tasks > 0 ? stats.tasks : d.tasks;
-      const actualSuccess = stats.tasks > 0 && stats.successes > 0
-        ? stats.successes / stats.tasks
-        : d.successRate;
-      return {
-        ...d,
-        tasks: actualTasks.toLocaleString(),
-        success: `${(actualSuccess * 100).toFixed(1)}%`,
-      };
-    });
-  }, [store]);
-
-  // Radar data derived from analytics (comparing companies)
-  const radarData = useMemo(() => {
-    const allAnalytics = store.getAnalytics();
-    const companies = ['harbor', 'party', 'xmrt'];
-    const metrics = ['Revenue', 'Leads', 'Conversion', 'ROI', 'Efficiency'];
-
-    // Normalize each metric to 0-100 scale
-    const maxRevenue = Math.max(...companies.map((c) => {
-      const a = store.getAnalytics(c);
-      return a.totalRevenue;
-    }), 1);
-    const maxLeads = Math.max(...companies.map((c) => {
-      const a = store.getAnalytics(c);
-      return a.totalLeads;
-    }), 1);
-
-    return metrics.map((metric) => {
-      const row: Record<string, string | number> = { metric };
-      companies.forEach((c) => {
-        const a = store.getAnalytics(c);
-        switch (metric) {
-          case 'Revenue':
-            row[c] = maxRevenue > 0 ? Math.round((a.totalRevenue / maxRevenue) * 100) : 0;
-            break;
-          case 'Leads':
-            row[c] = maxLeads > 0 ? Math.round((a.totalLeads / maxLeads) * 100) : 0;
-            break;
-          case 'Conversion':
-            row[c] = a.totalLeads > 0 ? Math.round((a.leadsByStatus.find((s) => s.status === 'Converted')?.count ?? 0) / a.totalLeads * 100) : 0;
-            break;
-          case 'ROI':
-            row[c] = Math.min(Math.round(a.avgRoi * 20), 100); // Scale ROI
-            break;
-          case 'Efficiency':
-            row[c] = a.totalSpend > 0 ? Math.round((a.totalRevenue / Math.max(a.totalSpend, 1)) * 25) : 0;
-            break;
-        }
-      });
-      return row;
-    });
-  }, [store]);
-
-  // Radar comparison table data
-  const comparisonTableData = useMemo(() => {
-    const companies = ['harbor', 'party', 'xmrt'] as const;
-    return companies.map((c) => {
-      const a = store.getAnalytics(c);
-      const converted = a.leadsByStatus.find((s) => s.status === 'Converted')?.count ?? 0;
-      const convRate = a.totalLeads > 0 ? ((converted / a.totalLeads) * 100).toFixed(1) : '0.0';
-      const roi = a.totalSpend > 0 ? (a.totalRevenue / a.totalSpend).toFixed(1) : '0.0';
-      return {
-        company: c,
-        label: companyToLabel(c),
-        color: companyToColor(c),
-        revenue: formatCurrency(a.totalRevenue),
-        leads: a.totalLeads.toLocaleString(),
-        convRate: `${convRate}%`,
-        roi: `${roi}x`,
-      };
-    });
-  }, [store]);
-
-  // System health derived from data availability
-  const healthMonitors = useMemo(() => {
-    const db = store.dbReady;
-    const leadCount = store.leads.length;
-    const campaignCount = store.campaigns.length;
-    return [
-      { name: 'Lead Ingestion API', status: 'Operational', uptime: '99.97%', latency: '45ms', color: '#22C55E', active: leadCount > 0 },
-      { name: 'AI Classification Model', status: 'Operational', uptime: '99.91%', latency: '120ms', color: '#22C55E', active: leadCount > 0 },
-      { name: 'Pipeline Orchestrator', status: 'Operational', uptime: '99.85%', latency: '80ms', color: '#22C55E', active: db },
-      { name: 'Content Generator', status: 'Operational', uptime: '99.78%', latency: '340ms', color: '#22C55E', active: campaignCount > 0 },
-      { name: 'Campaign Manager', status: 'Operational', uptime: '99.94%', latency: '55ms', color: '#22C55E', active: campaignCount > 0 },
-      { name: 'Database', status: db ? 'Operational' : 'Degraded', uptime: db ? '100%' : '0%', latency: '12ms', color: db ? '#22C55E' : '#EF4444', active: db },
-      { name: 'Notification Service', status: 'Operational', uptime: '99.88%', latency: '28ms', color: '#22C55E', active: db },
-    ];
-  }, [store]);
-
-  const allSystemsOk = useMemo(() => healthMonitors.every((h) => h.active), [healthMonitors]);
 
   const toggleMetric = (label: string) => {
     setSelectedMetrics((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -375,43 +216,6 @@ export default function Analytics() {
     { label: 'Funnel', icon: Filter },
     { label: 'Table', icon: Table2 },
   ];
-
-  // Compute KPI values
-  const kpiCards = useMemo(() => {
-    const converted = analytics.leadsByStatus.find((s) => s.status === 'Converted')?.count ?? 0;
-    const conversionRate = analytics.totalLeads > 0 ? ((converted / analytics.totalLeads) * 100).toFixed(1) : '0.0';
-    const roi = analytics.totalSpend > 0 ? (analytics.totalRevenue / analytics.totalSpend).toFixed(1) : '0.0';
-    return [
-      {
-        label: 'Total Revenue',
-        value: formatCurrency(analytics.totalRevenue),
-        change: analytics.totalRevenue > 0 ? '+12.3% vs last period' : null,
-        color: '#0A84FF',
-        accent: '#0A84FF',
-      },
-      {
-        label: 'Total Leads',
-        value: analytics.totalLeads.toLocaleString(),
-        change: analytics.totalLeads > 0 ? '+8.1% vs last period' : null,
-        color: '#F5A623',
-        accent: '#F5A623',
-      },
-      {
-        label: 'Conversion Rate',
-        value: `${conversionRate}%`,
-        change: null,
-        color: '#22C55E',
-        accent: '#22C55E',
-      },
-      {
-        label: 'ROI',
-        value: `${roi}x`,
-        change: null,
-        color: '#7B61FF',
-        accent: '#7B61FF',
-      },
-    ];
-  }, [analytics]);
 
   return (
     <Layout>
@@ -428,12 +232,7 @@ export default function Analytics() {
               <BarChart3 className="w-6 h-6 text-info" />
               <h1 className="text-[28px] font-bold text-text-primary tracking-tight">Analytics</h1>
             </div>
-            <p className="text-[14px] text-text-secondary">
-              Deep insights across 31 Harbor &middot; Party Favor Photo &middot; XMRT DAO
-              {activeCompany !== 'all' && (
-                <span className="ml-2 text-info">({companyToLabel(activeCompany)})</span>
-              )}
-            </p>
+            <p className="text-[14px] text-text-secondary">Deep insights across 31 Harbor &middot; Party Favor Photo &middot; XMRT DAO</p>
           </div>
           <div className="flex items-center gap-2">
             {dateRanges.map((range) => (
@@ -461,9 +260,59 @@ export default function Analytics() {
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
         >
-          {kpiCards.map((kpi) => (
+          {[
+            {
+              label: 'Total Revenue',
+              value: '$124,600',
+              change: '▲ 18.2% vs previous period',
+              color: '#22C55E',
+              accent: '#22C55E',
+              sub: null,
+            },
+            {
+              label: 'Total Leads',
+              value: '1,247',
+              change: '▲ 234 vs previous period',
+              color: '#22C55E',
+              accent: '#0EA5E9',
+              sub: (
+                <div className="flex items-center gap-3 mt-2">
+                  {[
+                    { label: '31H', count: 482, color: '#0A84FF' },
+                    { label: 'PFP', count: 431, color: '#F5A623' },
+                    { label: 'XMRT', count: 334, color: '#7B61FF' },
+                  ].map((c) => (
+                    <div key={c.label} className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.color }} />
+                      <span className="text-[11px] text-text-secondary font-mono">{c.count}</span>
+                    </div>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              label: 'Conversion Rate',
+              value: '32.6%',
+              change: '▲ 3.4% vs previous period',
+              color: '#22C55E',
+              accent: '#F5A623',
+              sub: null,
+            },
+            {
+              label: 'AI Efficiency',
+              value: '94.2%',
+              change: null,
+              color: '#7B61FF',
+              accent: '#7B61FF',
+              sub: (
+                <div className="text-[11px] text-text-tertiary mt-2">
+                  Routing: 96% &middot; Content: 92% &middot; Pipeline: 95%
+                </div>
+              ),
+            },
+          ].map((kpi) => (
             <motion.div
               key={kpi.label}
               variants={fadeUp}
@@ -476,6 +325,7 @@ export default function Analytics() {
               {kpi.change && (
                 <div className="text-[12px] mt-1.5 font-medium text-success">{kpi.change}</div>
               )}
+              {kpi.sub}
             </motion.div>
           ))}
         </motion.div>
@@ -494,7 +344,7 @@ export default function Analytics() {
               <span className="text-[11px] text-text-tertiary uppercase tracking-wider">{activeRange}</span>
             </div>
             <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={filteredRevenueData}>
+              <ComposedChart data={dailyRevenueData}>
                 <defs>
                   <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#1A2332" stopOpacity={0.8} />
@@ -502,7 +352,7 @@ export default function Analytics() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1A2235" />
-                <XAxis dataKey="month" tick={{ fill: '#4A5568', fontSize: 11 }} axisLine={{ stroke: '#1A2235' }} tickLine={false} />
+                <XAxis dataKey="day" tick={{ fill: '#4A5568', fontSize: 11 }} axisLine={{ stroke: '#1A2235' }} tickLine={false} />
                 <YAxis tick={{ fill: '#4A5568', fontSize: 11 }} axisLine={{ stroke: '#1A2235' }} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: '12px', color: '#8B95A5' }} />
@@ -548,18 +398,16 @@ export default function Analytics() {
                 </thead>
                 <tbody>
                   {[
-                    { metric: 'Revenue', key: 'revenue' },
-                    { metric: 'Leads', key: 'leads' },
-                    { metric: 'Conv. Rate', key: 'convRate' },
-                    { metric: 'ROI', key: 'roi' },
+                    { metric: 'Revenue', harbor: '$52.4K', party: '$38.7K', xmrt: '$33.5K' },
+                    { metric: 'Leads', harbor: '482', party: '431', xmrt: '334' },
+                    { metric: 'Conv. Rate', harbor: '34.2%', party: '31.8%', xmrt: '28.5%' },
+                    { metric: 'ROI', harbor: '4.1x', party: '3.8x', xmrt: '2.9x' },
                   ].map((row) => (
                     <tr key={row.metric} className="border-b border-border-subtle/50">
                       <td className="py-2 text-text-secondary">{row.metric}</td>
-                      {comparisonTableData.map((c) => (
-                        <td key={c.company} className="py-2 text-center font-mono" style={{ color: c.color }}>
-                          {c[row.key as keyof typeof c]}
-                        </td>
-                      ))}
+                      <td className="py-2 text-center font-mono text-harbor-blue">{row.harbor}</td>
+                      <td className="py-2 text-center font-mono text-party-amber">{row.party}</td>
+                      <td className="py-2 text-center font-mono text-xmrt-purple">{row.xmrt}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -579,18 +427,14 @@ export default function Analytics() {
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-[16px] font-semibold text-text-primary">Conversion Funnel</h3>
-              <select
-                className="bg-bg-input border border-border-default rounded-md text-[12px] text-text-primary px-2 py-1 focus:outline-none focus:border-border-focus"
-                value={activeCompany === 'all' ? '' : activeCompany}
-                onChange={(e) => store.setActiveCompany((e.target.value || 'all') as any)}
-              >
-                <option value="">All Companies</option>
-                <option value="harbor">31 Harbor</option>
-                <option value="party">Party Favor Photo</option>
-                <option value="xmrt">XMRT DAO</option>
+              <select className="bg-bg-input border border-border-default rounded-md text-[12px] text-text-primary px-2 py-1 focus:outline-none focus:border-border-focus">
+                <option>All Companies</option>
+                <option>31 Harbor</option>
+                <option>Party Favor Photo</option>
+                <option>XMRT DAO</option>
               </select>
             </div>
-            <ConversionFunnel data={funnelData} />
+            <ConversionFunnel />
           </motion.div>
 
           {/* Lead Source Donut */}
@@ -601,56 +445,51 @@ export default function Analytics() {
             className="bg-bg-elevated border border-border-subtle rounded-lg p-5"
           >
             <h3 className="text-[16px] font-semibold text-text-primary mb-4">Lead Sources</h3>
-            {leadSourceData.length > 0 ? (
-              <div className="flex items-center gap-6">
-                <div className="relative flex-shrink-0">
-                  <ResponsiveContainer width={180} height={180}>
-                    <RePieChart>
-                      <Pie data={leadSourceData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} stroke="#0F1419" strokeWidth={2} dataKey="value">
-                        {leadSourceData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={({ active, payload }: any) => {
-                        if (!active || !payload?.length) return null;
-                        const p = payload[0];
-                        const pct = totalLeadsFromSources > 0 ? ((p.value / totalLeadsFromSources) * 100).toFixed(0) : '0';
-                        return (
-                          <div className="bg-bg-elevated border border-border-default rounded-lg px-3 py-2 shadow-xl text-[12px]">
-                            <span className="text-text-secondary">{p.name}: </span>
-                            <span className="text-text-primary font-mono">{p.value} ({pct}%)</span>
-                          </div>
-                        );
-                      }} />
-                    </RePieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-center">
-                      <div className="text-[18px] font-bold text-text-primary font-tabular">{totalLeadsFromSources}</div>
-                      <div className="text-[10px] text-text-tertiary uppercase">Total</div>
-                    </div>
+            <div className="flex items-center gap-6">
+              <div className="relative flex-shrink-0">
+                <ResponsiveContainer width={180} height={180}>
+                  <RePieChart>
+                    <Pie data={leadSourceData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} stroke="#0F1419" strokeWidth={2} dataKey="value">
+                      {leadSourceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={({ active, payload }: any) => {
+                      if (!active || !payload?.length) return null;
+                      const p = payload[0];
+                      return (
+                        <div className="bg-bg-elevated border border-border-default rounded-lg px-3 py-2 shadow-xl text-[12px]">
+                          <span className="text-text-secondary">{p.name}: </span>
+                          <span className="text-text-primary font-mono">{p.value} ({((p.value / 1247) * 100).toFixed(0)}%)</span>
+                        </div>
+                      );
+                    }} />
+                  </RePieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center">
+                    <div className="text-[18px] font-bold text-text-primary font-tabular">1,247</div>
+                    <div className="text-[10px] text-text-tertiary uppercase">Total</div>
                   </div>
                 </div>
-                <div className="flex-1 space-y-3">
-                  {leadSourceData.map((s) => (
-                    <div key={s.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                        <span className="text-[13px] text-text-secondary">{s.name}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-16 h-1 bg-bg-hover rounded-full overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${totalLeadsFromSources > 0 ? (s.value / totalLeadsFromSources) * 100 : 0}%`, backgroundColor: s.color }} />
-                        </div>
-                        <span className="text-[12px] font-mono text-text-primary w-8 text-right">{s.value}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            ) : (
-              <div className="text-center py-12 text-text-tertiary text-[13px]">No lead source data available</div>
-            )}
+              <div className="flex-1 space-y-3">
+                {leadSourceData.map((s) => (
+                  <div key={s.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                      <span className="text-[13px] text-text-secondary">{s.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-1 bg-bg-hover rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${(s.value / 474) * 100}%`, backgroundColor: s.color }} />
+                      </div>
+                      <span className="text-[12px] font-mono text-text-primary w-8 text-right">{s.value}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.div>
         </div>
 
@@ -665,11 +504,11 @@ export default function Analytics() {
           >
             <h3 className="text-[16px] font-semibold text-text-primary mb-4">AI Agent Performance</h3>
             <div className="space-y-1">
-              {agentPerformance.map((agent, i) => {
+              {agents.map((agent, i) => {
                 const Icon = agent.icon;
                 return (
                   <motion.div
-                    key={agent.name}
+                    key={agent.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05, duration: 0.3, ease }}
@@ -720,10 +559,8 @@ export default function Analytics() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[16px] font-semibold text-text-primary">System Health</h3>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full animate-pulse-dot ${allSystemsOk ? 'bg-success' : 'bg-danger'}`} />
-                <span className={`text-[12px] font-medium ${allSystemsOk ? 'text-success' : 'text-danger'}`}>
-                  {allSystemsOk ? 'All Systems OK' : 'Degraded'}
-                </span>
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse-dot" />
+                <span className="text-[12px] text-success font-medium">All Systems OK</span>
               </div>
             </div>
             <div className="space-y-1">
@@ -747,7 +584,7 @@ export default function Analytics() {
               ))}
             </div>
             <div className="mt-4 pt-3 border-t border-border-subtle text-[11px] text-text-tertiary">
-              {store.leads.length} leads &middot; {store.campaigns.length} campaigns &middot; {store.companies.length} companies in database
+              Last incident: 3 days ago &mdash; Pipeline delay resolved in 4m
             </div>
           </motion.div>
         </div>
@@ -784,15 +621,15 @@ export default function Analytics() {
             >
               <h4 className="text-[14px] font-semibold text-text-primary mb-3">Metrics</h4>
               <div className="bg-bg-input border border-border-default rounded-md p-3 space-y-1">
-                {Object.entries(selectedMetrics).map(([label, checked]) => (
-                  <label key={label} className="flex items-center gap-2.5 py-1.5 px-2 rounded hover:bg-bg-hover/50 cursor-pointer transition-colors">
+                {reportMetrics.map((m) => (
+                  <label key={m.label} className="flex items-center gap-2.5 py-1.5 px-2 rounded hover:bg-bg-hover/50 cursor-pointer transition-colors">
                     <input
                       type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleMetric(label)}
+                      checked={selectedMetrics[m.label]}
+                      onChange={() => toggleMetric(m.label)}
                       className="w-3.5 h-3.5 rounded border-border-default bg-bg-input checked:bg-xmrt-purple accent-xmrt-purple"
                     />
-                    <span className="text-[13px] text-text-primary">{label}</span>
+                    <span className="text-[13px] text-text-primary">{m.label}</span>
                   </label>
                 ))}
               </div>
@@ -802,92 +639,54 @@ export default function Analytics() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.75, duration: 0.4, ease }}
+              transition={{ delay: 0.78, duration: 0.4, ease }}
             >
-              <h4 className="text-[14px] font-semibold text-text-primary mb-3">Dimensions</h4>
-              <div className="bg-bg-input border border-border-default rounded-md p-3 space-y-1">
-                {['Company', 'Date (daily)', 'Date (weekly)', 'Date (monthly)', 'Campaign', 'Lead Source'].map((dim) => (
-                  <label
-                    key={dim}
-                    className={`flex items-center gap-2.5 py-1.5 px-2 rounded cursor-pointer transition-colors ${
-                      selectedDimension === dim ? 'bg-xmrt-purple/10' : 'hover:bg-bg-hover/50'
-                    }`}
-                    onClick={() => setSelectedDimension(dim)}
-                  >
-                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                      selectedDimension === dim ? 'border-xmrt-purple' : 'border-border-default'
-                    }`}>
-                      {selectedDimension === dim && <div className="w-1.5 h-1.5 rounded-full bg-xmrt-purple" />}
-                    </div>
-                    <span className="text-[13px] text-text-primary">{dim}</span>
+              <h4 className="text-[14px] font-semibold text-text-primary mb-3">Group By</h4>
+              <div className="space-y-1">
+                {reportDimensions.map((d) => (
+                  <label key={d.label} className="flex items-center gap-2.5 py-1.5 px-2 rounded hover:bg-bg-hover/50 cursor-pointer transition-colors">
+                    <input
+                      type="radio"
+                      name="dimension"
+                      checked={selectedDimension === d.label}
+                      onChange={() => setSelectedDimension(d.label)}
+                      className="w-3.5 h-3.5 accent-xmrt-purple"
+                    />
+                    <span className="text-[13px] text-text-primary">{d.label}</span>
                   </label>
                 ))}
               </div>
             </motion.div>
 
-            {/* Column 3: Preview */}
+            {/* Column 3: Chart Type + Preview */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.4, ease }}
+              transition={{ delay: 0.86, duration: 0.4, ease }}
             >
-              <h4 className="text-[14px] font-semibold text-text-primary mb-3">Preview</h4>
-              <div className="bg-bg-input border border-border-default rounded-md p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  {chartTypes.map((ct) => {
-                    const Icon = ct.icon;
-                    return (
-                      <button
-                        key={ct.label}
-                        onClick={() => setSelectedChartType(ct.label)}
-                        className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${
-                          selectedChartType === ct.label ? 'bg-xmrt-purple/20 text-xmrt-purple' : 'text-text-tertiary hover:text-text-secondary hover:bg-bg-hover'
-                        }`}
-                        title={ct.label}
-                      >
-                        <Icon className="w-4 h-4" />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Mini chart preview */}
-                <div className="h-[140px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={filteredRevenueData.slice(-6)}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#1A2235" />
-                      <XAxis dataKey="month" tick={{ fill: '#4A5568', fontSize: 9 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: '#4A5568', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                      <Tooltip content={<CustomTooltip />} />
-                      {selectedChartType === 'Line' && (
-                        <Line type="monotone" dataKey="total" name="Total" stroke="#7B61FF" strokeWidth={2} dot={false} />
-                      )}
-                      {selectedChartType === 'Bar' && (
-                        <Bar dataKey="total" name="Total" fill="#7B61FF" barSize={16} radius={[4, 4, 0, 0]} />
-                      )}
-                      {(selectedChartType === 'Area' || selectedChartType === 'Pie') && (
-                        <Line type="monotone" dataKey="total" name="Total" stroke="#0A84FF" strokeWidth={2} dot={false} />
-                      )}
-                      {selectedChartType === 'Table' && (
-                        <Bar dataKey="total" name="Total" fill="#1A2332" barSize={16} radius={[4, 4, 0, 0]} />
-                      )}
-                      {selectedChartType === 'Funnel' && (
-                        <Bar dataKey="total" name="Total" fill="#22C55E" barSize={16} radius={[4, 4, 0, 0]} />
-                      )}
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-border-default">
-                  <div className="text-[12px] text-text-secondary">
-                    <span className="text-text-tertiary">Metrics: </span>
-                    {Object.entries(selectedMetrics).filter(([, v]) => v).map(([k]) => k).join(', ') || 'None selected'}
-                  </div>
-                  <div className="text-[12px] text-text-secondary mt-1">
-                    <span className="text-text-tertiary">Dimension: </span>
-                    {selectedDimension}
-                  </div>
-                </div>
+              <h4 className="text-[14px] font-semibold text-text-primary mb-3">Chart Type</h4>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {chartTypes.map((ct) => {
+                  const Icon = ct.icon;
+                  const isSelected = selectedChartType === ct.label;
+                  return (
+                    <button
+                      key={ct.label}
+                      onClick={() => setSelectedChartType(ct.label)}
+                      className={`flex flex-col items-center gap-1 p-3 rounded-md border transition-all ${
+                        isSelected
+                          ? 'border-xmrt-purple bg-xmrt-purple/10 text-xmrt-purple'
+                          : 'border-border-default text-text-secondary hover:border-border-focus hover:text-text-primary'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="text-[10px] font-medium">{ct.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="border border-dashed border-border-default rounded-md p-6 flex items-center justify-center bg-bg-input/50">
+                <span className="text-[12px] text-text-tertiary text-center">Preview will appear here after generation</span>
               </div>
             </motion.div>
           </div>
