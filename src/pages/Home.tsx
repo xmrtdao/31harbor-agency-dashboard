@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   UserPlus, Play, Sparkles, TrendingUp,
@@ -11,10 +11,7 @@ import {
 } from 'recharts';
 import Layout from '@/components/Layout';
 import { useDashboardStore } from '@/store/dashboardStore';
-import {
-  dailyRevenueData, companyRevenueBreakdown, sparklineDataTotalLeads,
-  sparklineDataPipeline, activityFeed, pipelineStages, campaigns, leads,
-} from '@/data/mockData';
+import { companies as mockCompanies } from '@/data/mockData';
 
 // ─── Animation Variants ──────────────────────────────────────────────────────
 
@@ -73,7 +70,9 @@ function useCountUp(target: number, duration: number = 1200, suffix: string = ''
 
 const activityIcons: Record<string, React.ElementType> = {
   UserPlus, Sparkles, CheckCircle, GitBranch, TrendingUp, AlertTriangle, Zap,
-  BarChart3, Megaphone,
+  BarChart3, Megaphone, routing: GitBranch, lead: UserPlus, pipeline: GitBranch,
+  campaign: Megaphone, ai: Sparkles, system: Zap, approval: AlertTriangle,
+  content: Sparkles, analytics: BarChart3, conversion: TrendingUp,
 };
 
 // ─── Status Badge ────────────────────────────────────────────────────────────
@@ -87,6 +86,7 @@ function StatusBadge({ status }: { status: string }) {
     Contracted: { bg: 'bg-success/15', text: 'text-success' },
     Quoted: { bg: 'bg-info/15', text: 'text-info' },
     Active: { bg: 'bg-success/15', text: 'text-success' },
+    new: { bg: 'bg-info/15', text: 'text-info' },
   };
   const v = variants[status] || { bg: 'bg-text-tertiary/15', text: 'text-text-secondary' };
   return (
@@ -102,6 +102,12 @@ function scoreColor(score: number): string {
   if (score >= 80) return 'text-success';
   if (score >= 50) return 'text-warning';
   return 'text-danger';
+}
+
+function getScoreColorHex(score: number): string {
+  if (score >= 80) return '#22C55E';
+  if (score >= 50) return '#F59E0B';
+  return '#EF4444';
 }
 
 // ─── KPI Sparkline (mini SVG) ────────────────────────────────────────────────
@@ -131,21 +137,16 @@ function MiniSparkline({ data, color, fillColor }: { data: number[]; color: stri
 
 // ─── Mini Bar Chart for Marketing ROI ────────────────────────────────────────
 
-function MiniBarChart() {
-  const bars = [
-    { h: 18, color: '#0A84FF' },
-    { h: 24, color: '#F5A623' },
-    { h: 14, color: '#7B61FF' },
-    { h: 22, color: '#0A84FF' },
-    { h: 16, color: '#F5A623' },
-  ];
+function MiniBarChart({ data }: { data: number[] }) {
+  const colors = ['#0A84FF', '#F5A623', '#7B61FF', '#0A84FF', '#F5A623'];
+  const max = Math.max(...data, 1);
   return (
     <div className="flex items-end gap-[4px] h-[30px]">
-      {bars.map((bar, i) => (
+      {data.slice(0, 5).map((val, i) => (
         <div
           key={i}
           className="w-[10px] rounded-sm"
-          style={{ height: `${bar.h}px`, backgroundColor: bar.color }}
+          style={{ height: `${Math.max((val / max) * 24, 4)}px`, backgroundColor: colors[i % colors.length] }}
         />
       ))}
     </div>
@@ -186,37 +187,163 @@ function DonutTooltip({ active, payload }: { active?: boolean; payload?: Array<{
   );
 }
 
+// ─── Time Ago Helper ─────────────────────────────────────────────────────────
+
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return 'recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 // ─── Main Overview Page ──────────────────────────────────────────────────────
 
 export default function Home() {
-  const { activeCompany } = useDashboardStore();
+  const store = useDashboardStore();
+  const { activeCompany, leads, campaigns, pipelineStages, activityFeed, companies } = store;
 
-  // Count-up values
-  const totalLeadsDisplay = useCountUp(247, 1200, '');
-  const pipelineValueDisplay = useCountUp(84, 1200, '.2K');
-  const marketingROIDisplay = useCountUp(3, 1200, '.4x');
-  const aiDecisionsDisplay = useCountUp(1847, 1200, '');
+  // ── Derived KPI values (reactive from store) ────────────────────────────
+  const filteredLeads = useMemo(() => {
+    if (activeCompany === 'all') return leads;
+    return leads.filter((l) => l.company_routed === activeCompany);
+  }, [leads, activeCompany]);
 
-  // Filtered data based on active company
-  const filteredLeads = activeCompany === 'all'
-    ? leads.slice(0, 10)
-    : leads.filter((l) => l.companyId === activeCompany).slice(0, 10);
+  const filteredCampaigns = useMemo(() => {
+    if (activeCompany === 'all') return campaigns;
+    return campaigns.filter((c) => c.company === activeCompany);
+  }, [campaigns, activeCompany]);
 
-  const filteredActivity = activeCompany === 'all'
-    ? activityFeed.slice(0, 20)
-    : activityFeed.filter((a) => a.companyId === activeCompany).slice(0, 20);
+  const totalLeads = filteredLeads.length;
+  const pipelineValue = filteredLeads.reduce((sum, l) => sum + (l.value || 0), 0);
+  const avgRoi = filteredCampaigns.length > 0
+    ? filteredCampaigns.reduce((s, c) => s + (c.roi || 0), 0) / filteredCampaigns.length
+    : 0;
+  const aiDecisions = leads.filter((l) => l.ai_confidence && l.ai_confidence !== 'low').length;
 
-  const totalRevenue = companyRevenueBreakdown.reduce((s, c) => s + c.value, 0);
+  // Count-up displays (recomputed when derived values change)
+  const totalLeadsDisplay = useCountUp(totalLeads, 1200, '');
+  const pipelineValueDisplay = useCountUp(Math.round(pipelineValue / 1000), 1200, 'K');
+  const marketingROIDisplay = useCountUp(Math.round(avgRoi * 10), 1200, `.${Math.round((avgRoi % 1) * 10)}x`);
+  const aiDecisionsDisplay = useCountUp(aiDecisions, 1200, '');
 
-  const getCompanyDot = (companyId: string) => {
+  // ── Revenue chart data from store ───────────────────────────────────────
+  const revenueData = store.getRevenueData();
+  const activeRevenueData = useMemo(() => {
+    if (activeCompany === 'all') return revenueData;
+    return revenueData.map((d: any) => ({
+      ...d,
+      harbor: d.harbor * (activeCompany === 'harbor' ? 1 : 0.3),
+      party: d.party * (activeCompany === 'party' ? 1 : 0.3),
+      xmrt: d.xmrt * (activeCompany === 'xmrt' ? 1 : 0.3),
+    }));
+  }, [revenueData, activeCompany]);
+
+  // ── Company donut chart (derived from real leads) ───────────────────────
+  const companyDonutData = useMemo(() => {
+    const companyColors: Record<string, string> = {
+      harbor: '#0A84FF',
+      party: '#F5A623',
+      xmrt: '#7B61FF',
+    };
+    const companyNames: Record<string, string> = {
+      harbor: '31 Harbor',
+      party: 'Party Favor Photo',
+      xmrt: 'XMRT DAO',
+    };
+    const relevantLeads = activeCompany === 'all' ? leads : leads.filter((l) => l.company_routed === activeCompany);
+    const counts: Record<string, number> = {};
+    relevantLeads.forEach((l) => {
+      const cid = l.company_routed || 'unknown';
+      counts[cid] = (counts[cid] || 0) + 1;
+    });
+    const data = Object.entries(counts).map(([company, count]) => ({
+      name: companyNames[company] || company,
+      value: count,
+      color: companyColors[company] || '#8B95A5',
+    }));
+    if (data.length === 0) {
+      return [{ name: 'No Data', value: 1, color: '#8B95A5' }];
+    }
+    return data;
+  }, [leads, activeCompany]);
+
+  const totalDonutValue = companyDonutData.reduce((s, c) => s + c.value, 0);
+
+  // ── Activity feed from store ────────────────────────────────────────────
+  const filteredActivity = useMemo(() => {
+    const feed = activityFeed || [];
+    const relevant = activeCompany === 'all'
+      ? feed
+      : feed.filter((a) => a.company === activeCompany);
+    return relevant.slice(0, 20);
+  }, [activityFeed, activeCompany]);
+
+  // ── Pipeline stages with counts from store ──────────────────────────────
+  const pipelineData = store.getPipelineData();
+  const activePipelineStages = useMemo(() => {
+    return pipelineData.map((s: any) => ({
+      id: s.id,
+      label: s.name.toUpperCase(),
+      count: s.count,
+      needsApproval: s.requires_approval,
+      activeCompanies: [s.id],
+    }));
+  }, [pipelineData]);
+
+  const totalApprovals = activePipelineStages.reduce((s, st) => s + st.needsApproval, 0);
+
+  // ── Recent leads (top 10 from store) ────────────────────────────────────
+  const recentLeads = useMemo(() => {
+    return filteredLeads.slice(0, 10);
+  }, [filteredLeads]);
+
+  // ── Helpers ─────────────────────────────────────────────────────────────
+  const getCompanyDot = (companyId: string | null) => {
     const colors: Record<string, string> = { harbor: '#0A84FF', party: '#F5A623', xmrt: '#7B61FF' };
-    return <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colors[companyId] || '#8B95A5' }} />;
+    return <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colors[companyId || ''] || '#8B95A5' }} />;
   };
 
-  const getCompanyName = (companyId: string) => {
+  const getCompanyName = (companyId: string | null) => {
     const names: Record<string, string> = { harbor: '31 Harbor', party: 'Party Favor Photo', xmrt: 'XMRT DAO' };
-    return names[companyId] || companyId;
+    return names[companyId || ''] || companyId || 'Unknown';
   };
+
+  const getCompanyColor = (companyId: string | null) => {
+    const colors: Record<string, string> = { harbor: '#0A84FF', party: '#F5A623', xmrt: '#7B61FF' };
+    return colors[companyId || ''] || '#8B95A5';
+  };
+
+  const getCompanyColorDim = (companyId: string | null) => {
+    const dims: Record<string, string> = { harbor: '#0A84FF33', party: '#F5A62333', xmrt: '#7B61FF33' };
+    return dims[companyId || ''] || '#8B95A533';
+  };
+
+  // ── Sparkline data (derived from actual lead counts over time) ──────────
+  const leadSparkline = useMemo(() => {
+    const counts: number[] = [];
+    const sorted = [...filteredLeads].sort((a, b) =>
+      new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+    let running = 0;
+    sorted.forEach(() => {
+      running++;
+      counts.push(running);
+    });
+    return counts.length >= 5 ? counts : [12, 18, 25, 32, 38, 42, 48, 55, 60, 68, 72, 80, 85, 92, 100, 105, 112, 120, 128, 135];
+  }, [filteredLeads]);
+
+  const pipelineSparkline = useMemo(() => {
+    const stages = activePipelineStages;
+    return stages.map((s) => s.count * 1.5);
+  }, [activePipelineStages]);
+
+  const campaignBarData = useMemo(() => {
+    return filteredCampaigns.map((c) => c.spend || 0);
+  }, [filteredCampaigns]);
 
   return (
     <Layout>
@@ -262,15 +389,15 @@ export default function Home() {
             variants={cardVariants}
             initial="hidden"
             animate="visible"
-            className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 border-t-[3px] border-t-info"
+            className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 border-t-[3px] border-t-harbor-blue"
           >
             <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider mb-2">Total Leads</div>
             <div className="text-[42px] font-extrabold text-text-primary leading-tight tracking-tight">{totalLeadsDisplay}</div>
             <div className="flex items-center gap-1.5 mt-1.5 mb-3">
               <TrendingUp className="w-3.5 h-3.5 text-success" />
-              <span className="text-[12px] text-success font-medium">12.5% vs last week</span>
+              <span className="text-[12px] text-success font-medium">{filteredLeads.filter((l) => (l.score || 0) >= 80).length} high-intent</span>
             </div>
-            <MiniSparkline data={sparklineDataTotalLeads.slice(-7)} color="#0EA5E9" fillColor="#0EA5E9" />
+            <MiniSparkline data={leadSparkline} color="#0A84FF" fillColor="#0A84FF" />
           </motion.div>
 
           {/* KPI 2: Pipeline Value */}
@@ -279,15 +406,15 @@ export default function Home() {
             variants={cardVariants}
             initial="hidden"
             animate="visible"
-            className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 border-t-[3px] border-t-success"
+            className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 border-t-[3px] border-t-party-gold"
           >
             <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider mb-2">Pipeline Value</div>
             <div className="text-[42px] font-extrabold text-text-primary leading-tight tracking-tight">${pipelineValueDisplay}</div>
             <div className="flex items-center gap-1.5 mt-1.5 mb-3">
               <TrendingUp className="w-3.5 h-3.5 text-success" />
-              <span className="text-[12px] text-success font-medium">8.3% vs last week</span>
+              <span className="text-[12px] text-success font-medium">{filteredLeads.filter((l) => l.status === 'Contracted' || l.status === 'contracted').length} contracted</span>
             </div>
-            <MiniSparkline data={sparklineDataPipeline.slice(-7)} color="#22C55E" fillColor="#22C55E" />
+            <MiniSparkline data={pipelineSparkline.length >= 5 ? pipelineSparkline : [12, 14, 13, 15, 16, 15, 17, 18, 17, 19, 20, 19, 21, 22, 21]} color="#F5A623" fillColor="#F5A623" />
           </motion.div>
 
           {/* KPI 3: Marketing ROI */}
@@ -296,15 +423,15 @@ export default function Home() {
             variants={cardVariants}
             initial="hidden"
             animate="visible"
-            className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 border-t-[3px] border-t-party-amber"
+            className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition-all duration-200 border-t-[3px] border-t-success"
           >
             <div className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider mb-2">Marketing ROI</div>
-            <div className="text-[42px] font-extrabold text-text-primary leading-tight tracking-tight">{marketingROIDisplay}</div>
+            <div className="text-[42px] font-extrabold text-text-primary leading-tight tracking-tight">{avgRoi > 0 ? `${avgRoi.toFixed(1)}x` : marketingROIDisplay}</div>
             <div className="flex items-center gap-1.5 mt-1.5 mb-3">
               <TrendingUp className="w-3.5 h-3.5 text-success" />
-              <span className="text-[12px] text-success font-medium">0.2x vs last month</span>
+              <span className="text-[12px] text-success font-medium">{filteredCampaigns.filter((c) => (c.roi || 0) > 0).length} active campaigns</span>
             </div>
-            <MiniBarChart />
+            <MiniBarChart data={campaignBarData.length > 0 ? campaignBarData : [4200, 2800, 5500, 3500, 1800]} />
           </motion.div>
 
           {/* KPI 4: AI Decisions */}
@@ -319,7 +446,7 @@ export default function Home() {
             <div className="text-[42px] font-extrabold text-text-primary leading-tight tracking-tight">{aiDecisionsDisplay}</div>
             <div className="flex items-center gap-1.5 mt-1.5 mb-3">
               <TrendingUp className="w-3.5 h-3.5 text-success" />
-              <span className="text-[12px] text-success font-medium">234 vs yesterday</span>
+              <span className="text-[12px] text-success font-medium">{leads.filter((l) => (l.score || 0) >= 80).length} high-confidence</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-success animate-pulse-dot" />
@@ -340,10 +467,10 @@ export default function Home() {
           >
             <div className="mb-4">
               <h3 className="text-[18px] font-semibold text-text-primary">Revenue Trend</h3>
-              <span className="text-[12px] text-text-tertiary">Last 30 days</span>
+              <span className="text-[12px] text-text-tertiary">Last 12 months</span>
             </div>
             <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={dailyRevenueData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+              <AreaChart data={activeRevenueData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradHarbor" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0A84FF" stopOpacity={0.1} />
@@ -359,7 +486,7 @@ export default function Home() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1A2235" />
-                <XAxis dataKey="day" tick={{ fill: '#4A5568', fontSize: 12 }} axisLine={{ stroke: '#1A2235' }} tickLine={false} />
+                <XAxis dataKey="month" tick={{ fill: '#4A5568', fontSize: 12 }} axisLine={{ stroke: '#1A2235' }} tickLine={false} />
                 <YAxis tick={{ fill: '#4A5568', fontSize: 12 }} axisLine={{ stroke: '#1A2235' }} tickLine={false} tickFormatter={(v) => `$${v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v}`} />
                 <Tooltip content={<RevenueTooltip />} />
                 <Area type="monotone" dataKey="harbor" name="31 Harbor" stroke="#0A84FF" strokeWidth={2} fill="url(#gradHarbor)" />
@@ -390,13 +517,13 @@ export default function Home() {
             className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default transition-all duration-200"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[18px] font-semibold text-text-primary">Revenue by Company</h3>
-              <span className="text-[14px] font-bold text-text-primary">100%</span>
+              <h3 className="text-[18px] font-semibold text-text-primary">Leads by Company</h3>
+              <span className="text-[14px] font-bold text-text-primary">{totalDonutValue}</span>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie
-                  data={companyRevenueBreakdown}
+                  data={companyDonutData}
                   cx="50%"
                   cy="50%"
                   innerRadius="60%"
@@ -406,7 +533,7 @@ export default function Home() {
                   stroke="#0F1419"
                   strokeWidth={3}
                 >
-                  {companyRevenueBreakdown.map((entry, i) => (
+                  {companyDonutData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
@@ -415,16 +542,16 @@ export default function Home() {
             </ResponsiveContainer>
             <div className="text-center -mt-4 mb-3">
               <div className="text-[11px] text-text-tertiary uppercase tracking-wider">Total</div>
-              <div className="text-[18px] font-bold text-text-primary">${(totalRevenue / 1000).toFixed(1)}K</div>
+              <div className="text-[18px] font-bold text-text-primary">{totalDonutValue} leads</div>
             </div>
             <div className="space-y-2">
-              {companyRevenueBreakdown.map((item) => (
+              {companyDonutData.map((item) => (
                 <div key={item.name} className="flex items-center justify-between text-[13px]">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                     <span className="text-text-secondary">{item.name}</span>
                   </div>
-                  <span className="text-text-primary font-medium">{item.percentage}%</span>
+                  <span className="text-text-primary font-medium">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -452,7 +579,7 @@ export default function Home() {
             </div>
             <div className="max-h-[320px] overflow-y-auto space-y-0 pr-1">
               {filteredActivity.map((item, i) => {
-                const IconComp = activityIcons[item.icon] || Activity;
+                const IconComp = activityIcons[item.type || ''] || Activity;
                 return (
                   <motion.div
                     key={item.id}
@@ -462,12 +589,12 @@ export default function Home() {
                     animate="visible"
                     className="flex items-start gap-3 py-2.5 border-b border-border-subtle last:border-b-0 hover:bg-bg-hover/50 px-2 -mx-2 rounded transition-colors"
                   >
-                    {getCompanyDot(item.companyId)}
+                    {getCompanyDot(item.company)}
                     <IconComp className="w-4 h-4 text-text-secondary mt-0.5 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] text-text-primary leading-snug">{item.description}</p>
                     </div>
-                    <span className="text-[11px] text-text-tertiary shrink-0 font-mono tracking-tight">{item.timestamp}</span>
+                    <span className="text-[11px] text-text-tertiary shrink-0 font-mono tracking-tight">{timeAgo(item.created_at)}</span>
                   </motion.div>
                 );
               })}
@@ -491,7 +618,7 @@ export default function Home() {
 
             {/* Pipeline Flow */}
             <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-2">
-              {pipelineStages.map((stage, i) => (
+              {activePipelineStages.map((stage, i) => (
                 <div key={stage.id} className="flex items-center gap-1 shrink-0">
                   <div className="flex flex-col items-center">
                     <motion.div
@@ -505,7 +632,7 @@ export default function Home() {
                     </motion.div>
                     <span className="text-[14px] font-semibold text-text-primary mt-1.5 font-mono">{stage.count}</span>
                   </div>
-                  {i < pipelineStages.length - 1 && (
+                  {i < activePipelineStages.length - 1 && (
                     <ChevronRight className="w-3.5 h-3.5 text-border-default shrink-0 mx-0.5" />
                   )}
                 </div>
@@ -513,11 +640,11 @@ export default function Home() {
             </div>
 
             {/* Approval Alert */}
-            {pipelineStages.reduce((s, st) => s + st.needsApproval, 0) > 0 && (
+            {totalApprovals > 0 && (
               <div className="flex items-center gap-2.5 px-3 py-2.5 bg-warning/10 border-l-[3px] border-l-warning rounded-md">
                 <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
                 <span className="text-[13px] text-text-primary flex-1">
-                  {pipelineStages.reduce((s, st) => s + st.needsApproval, 0)} approvals pending
+                  {totalApprovals} approvals pending
                 </span>
                 <a href="#/pipeline" className="text-[12px] text-warning hover:underline font-medium">Review →</a>
               </div>
@@ -541,32 +668,40 @@ export default function Home() {
 
             {/* Mini Horizontal Bars */}
             <div className="space-y-3 mb-4">
-              {[
-                { companyId: 'harbor', label: '31H', color: '#0A84FF', spend: 65, roas: '3.2x' },
-                { companyId: 'party', label: 'PFP', color: '#F5A623', spend: 50, roas: '4.1x' },
-                { companyId: 'xmrt', label: 'XMRT', color: '#7B61FF', spend: 45, roas: '2.8x' },
-              ].map((bar) => (
-                <div key={bar.companyId} className="flex items-center gap-3">
-                  <span className="text-[12px] font-mono text-text-secondary w-10">{bar.label}</span>
-                  <div className="flex-1 h-6 bg-bg-hover rounded overflow-hidden flex">
-                    <div className="h-full rounded-l" style={{ width: `${bar.spend}%`, backgroundColor: bar.color, opacity: 0.6 }} />
-                    <div className="h-full rounded-r" style={{ width: `${100 - bar.spend}%`, backgroundColor: bar.color, opacity: 0.25 }} />
+              {mockCompanies.map((bar) => {
+                const companyCampaigns = campaigns.filter((c) => c.company === bar.id);
+                const totalSpend = companyCampaigns.reduce((s, c) => s + (c.spend || 0), 0);
+                const maxSpend = Math.max(...campaigns.map((c) => c.spend || 1), 1);
+                const avgRoas = companyCampaigns.length > 0
+                  ? companyCampaigns.reduce((s, c) => s + (c.roi || 0), 0) / companyCampaigns.length
+                  : 0;
+                if (activeCompany !== 'all' && activeCompany !== bar.id) return null;
+                return (
+                  <div key={bar.id} className="flex items-center gap-3">
+                    <span className="text-[12px] font-mono text-text-secondary w-10">{bar.abbreviation}</span>
+                    <div className="flex-1 h-6 bg-bg-hover rounded overflow-hidden flex">
+                      <div className="h-full rounded-l" style={{ width: `${Math.min((totalSpend / maxSpend) * 100, 100)}%`, backgroundColor: bar.color, opacity: 0.6 }} />
+                      <div className="h-full rounded-r flex-1" style={{ backgroundColor: bar.color, opacity: 0.15 }} />
+                    </div>
+                    <span className="text-[12px] font-semibold text-text-primary w-10 text-right">{avgRoas.toFixed(1)}x</span>
                   </div>
-                  <span className="text-[12px] font-semibold text-text-primary w-10 text-right">{bar.roas}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Active Campaigns */}
             <div className="space-y-2">
               {campaigns
-                .filter((c) => c.status === 'Active' || c.status === 'Pending')
+                .filter((c) => {
+                  if (activeCompany !== 'all' && c.company !== activeCompany) return false;
+                  return (c.status || '').toLowerCase() === 'active' || (c.status || '').toLowerCase() === 'pending';
+                })
                 .slice(0, 3)
                 .map((campaign) => (
                   <div key={campaign.id} className="flex items-center gap-2.5 py-1.5">
-                    {getCompanyDot(campaign.companyId)}
+                    {getCompanyDot(campaign.company)}
                     <span className="text-[13px] text-text-primary flex-1 truncate">{campaign.name}</span>
-                    <StatusBadge status={campaign.status} />
+                    <StatusBadge status={campaign.status || 'Draft'} />
                   </div>
                 ))}
             </div>
@@ -588,7 +723,7 @@ export default function Home() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-[18px] font-semibold text-text-primary">Recent Leads</h3>
-              <span className="text-[12px] text-text-tertiary">Last 24 hours</span>
+              <span className="text-[12px] text-text-tertiary">From SQLite database</span>
             </div>
             <a href="#/leads" className="text-[13px] text-harbor-blue hover:underline flex items-center gap-1">
               View All Leads <ChevronRight className="w-3.5 h-3.5" />
@@ -604,13 +739,13 @@ export default function Home() {
                   <th className="text-left text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Score</th>
                   <th className="text-left text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Source</th>
                   <th className="text-left text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Status</th>
-                  <th className="text-left text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Routed</th>
+                  <th className="text-left text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Intent</th>
                   <th className="text-left text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Time</th>
                   <th className="text-right text-[11px] font-medium text-text-secondary uppercase tracking-wider px-3 py-2.5">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredLeads.map((lead, i) => (
+                {recentLeads.map((lead, i) => (
                   <motion.tr
                     key={lead.id}
                     custom={i}
@@ -621,33 +756,33 @@ export default function Home() {
                   >
                     <td className="px-3 py-3">
                       <div className="text-[14px] font-medium text-text-primary">{lead.name}</div>
-                      <div className="text-[12px] text-text-tertiary">{lead.email}</div>
+                      <div className="text-[12px] text-text-tertiary">{lead.email || '—'}</div>
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-2">
-                        {getCompanyDot(lead.companyId)}
-                        <span className="text-[13px] text-text-primary">{getCompanyName(lead.companyId)}</span>
+                        {getCompanyDot(lead.company_routed)}
+                        <span className="text-[13px] text-text-primary">{getCompanyName(lead.company_routed)}</span>
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      <span className={`text-[14px] font-bold font-mono tabular-nums ${scoreColor(lead.score)}`}>
-                        {lead.score}
+                      <span className={`text-[14px] font-bold font-mono tabular-nums ${scoreColor(lead.score || 0)}`}>
+                        {lead.score || 0}
                       </span>
                     </td>
                     <td className="px-3 py-3">
-                      <span className="text-[13px] text-text-secondary">{lead.source}</span>
+                      <span className="text-[13px] text-text-secondary">{lead.source || '—'}</span>
                     </td>
                     <td className="px-3 py-3">
-                      <StatusBadge status={lead.status} />
+                      <StatusBadge status={lead.status || 'New'} />
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-xmrt-purple" />
-                        <span className="text-[13px] text-text-secondary">{lead.routedBy}</span>
+                        <span className="text-[13px] text-text-secondary truncate max-w-[140px]">{lead.intent || '—'}</span>
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      <span className="text-[12px] text-text-tertiary font-mono">{lead.timeAgo}</span>
+                      <span className="text-[12px] text-text-tertiary font-mono">{timeAgo(lead.created_at)}</span>
                     </td>
                     <td className="px-3 py-3 text-right">
                       <button className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bg-hover transition-colors">
@@ -658,6 +793,9 @@ export default function Home() {
                 ))}
               </tbody>
             </table>
+            {recentLeads.length === 0 && (
+              <div className="py-12 text-center text-[14px] text-text-secondary">No leads found for the selected company.</div>
+            )}
           </div>
         </motion.div>
       </div>

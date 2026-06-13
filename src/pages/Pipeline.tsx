@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -29,7 +29,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import Layout from '@/components/Layout';
-import { useDashboardStore } from '@/store/dashboardStore';
 import { companies } from '@/data/mockData';
 
 // ─── Animation Config ───────────────────────────────────────────────────────
@@ -45,13 +44,14 @@ const fadeUp = {
   }),
 };
 
-// ─── Stage Config (static metadata) ─────────────────────────────────────────
+// ─── Stage Config ───────────────────────────────────────────────────────────
 
 interface StageConfig {
   id: string;
   label: string;
   icon: React.ElementType;
   color: string;
+  count: string;
   statusText: string;
   statusColor: string;
   miniText: string;
@@ -59,19 +59,86 @@ interface StageConfig {
   completed?: boolean;
 }
 
-const stageMeta: StageConfig[] = [
-  { id: 'scraping', label: 'LEAD SCRAPE', icon: Globe, color: '#0EA5E9', statusText: 'Running', statusColor: '#0EA5E9', miniText: 'Web scrape & Form intake', pulse: true },
-  { id: 'qualify', label: 'AI QUALIFY', icon: BrainCircuit, color: '#7B61FF', statusText: 'Processing', statusColor: '#7B61FF', miniText: 'Confidence scoring', pulse: true },
-  { id: 'quote', label: 'QUOTE GEN', icon: FileText, color: '#F59E0B', statusText: 'Needs Approval', statusColor: '#F59E0B', miniText: 'Human review required', pulse: true },
-  { id: 'contract', label: 'CONTRACT', icon: FileSignature, color: '#22C55E', statusText: 'Active', statusColor: '#22C55E', miniText: 'Contract generation', completed: false },
-  { id: 'payment', label: 'PAYMENT', icon: CreditCard, color: '#22C55E', statusText: 'Processing', statusColor: '#22C55E', miniText: 'Secure payment gateway', completed: false },
-  { id: 'schedule', label: 'SCHEDULE', icon: CalendarCheck, color: '#8B95A5', statusText: 'Complete', statusColor: '#8B95A5', miniText: 'Delivery scheduling', completed: true },
+const stages: StageConfig[] = [
+  { id: 'scraping', label: 'LEAD SCRAPE', icon: Globe, color: '#0EA5E9', count: '12 active', statusText: 'Running', statusColor: '#0EA5E9', miniText: '2 sources: Web scrape, Form intake', pulse: true },
+  { id: 'qualify', label: 'AI QUALIFY', icon: BrainCircuit, color: '#7B61FF', count: '8 active', statusText: 'Processing', statusColor: '#7B61FF', miniText: 'Avg confidence: 91%', pulse: true },
+  { id: 'quote', label: 'QUOTE GEN', icon: FileText, color: '#F59E0B', count: '5 active', statusText: 'Needs Approval x1', statusColor: '#F59E0B', miniText: '1 pending human review', pulse: true },
+  { id: 'contract', label: 'CONTRACT', icon: FileSignature, color: '#22C55E', count: '3 active', statusText: 'Active', statusColor: '#22C55E', miniText: 'All contracts signed', completed: false },
+  { id: 'payment', label: 'PAYMENT', icon: CreditCard, color: '#22C55E', count: '2 processing', statusText: 'Processing', statusColor: '#22C55E', miniText: 'Secure payment gateway', completed: false },
+  { id: 'schedule', label: 'SCHEDULE', icon: CalendarCheck, color: '#8B95A5', count: '1 complete', statusText: 'Complete', statusColor: '#8B95A5', miniText: 'All scheduled', completed: true },
 ];
+
+// ─── Pipeline Table Data ────────────────────────────────────────────────────
+
+interface PipelineLead {
+  id: string;
+  name: string;
+  companyId: string;
+  stageId: string;
+  progress: number;
+  stageLabel: string;
+  timeInStage: string;
+  value: string;
+  status: string;
+  needsApproval?: boolean;
+}
+
+const pipelineLeads: PipelineLead[] = [
+  { id: 'P-101', name: 'Sarah Mitchell', companyId: 'harbor', stageId: 'qualify', progress: 33, stageLabel: 'AI QUALIFY', timeInStage: '2h 14m', value: '$0', status: 'Processing' },
+  { id: 'P-102', name: 'CryptoVentures LLC', companyId: 'xmrt', stageId: 'quote', progress: 50, stageLabel: 'QUOTE GEN', timeInStage: '5h 32m', value: '$12,500', status: 'Needs Approval', needsApproval: true },
+  { id: 'P-103', name: "Emily's Wedding", companyId: 'party', stageId: 'scraping', progress: 17, stageLabel: 'LEAD SCRAPE', timeInStage: '45m', value: '$0', status: 'Processing' },
+  { id: 'P-104', name: 'DeFi Labs', companyId: 'xmrt', stageId: 'contract', progress: 67, stageLabel: 'CONTRACT', timeInStage: '1d 4h', value: '$8,400', status: 'Processing' },
+  { id: 'P-105', name: 'Harbor View RE', companyId: 'harbor', stageId: 'payment', progress: 83, stageLabel: 'PAYMENT', timeInStage: '6h', value: '$45,000', status: 'Processing' },
+  { id: 'P-106', name: 'Birthday Bash Co', companyId: 'party', stageId: 'qualify', progress: 33, stageLabel: 'AI QUALIFY', timeInStage: '3h 20m', value: '$0', status: 'Processing' },
+  { id: 'P-107', name: 'TokenForge Inc', companyId: 'xmrt', stageId: 'scraping', progress: 17, stageLabel: 'LEAD SCRAPE', timeInStage: '1h 10m', value: '$0', status: 'Processing' },
+  { id: 'P-108', name: 'Marina Residences', companyId: 'harbor', stageId: 'contract', progress: 67, stageLabel: 'CONTRACT', timeInStage: '2d 1h', value: '$125,000', status: 'Processing' },
+  { id: 'P-109', name: 'Wedding Planners R Us', companyId: 'party', stageId: 'quote', progress: 50, stageLabel: 'QUOTE GEN', timeInStage: '4h 15m', value: '$4,800', status: 'Needs Approval', needsApproval: true },
+  { id: 'P-110', name: 'NFT Collective', companyId: 'xmrt', stageId: 'qualify', progress: 33, stageLabel: 'AI QUALIFY', timeInStage: '1h 45m', value: '$0', status: 'Processing' },
+  { id: 'P-111', name: 'Coastal Realty Group', companyId: 'harbor', stageId: 'schedule', progress: 100, stageLabel: 'SCHEDULE', timeInStage: '3d', value: '$85,000', status: 'Complete' },
+  { id: 'P-112', name: 'SnapHappy Photobooth', companyId: 'party', stageId: 'payment', progress: 83, stageLabel: 'PAYMENT', timeInStage: '8h', value: '$2,400', status: 'Processing' },
+];
+
+// ─── Approval Queue Data ────────────────────────────────────────────────────
+
+interface ApprovalItem {
+  id: string;
+  companyId: string;
+  title: string;
+  description: string;
+  value: string;
+  waitingTime: string;
+}
+
+const approvals: ApprovalItem[] = [
+  { id: 'A-1', companyId: 'xmrt', title: 'Quote Generation: CryptoVentures LLC', description: 'DeFi platform development proposal · 12-week timeline · Includes smart contract audit', value: '$12,500', waitingTime: '5h 32m' },
+  { id: 'A-2', companyId: 'harbor', title: 'Contract Terms: Harbor View Properties', description: 'Property management agreement · 6-month term · Revenue share model', value: '$3,200/mo', waitingTime: '2h 18m' },
+  { id: 'A-3', companyId: 'party', title: 'Event Package: Wedding Planners R Us', description: 'Premium photo booth + videography · 200 guests · 8-hour coverage', value: '$4,800', waitingTime: '45m' },
+];
+
+// ─── Chart Data ─────────────────────────────────────────────────────────────
+
+const chartData = Array.from({ length: 30 }, (_, i) => ({
+  day: i + 1,
+  harbor: Math.floor(Math.random() * 8) + 2,
+  party: Math.floor(Math.random() * 6) + 1,
+  xmrt: Math.floor(Math.random() * 5) + 1,
+  conversion: Math.floor(Math.random() * 20) + 15,
+}));
+
+// ─── Stage Detail Data ──────────────────────────────────────────────────────
+
+const stageDetailStats: Record<string, { active: number; completed: number; avgTime: string; successRate: string }> = {
+  scraping: { active: 12, completed: 45, avgTime: '1.2h', successRate: '96%' },
+  qualify: { active: 8, completed: 38, avgTime: '2.4h', successRate: '91%' },
+  quote: { active: 5, completed: 22, avgTime: '4.1h', successRate: '88%' },
+  contract: { active: 3, completed: 18, avgTime: '1.5d', successRate: '94%' },
+  payment: { active: 2, completed: 15, avgTime: '2.1h', successRate: '98%' },
+  schedule: { active: 1, completed: 12, avgTime: '3.2h', successRate: '100%' },
+};
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getCompany(id: string | null) {
-  if (!id) return companies[0];
+function getCompany(id: string) {
   return companies.find((c) => c.id === id) || companies[0];
 }
 
@@ -87,35 +154,11 @@ function getStageBadge(stageId: string) {
   return map[stageId] || map.scraping;
 }
 
-function stageProgress(stageId: string): number {
-  const idx = stageMeta.findIndex((s) => s.id === stageId);
-  if (idx < 0) return 0;
-  return Math.round(((idx + 1) / stageMeta.length) * 100);
-}
-
-function timeSince(iso: string | null): string {
-  if (!iso) return '-';
-  const then = new Date(iso).getTime();
-  const now = Date.now();
-  const mins = Math.floor((now - then) / 60000);
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ${mins % 60}m`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ${hrs % 24}h`;
-}
-
-function formatValue(v: number): string {
-  if (v >= 1000) return `$${(v / 1000).toFixed(1)}K`;
-  return v > 0 ? `$${v}` : '$0';
-}
-
 // ─── Stage Detail Modal ─────────────────────────────────────────────────────
 
-function StageDetailModal({ stage, leads, onClose }: { stage: StageConfig; leads: any[]; onClose: () => void }) {
-  const stageLeads = leads.filter((l) => l.pipeline_stage === stage.id);
-  const completedCount = stageLeads.filter((l) => l.status === 'Complete' || l.status === 'Contracted').length;
-  const activeCount = stageLeads.length - completedCount;
+function StageDetailModal({ stage, onClose }: { stage: StageConfig; onClose: () => void }) {
+  const stats = stageDetailStats[stage.id] || { active: 0, completed: 0, avgTime: '-', successRate: '-' };
+  const stageLeads = pipelineLeads.filter((l) => l.stageId === stage.id);
 
   return (
     <motion.div
@@ -149,10 +192,10 @@ function StageDetailModal({ stage, leads, onClose }: { stage: StageConfig; leads
           {/* Stats Row */}
           <div className="grid grid-cols-4 gap-3">
             {[
-              { label: 'Active', value: String(activeCount) },
-              { label: 'Completed', value: String(completedCount) },
-              { label: 'Total', value: String(stageLeads.length) },
-              { label: 'Success rate', value: stageLeads.length > 0 ? `${Math.round((completedCount / stageLeads.length) * 100)}%` : '-' },
+              { label: 'Active', value: String(stats.active) },
+              { label: 'Completed today', value: String(stats.completed) },
+              { label: 'Avg time', value: stats.avgTime },
+              { label: 'Success rate', value: stats.successRate },
             ].map((s) => (
               <div key={s.label} className="bg-bg-input border border-border-default rounded-lg p-3 text-center">
                 <div className="text-[20px] font-bold text-text-primary">{s.value}</div>
@@ -169,18 +212,18 @@ function StageDetailModal({ stage, leads, onClose }: { stage: StageConfig; leads
             ) : (
               <div className="space-y-2 max-h-[240px] overflow-y-auto">
                 {stageLeads.map((lead) => {
-                  const company = getCompany(lead.company_routed);
+                  const company = getCompany(lead.companyId);
                   return (
                     <div key={lead.id} className="flex items-center gap-3 bg-bg-input border border-border-default rounded-lg p-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0" style={{ backgroundColor: company.colorDim, color: company.color }}>
-                        {lead.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                        {lead.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[14px] font-semibold text-text-primary truncate">{lead.name}</div>
                         <div className="text-[12px] text-text-secondary">{company.name}</div>
                       </div>
-                      <div className="text-[12px] font-mono text-text-secondary">{timeSince(lead.updated_at)}</div>
-                      <div className="text-[13px] font-mono font-semibold text-text-primary">{formatValue(lead.value)}</div>
+                      <div className="text-[12px] font-mono text-text-secondary">{lead.timeInStage}</div>
+                      <div className="text-[13px] font-mono font-semibold text-text-primary">{lead.value}</div>
                     </div>
                   );
                 })}
@@ -228,6 +271,8 @@ function StageDetailModal({ stage, leads, onClose }: { stage: StageConfig; leads
 
 // ─── Traveling Dot Component (isolated for performance) ─────────────────────
 
+import React from 'react';
+
 const TravelingDot = React.memo(function TravelingDot({ color }: { color: string }) {
   return (
     <div className="absolute top-1/2 -translate-y-1/2 left-0 w-full h-0 pointer-events-none">
@@ -271,94 +316,19 @@ function KpiCard({ caption, metric, trend, trendColor, accentColor, subContent, 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Pipeline() {
-  const store = useDashboardStore();
-  const { activeCompany, leads, updateLead, refresh } = store;
-
   const [selectedStage, setSelectedStage] = useState<StageConfig | null>(null);
   const [pipelineRunning, setPipelineRunning] = useState(true);
+  const [approvalsList, setApprovalsList] = useState(approvals);
   const [chartTab, setChartTab] = useState('Volume');
   const [pipelineFilter, setPipelineFilter] = useState('All Pipelines');
 
-  // ── Derived data from SQLite ──────────────────────────────────────────
+  const handleApprove = useCallback((id: string) => {
+    setApprovalsList((prev) => prev.filter((a) => a.id !== id));
+  }, []);
 
-  // Filter leads by active company
-  const filteredLeads = useMemo(() => {
-    const filterCo = pipelineFilter === 'All Pipelines' ? activeCompany :
-      pipelineFilter === '31 Harbor Sales' ? 'harbor' :
-      pipelineFilter === 'Party Favor Photo Events' ? 'party' :
-      pipelineFilter === 'XMRT DAO Tech' ? 'xmrt' : activeCompany;
-    if (filterCo === 'all') return leads;
-    return leads.filter((l) => l.company_routed === filterCo);
-  }, [leads, activeCompany, pipelineFilter]);
-
-  // Approval queue from SQLite
-  const approvalsList = useMemo(() => {
-    return store.getPendingApprovals();
-  }, [leads, store]);
-
-  // Filter approvals by active company
-  const filteredApprovals = useMemo(() => {
-    if (activeCompany === 'all') return approvalsList;
-    return approvalsList.filter((a) => a.company_routed === activeCompany);
-  }, [approvalsList, activeCompany]);
-
-  // Revenue data from SQLite
-  const revenueData = useMemo(() => {
-    const data = store.getRevenueData();
-    if (activeCompany === 'all') return data;
-    return data.map((d) => ({
-      ...d,
-      harbor: activeCompany === 'harbor' ? d.harbor : 0,
-      party: activeCompany === 'party' ? d.party : 0,
-      xmrt: activeCompany === 'xmrt' ? d.xmrt : 0,
-    }));
-  }, [store, activeCompany]);
-
-  // Pipeline stage counts derived from actual leads
-  const stagesWithCounts = useMemo(() => {
-    return stageMeta.map((stage) => {
-      const stageLeads = filteredLeads.filter((l) => l.pipeline_stage === stage.id);
-      return {
-        ...stage,
-        count: stageLeads.length,
-        countText: `${stageLeads.length} active`,
-        completed: stage.id === 'schedule' ? stageLeads.length > 0 && stageLeads.every((l) => l.status === 'Complete' || l.status === 'Contracted') : false,
-      };
-    });
-  }, [filteredLeads]);
-
-  // KPI metrics
-  const activePipelines = filteredLeads.filter((l) => l.status !== 'Complete' && l.status !== 'Low Match').length;
-  const avgDealValue = filteredLeads.length > 0
-    ? filteredLeads.reduce((sum, l) => sum + (l.value || 0), 0) / filteredLeads.length
-    : 0;
-  const winRate = filteredLeads.length > 0
-    ? Math.round((filteredLeads.filter((l) => l.status === 'Contracted' || l.status === 'Complete').length / filteredLeads.length) * 100 * 10) / 10
-    : 0;
-  const revenueThisMonth = filteredLeads.reduce((sum, l) => sum + (l.value || 0), 0);
-
-  // Chart data: use revenue data as base, add conversion line
-  const chartData = useMemo(() => {
-    return revenueData.map((d, i) => ({
-      day: i + 1,
-      harbor: Math.max(1, Math.round(d.harbor / 5000)),
-      party: Math.max(1, Math.round(d.party / 5000)),
-      xmrt: Math.max(1, Math.round(d.xmrt / 5000)),
-      conversion: Math.min(100, 15 + i * 2 + ((i * 137) % 20)),
-    }));
-  }, [revenueData]);
-
-  // ── Handlers ──────────────────────────────────────────────────────────
-
-  const handleApprove = useCallback((id: number) => {
-    updateLead(id, { status: 'Qualified', pipeline_stage: 'contract' });
-    refresh();
-  }, [updateLead, refresh]);
-
-  const handleReject = useCallback((id: number) => {
-    updateLead(id, { status: 'Low Match', pipeline_stage: 'scraping' });
-    refresh();
-  }, [updateLead, refresh]);
+  const handleReject = useCallback((id: string) => {
+    setApprovalsList((prev) => prev.filter((a) => a.id !== id));
+  }, []);
 
   return (
     <Layout>
@@ -389,7 +359,7 @@ export default function Pipeline() {
                 <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" /> ABBA ACTIVE
               </span>
             </div>
-            <p className="text-[14px] text-text-secondary mb-2">End-to-end autonomous pipeline &middot; ABBA v1.8</p>
+            <p className="text-[14px] text-text-secondary mb-2">End-to-end autonomous pipeline · ABBA v1.8</p>
             <select
               value={pipelineFilter}
               onChange={(e) => setPipelineFilter(e.target.value)}
@@ -428,7 +398,7 @@ export default function Pipeline() {
           className="bg-bg-elevated border border-border-subtle rounded-lg p-8 mb-6 hover:border-border-default transition-colors"
         >
           <div className="flex items-center justify-between relative">
-            {stagesWithCounts.map((stage, i) => (
+            {stages.map((stage, i) => (
               <React.Fragment key={stage.id}>
                 {/* Stage Node */}
                 <motion.button
@@ -456,7 +426,7 @@ export default function Pipeline() {
 
                     <stage.icon className="w-6 h-6 mx-auto mb-2" style={{ color: stage.color }} />
                     <div className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary mb-1">{stage.label}</div>
-                    <div className="text-[18px] font-bold text-text-primary mb-1">{stage.count} active</div>
+                    <div className="text-[18px] font-bold text-text-primary mb-1">{stage.count}</div>
                     <div className="flex items-center justify-center gap-1.5 mb-2">
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${stage.pulse ? 'animate-pulse-dot' : ''}`}
@@ -469,7 +439,7 @@ export default function Pipeline() {
                 </motion.button>
 
                 {/* Connection Line */}
-                {i < stagesWithCounts.length - 1 && (
+                {i < stages.length - 1 && (
                   <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -487,7 +457,7 @@ export default function Pipeline() {
                     />
                     {/* Traveling dot on active stages */}
                     {stage.pulse && pipelineRunning && (
-                      <TravelingDot color={stagesWithCounts[i + 1].color} />
+                      <TravelingDot color={stages[i + 1].color} />
                     )}
                   </motion.div>
                 )}
@@ -514,10 +484,10 @@ export default function Pipeline() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <KpiCard caption="Active Pipelines" metric={String(activePipelines)} trend={`${filteredLeads.filter((l) => l.status === 'Pending').length} pending approval`} trendColor="#F59E0B" accentColor="#0EA5E9" index={0} />
-          <KpiCard caption="Avg Deal Value" metric={formatValue(avgDealValue)} trend={`${filteredLeads.length} total leads`} trendColor="#22C55E" accentColor="#22C55E" index={1} />
-          <KpiCard caption="Win Rate" metric={`${winRate}%`} trend="Contracted vs total" trendColor="#22C55E" accentColor="#F59E0B" index={2} />
-          <KpiCard caption="Pipeline Value" metric={formatValue(revenueThisMonth)} trend="Total lead value" trendColor="#22C55E" accentColor="#7B61FF" index={3} />
+          <KpiCard caption="Active Pipelines" metric="18" trend="▲ 4 vs yesterday" trendColor="#22C55E" accentColor="#0EA5E9" index={0} />
+          <KpiCard caption="Avg Deal Value" metric="$24.3K" trend="▲ 8.2% this month" trendColor="#22C55E" accentColor="#22C55E" index={1} />
+          <KpiCard caption="Win Rate" metric="68.4%" trend="▲ 3.1% vs last month" trendColor="#22C55E" accentColor="#F59E0B" index={2} />
+          <KpiCard caption="Revenue This Month" metric="$84.2K" trend="▲ $12.4K vs last month" trendColor="#22C55E" accentColor="#7B61FF" index={3} />
         </div>
 
         {/* Active Pipeline Table + Approval Queue */}
@@ -532,7 +502,7 @@ export default function Pipeline() {
             <div className="flex items-center justify-between p-5 border-b border-border-subtle">
               <div className="flex items-center gap-3">
                 <h3 className="text-[18px] font-semibold text-text-primary">Active Pipeline</h3>
-                <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-bg-hover text-text-secondary">{filteredLeads.length} items</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-bg-hover text-text-secondary">{pipelineLeads.length} items</span>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -549,12 +519,10 @@ export default function Pipeline() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredLeads.map((lead, i) => {
-                    const company = getCompany(lead.company_routed);
-                    const stageBadge = getStageBadge(lead.pipeline_stage);
+                  {pipelineLeads.map((lead, i) => {
+                    const company = getCompany(lead.companyId);
+                    const stageBadge = getStageBadge(lead.stageId);
                     const StageIcon = stageBadge.icon;
-                    const progress = stageProgress(lead.pipeline_stage);
-                    const needsApproval = lead.status === 'Pending';
                     return (
                       <motion.tr
                         key={lead.id}
@@ -566,7 +534,7 @@ export default function Pipeline() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0" style={{ backgroundColor: company.colorDim, color: company.color }}>
-                              {lead.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                              {lead.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                             </div>
                             <div>
                               <div className="text-[14px] font-semibold text-text-primary">{lead.name}</div>
@@ -579,34 +547,31 @@ export default function Pipeline() {
                         </td>
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-medium" style={{ backgroundColor: stageBadge.bg, color: stageBadge.text }}>
-                            <StageIcon className="w-3.5 h-3.5" /> {stageMeta.find((s) => s.id === lead.pipeline_stage)?.label || lead.pipeline_stage}
+                            <StageIcon className="w-3.5 h-3.5" /> {lead.stageLabel}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="w-full max-w-[120px]">
                             <div className="h-1.5 bg-border-subtle rounded-full overflow-hidden mb-1">
-                              <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: company.color }} />
+                              <div className="h-full rounded-full transition-all" style={{ width: `${lead.progress}%`, backgroundColor: company.color }} />
                             </div>
-                            <span className="text-[11px] font-mono text-text-tertiary">Stage {Math.ceil(progress / 17)}/6</span>
+                            <span className="text-[11px] font-mono text-text-tertiary">Stage {Math.ceil(lead.progress / 17)}/6</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-[13px] font-mono text-text-secondary">{timeSince(lead.updated_at)}</td>
-                        <td className="px-4 py-3 text-[14px] font-mono font-semibold text-text-primary">{formatValue(lead.value)}</td>
+                        <td className="px-4 py-3 text-[13px] font-mono text-text-secondary">{lead.timeInStage}</td>
+                        <td className="px-4 py-3 text-[14px] font-mono font-semibold text-text-primary">{lead.value}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium ${
-                            needsApproval ? 'bg-warning/10 text-warning' :
-                            lead.status === 'Complete' || lead.status === 'Contracted' ? 'bg-success/10 text-success' :
+                            lead.needsApproval ? 'bg-warning/10 text-warning' :
+                            lead.status === 'Complete' ? 'bg-success/10 text-success' :
                             'bg-info/10 text-info'
                           }`}>
                             {lead.status}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          {needsApproval ? (
-                            <button
-                              onClick={() => handleApprove(lead.id)}
-                              className="px-3 py-1.5 bg-warning text-bg-darkest text-[12px] font-semibold rounded-md hover:brightness-110 transition-all"
-                            >
+                          {lead.needsApproval ? (
+                            <button className="px-3 py-1.5 bg-warning text-bg-darkest text-[12px] font-semibold rounded-md hover:brightness-110 transition-all">
                               Approve
                             </button>
                           ) : (
@@ -630,18 +595,18 @@ export default function Pipeline() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[18px] font-semibold text-text-primary">Approval Queue</h3>
-              <span className="px-2 py-0.5 rounded-full text-[12px] font-medium bg-danger/10 text-danger">{filteredApprovals.length}</span>
+              <span className="px-2 py-0.5 rounded-full text-[12px] font-medium bg-danger/10 text-danger">{approvalsList.length}</span>
             </div>
 
-            {filteredApprovals.length === 0 ? (
+            {approvalsList.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <CheckCircle className="w-12 h-12 text-success mb-3" />
                 <p className="text-[14px] text-text-secondary text-center">All caught up! No approvals pending.</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredApprovals.map((approval, i) => {
-                  const company = getCompany(approval.company_routed);
+                {approvalsList.map((approval, i) => {
+                  const company = getCompany(approval.companyId);
                   return (
                     <motion.div
                       key={approval.id}
@@ -656,12 +621,12 @@ export default function Pipeline() {
                           {company.abbreviation}
                         </span>
                         <span className="text-[11px] font-mono text-text-tertiary flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {timeSince(approval.updated_at)}
+                          <Clock className="w-3 h-3" /> {approval.waitingTime}
                         </span>
                       </div>
-                      <h4 className="text-[14px] font-semibold text-text-primary mb-1">{approval.name}</h4>
-                      <p className="text-[13px] text-text-secondary mb-3 leading-relaxed">{approval.intent || 'Awaiting approval'}</p>
-                      <div className="text-[20px] font-bold text-text-primary mb-3">{formatValue(approval.value)}</div>
+                      <h4 className="text-[14px] font-semibold text-text-primary mb-1">{approval.title}</h4>
+                      <p className="text-[13px] text-text-secondary mb-3 leading-relaxed">{approval.description}</p>
+                      <div className="text-[20px] font-bold text-text-primary mb-3">{approval.value}</div>
                       <div className="flex items-center gap-2">
                         <motion.button
                           whileHover={{ scale: 1.05 }}
@@ -751,7 +716,7 @@ export default function Pipeline() {
       {/* Stage Detail Modal */}
       <AnimatePresence>
         {selectedStage && (
-          <StageDetailModal stage={selectedStage} leads={filteredLeads} onClose={() => setSelectedStage(null)} />
+          <StageDetailModal stage={selectedStage} onClose={() => setSelectedStage(null)} />
         )}
       </AnimatePresence>
     </Layout>

@@ -62,9 +62,6 @@ interface DashboardStore {
   deleteLead: (id: number) => void;
   routeLead: (leadId: number, targetCompany: string) => boolean;
 
-  // ── Campaign CRUD ───────────────────────────────────────────────────
-  updateCampaign: (id: number, updates: Partial<Campaign>) => void;
-
   // ── Analytics ───────────────────────────────────────────────────────
   getRevenueData: () => ReturnType<typeof queries.getRevenueData>;
   getConversionFunnel: () => ReturnType<typeof queries.getConversionFunnel>;
@@ -207,11 +204,6 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
       set(syncFromDB());
     }
     return success;
-  },
-
-  updateCampaign: (id, updates) => {
-    queries.updateCampaign(id, updates);
-    set(syncFromDB());
   },
 
   // ── Analytics ───────────────────────────────────────────────────────

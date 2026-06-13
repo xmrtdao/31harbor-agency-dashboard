@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   Upload,
   RefreshCw,
@@ -17,6 +18,7 @@ import {
   Check,
   MoreHorizontal,
   Filter,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   PieChart,
@@ -25,10 +27,11 @@ import {
   ResponsiveContainer,
   Tooltip as ReTooltip,
 } from 'recharts';
+import { Toaster } from '@/components/ui/sonner';
 import Layout from '@/components/Layout';
 import { useDashboardStore } from '@/store/dashboardStore';
-import { companies } from '@/data/mockData';
-import type { Lead } from '@/data/mockData';
+import { companies as mockCompanies } from '@/data/mockData';
+import type { Lead } from '@/db/types';
 
 // ─── Animation Config ───────────────────────────────────────────────────────
 
@@ -43,77 +46,10 @@ const fadeUp = {
   }),
 };
 
-// ─── Mock Lead Data (15 rows per spec) ──────────────────────────────────────
-
-const leadRows: Lead[] = [
-  { id: 'L-2847', name: 'Sarah Mitchell', email: 'sarah@email.com', companyId: 'harbor', score: 87, source: 'Organic', status: 'Routed', routedBy: 'AI', timeAgo: '2m ago', intent: 'Real Estate Interest' },
-  { id: 'L-2848', name: 'James & Linda Chen', email: 'jlchen@events.com', companyId: 'party', score: 92, source: 'Paid', status: 'Qualified', routedBy: 'AI', timeAgo: '15m ago', intent: 'Wedding Services' },
-  { id: 'L-2849', name: 'CryptoVentures LLC', email: 'contact@cryptov.com', companyId: 'xmrt', score: 64, source: 'Referral', status: 'Pending', routedBy: 'AI', timeAgo: '32m ago', intent: 'Blockchain Dev' },
-  { id: 'L-2850', name: 'Roberto Alvarado', email: 'ralvarado@email.com', companyId: 'harbor', score: 45, source: 'Organic', status: 'Low Match', routedBy: 'AI', timeAgo: '1h ago', intent: 'Real Estate' },
-  { id: 'L-2851', name: 'Emily Watson', email: 'emily@ewp.com', companyId: 'party', score: 78, source: 'Organic', status: 'Routed', routedBy: 'AI', timeAgo: '1h ago', intent: 'Birthday Event' },
-  { id: 'L-2852', name: 'DeFi Labs Inc', email: 'partners@defilabs.io', companyId: 'xmrt', score: 95, source: 'Paid', status: 'Contracted', routedBy: 'AI', timeAgo: '2h ago', intent: 'Token Launch' },
-  { id: 'L-2853', name: 'Harbor View RE', email: 'info@harborview.com', companyId: 'harbor', score: 71, source: 'Referral', status: 'Quoted', routedBy: 'AI', timeAgo: '3h ago', intent: 'Property Mgmt' },
-  { id: 'L-2854', name: 'Birthday Bash Co', email: 'hello@bbevents.com', companyId: 'party', score: 56, source: 'Organic', status: 'Qualified', routedBy: 'AI', timeAgo: '4h ago', intent: 'Corporate Event' },
-  { id: 'L-2855', name: 'Blockchain Summit', email: 'team@bcsummit.org', companyId: 'xmrt', score: 88, source: 'Paid', status: 'Routed', routedBy: 'AI', timeAgo: '5h ago', intent: 'DAO Consulting' },
-  { id: 'L-2856', name: 'Marina Residences', email: 'sales@marinares.com', companyId: 'harbor', score: 82, source: 'Organic', status: 'Qualified', routedBy: 'AI', timeAgo: '6h ago', intent: 'Condo Purchase' },
-  { id: 'L-2857', name: 'Wedding Planners R Us', email: 'wp@wprus.com', companyId: 'party', score: 89, source: 'Referral', status: 'Quoted', routedBy: 'AI', timeAgo: '7h ago', intent: 'Wedding Package' },
-  { id: 'L-2858', name: 'NFT Collective', email: 'hello@nftcoll.org', companyId: 'xmrt', score: 52, source: 'Organic', status: 'Pending', routedBy: 'AI', timeAgo: '8h ago', intent: 'Smart Contract' },
-  { id: 'L-2859', name: 'Vista Costa Rica', email: 'info@vistacr.com', companyId: 'harbor', score: 48, source: 'Organic', status: 'Low Match', routedBy: 'AI', timeAgo: '9h ago', intent: 'Vacation Rental' },
-  { id: 'L-2860', name: 'PhotoGenic Events', email: 'book@photogenic.com', companyId: 'party', score: 85, source: 'Paid', status: 'Routed', routedBy: 'AI', timeAgo: '10h ago', intent: 'Photo Booth' },
-  { id: 'L-2861', name: 'Web3 Capital', email: 'deal@web3cap.io', companyId: 'xmrt', score: 79, source: 'Referral', status: 'Qualified', routedBy: 'AI', timeAgo: '11h ago', intent: 'DeFi Strategy' },
-];
-
-// ─── Intent Classification Matrix Data ───────────────────────────────────────
-
-const intentCategories = [
-  'Real Estate Interest',
-  'Event / Wedding Services',
-  'Tech / Crypto / Blockchain',
-  'Travel / Tourism',
-  'Unclear / Needs Review',
-];
-
-const intentMatrix: Record<string, Record<string, number>> = {
-  'Real Estate Interest': { harbor: 18, party: 2, xmrt: 1 },
-  'Event / Wedding Services': { harbor: 1, party: 22, xmrt: 0 },
-  'Tech / Crypto / Blockchain': { harbor: 0, party: 1, xmrt: 16 },
-  'Travel / Tourism': { harbor: 3, party: 0, xmrt: 0 },
-  'Unclear / Needs Review': { harbor: 2, party: 1, xmrt: 2 },
-};
-
-const confidenceData = [
-  { name: 'High (>80%)', value: 68, color: '#22C55E' },
-  { name: 'Medium (50-80%)', value: 22, color: '#F59E0B' },
-  { name: 'Low (<50%)', value: 10, color: '#EF4444' },
-];
-
-// ─── Routing Log Data ────────────────────────────────────────────────────────
-
-const routingLog = [
-  { time: '14:32:07', companyId: 'harbor', leadId: '2841', leadName: 'Sarah Mitchell', intent: 'Real Estate Interest', confidence: 92, result: 'routed' },
-  { time: '14:28:15', companyId: 'party', leadId: '2840', leadName: 'James Chen', intent: 'Wedding Services', confidence: 95, result: 'routed' },
-  { time: '14:25:33', companyId: 'xmrt', leadId: '2839', leadName: 'CryptoVentures LLC', intent: 'Blockchain Dev', confidence: 71, result: 'flagged' },
-  { time: '14:20:11', companyId: 'harbor', leadId: '2838', leadName: 'Roberto Alvarado', intent: 'Unclear / Needs Review', confidence: 38, result: 'review' },
-  { time: '14:15:48', companyId: 'party', leadId: '2837', leadName: 'Emily Watson', intent: 'Birthday Event', confidence: 88, result: 'routed' },
-  { time: '14:10:22', companyId: 'xmrt', leadId: '2836', leadName: 'DeFi Labs Inc', intent: 'Token Launch', confidence: 97, result: 'routed' },
-  { time: '14:05:59', companyId: 'harbor', leadId: '2835', leadName: 'Harbor View RE', intent: 'Property Mgmt', confidence: 85, result: 'routed' },
-  { time: '13:58:41', companyId: 'party', leadId: '2834', leadName: 'Birthday Bash Co', intent: 'Corporate Event', confidence: 62, result: 'routed' },
-  { time: '13:52:17', companyId: 'xmrt', leadId: '2833', leadName: 'Blockchain Summit', intent: 'DAO Consulting', confidence: 91, result: 'routed' },
-  { time: '13:45:03', companyId: 'harbor', leadId: '2832', leadName: 'Marina Residences', intent: 'Condo Purchase', confidence: 79, result: 'routed' },
-];
-
-// ─── Conversion Data ─────────────────────────────────────────────────────────
-
-const conversionData = [
-  { company: '31 Harbor', companyId: 'harbor', color: '#0A84FF', leads: 42, qualified: 28, converted: 12, rate: '28.6%' },
-  { company: 'Party Favor Photo', companyId: 'party', color: '#F5A623', leads: 38, qualified: 31, converted: 15, rate: '39.5%' },
-  { company: 'XMRT DAO', companyId: 'xmrt', color: '#7B61FF', leads: 29, qualified: 19, converted: 8, rate: '27.6%' },
-];
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function getCompany(id: string) {
-  return companies.find((c) => c.id === id) || companies[0];
+function getCompany(id: string | null) {
+  return mockCompanies.find((c) => c.id === id) || mockCompanies[0];
 }
 
 function getScoreColor(score: number) {
@@ -130,11 +66,13 @@ function getStatusBadge(status: string) {
     'Low Match': { bg: '#1A2332', text: '#8B95A5' },
     'Contracted': { bg: '#22C55E22', text: '#22C55E' },
     'Quoted': { bg: '#0EA5E922', text: '#0EA5E9' },
+    'new': { bg: '#0EA5E922', text: '#0EA5E9' },
+    'active': { bg: '#22C55E22', text: '#22C55E' },
   };
   return map[status] || { bg: '#1A2332', text: '#8B95A5' };
 }
 
-function getSourceIcon(source: string) {
+function getSourceIcon(source: string | null) {
   switch (source) {
     case 'Organic': return <Globe className="w-3.5 h-3.5" />;
     case 'Paid': return <DollarSign className="w-3.5 h-3.5" />;
@@ -143,17 +81,63 @@ function getSourceIcon(source: string) {
   }
 }
 
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return 'recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 // ─── Filter Sidebar Component ────────────────────────────────────────────────
 
-function FilterSidebar() {
-  const [companyFilters, setCompanyFilters] = useState<string[]>(['all']);
-  const [sourceFilters, setSourceFilters] = useState<string[]>([]);
+function FilterSidebar({
+  onFiltersChange,
+  activeCompany,
+}: {
+  onFiltersChange: (filters: { company: string; status: string; scoreMin: number; scoreMax: number }) => void;
+  activeCompany: string;
+}) {
+  const [companyFilters, setCompanyFilters] = useState<string[]>([activeCompany === 'all' ? 'all' : activeCompany]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [scoreRange, setScoreRange] = useState<number[]>([0, 100]);
+
+  // Sync with activeCompany changes
+  useEffect(() => {
+    if (activeCompany !== 'all') {
+      setCompanyFilters([activeCompany]);
+    }
+  }, [activeCompany]);
 
   const toggleFilter = (val: string, arr: string[], setter: (v: string[]) => void) => {
     if (arr.includes(val)) setter(arr.filter((v) => v !== val));
     else setter([...arr, val]);
+  };
+
+  const handleApply = () => {
+    const company = activeCompany !== 'all' ? activeCompany : (companyFilters[0] || 'all');
+    const status = statusFilters.length === 1 ? statusFilters[0] : '';
+    onFiltersChange({
+      company,
+      status,
+      scoreMin: scoreRange[0],
+      scoreMax: scoreRange[1],
+    });
+  };
+
+  const handleReset = () => {
+    setCompanyFilters(activeCompany === 'all' ? ['all'] : [activeCompany]);
+    setStatusFilters([]);
+    setScoreRange([0, 100]);
+    onFiltersChange({
+      company: activeCompany === 'all' ? 'all' : activeCompany,
+      status: '',
+      scoreMin: 0,
+      scoreMax: 100,
+    });
   };
 
   const Checkbox = ({ label, value, checked, onChange, color }: {
@@ -186,18 +170,19 @@ function FilterSidebar() {
         {/* Company */}
         <div>
           <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-2">Company</h4>
-          <Checkbox label="All Companies" value="all" checked={companyFilters.includes('all')} onChange={() => setCompanyFilters(['all'])} />
-          <Checkbox label="31 Harbor" value="harbor" checked={companyFilters.includes('harbor')} onChange={() => { toggleFilter('harbor', companyFilters, setCompanyFilters); setCompanyFilters((p) => p.filter((v) => v !== 'all')); }} color="#0A84FF" />
-          <Checkbox label="Party Favor Photo" value="party" checked={companyFilters.includes('party')} onChange={() => { toggleFilter('party', companyFilters, setCompanyFilters); setCompanyFilters((p) => p.filter((v) => v !== 'all')); }} color="#F5A623" />
-          <Checkbox label="XMRT DAO" value="xmrt" checked={companyFilters.includes('xmrt')} onChange={() => { toggleFilter('xmrt', companyFilters, setCompanyFilters); setCompanyFilters((p) => p.filter((v) => v !== 'all')); }} color="#7B61FF" />
-        </div>
-
-        {/* Date Range */}
-        <div>
-          <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-2">Date Range</h4>
-          {['Today', 'Last 7 days', 'Last 30 days', 'All time'].map((d) => (
-            <Checkbox key={d} label={d} value={d} checked={d === 'Last 7 days'} onChange={() => {}} />
-          ))}
+          {activeCompany === 'all' ? (
+            <>
+              <Checkbox label="All Companies" value="all" checked={companyFilters.includes('all')} onChange={() => { setCompanyFilters(['all']); }} />
+              {mockCompanies.map((c) => (
+                <Checkbox key={c.id} label={c.name} value={c.id} checked={companyFilters.includes(c.id)} onChange={() => { setCompanyFilters([c.id]); }} color={c.color} />
+              ))}
+            </>
+          ) : (
+            <div className="flex items-center gap-2 py-1.5">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: getCompany(activeCompany).color }} />
+              <span className="text-[13px] text-text-primary">{getCompany(activeCompany).name}</span>
+            </div>
+          )}
         </div>
 
         {/* Lead Score */}
@@ -210,20 +195,39 @@ function FilterSidebar() {
             </div>
             <span className="text-[12px] text-text-secondary font-mono">{scoreRange[1]}</span>
           </div>
+          <div className="flex gap-2 mt-2">
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={scoreRange[0]}
+              onChange={(e) => setScoreRange([Math.min(Number(e.target.value), scoreRange[1]), scoreRange[1]])}
+              className="w-full h-8 bg-bg-input border border-border-default rounded text-[12px] text-text-primary px-2 text-center"
+            />
+            <span className="text-text-tertiary self-center">-</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={scoreRange[1]}
+              onChange={(e) => setScoreRange([scoreRange[0], Math.max(Number(e.target.value), scoreRange[0])])}
+              className="w-full h-8 bg-bg-input border border-border-default rounded text-[12px] text-text-primary px-2 text-center"
+            />
+          </div>
         </div>
 
         {/* Source */}
         <div>
           <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-2">Source</h4>
           {['Organic', 'Paid', 'Referral', 'Scraped'].map((s) => (
-            <Checkbox key={s} label={s} value={s} checked={sourceFilters.includes(s)} onChange={() => toggleFilter(s, sourceFilters, setSourceFilters)} />
+            <Checkbox key={s} label={s} value={s} checked={false} onChange={() => {}} />
           ))}
         </div>
 
         {/* Status */}
         <div>
           <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-2">Status</h4>
-          {['Routed', 'Qualified', 'Quoted', 'Contracted', 'Rejected', 'Pending Review'].map((s) => (
+          {['Routed', 'Qualified', 'Quoted', 'Contracted', 'Pending', 'Low Match'].map((s) => (
             <Checkbox key={s} label={s} value={s} checked={statusFilters.includes(s)} onChange={() => toggleFilter(s, statusFilters, setStatusFilters)} />
           ))}
         </div>
@@ -243,10 +247,16 @@ function FilterSidebar() {
       </div>
 
       <div className="p-4 border-t border-border-subtle space-y-2">
-        <button className="w-full h-9 bg-harbor-blue text-bg-darkest font-semibold text-[13px] rounded-md hover:brightness-110 transition-all">
+        <button
+          onClick={handleApply}
+          className="w-full h-9 bg-harbor-blue text-bg-darkest font-semibold text-[13px] rounded-md hover:brightness-110 transition-all"
+        >
           Apply Filters
         </button>
-        <button className="w-full h-9 bg-transparent text-text-secondary font-medium text-[13px] rounded-md hover:bg-bg-hover transition-colors">
+        <button
+          onClick={handleReset}
+          className="w-full h-9 bg-transparent text-text-secondary font-medium text-[13px] rounded-md hover:bg-bg-hover transition-colors"
+        >
           Reset
         </button>
       </div>
@@ -281,8 +291,30 @@ function KpiCard({ caption, metric, trend, trendColor, accentColor, subContent, 
 
 // ─── Lead Detail Drawer ──────────────────────────────────────────────────────
 
-function LeadDetailDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }) {
-  const company = getCompany(lead.companyId);
+function LeadDetailDrawer({ leadId, onClose }: { leadId: number; onClose: () => void }) {
+  const store = useDashboardStore();
+  const lead = store.getLeadById(leadId);
+  const [targetCompany, setTargetCompany] = useState(lead?.company_routed || 'harbor');
+
+  useEffect(() => {
+    if (lead?.company_routed) setTargetCompany(lead.company_routed);
+  }, [lead]);
+
+  const handleRoute = () => {
+    if (!lead) return;
+    const fromCompany = lead.company_routed || 'unknown';
+    const success = store.routeLead(lead.id, targetCompany);
+    if (!success) {
+      toast.error(`Lead sharing blocked between ${getCompany(fromCompany).name} → ${getCompany(targetCompany).name}. Check Settings → Companies.`);
+    } else {
+      toast.success(`Lead routed to ${getCompany(targetCompany).name}`);
+      onClose();
+    }
+  };
+
+  if (!lead) return null;
+
+  const company = getCompany(lead.company_routed);
   return (
     <AnimatePresence>
       <motion.div
@@ -318,21 +350,23 @@ function LeadDetailDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }
             <div>
               <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-3">Contact Info</h4>
               <div className="space-y-2">
-                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Email</span><span className="text-[13px] text-text-primary">{lead.email}</span></div>
-                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Source</span><span className="text-[13px] text-text-primary">{lead.source}</span></div>
-                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Received</span><span className="text-[13px] text-text-primary font-mono">{lead.timeAgo}</span></div>
+                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Email</span><span className="text-[13px] text-text-primary">{lead.email || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Phone</span><span className="text-[13px] text-text-primary">{lead.phone || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Source</span><span className="text-[13px] text-text-primary">{lead.source || '—'}</span></div>
+                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Received</span><span className="text-[13px] text-text-primary font-mono">{timeAgo(lead.created_at)}</span></div>
+                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Value</span><span className="text-[13px] text-text-primary font-mono">${(lead.value || 0).toLocaleString()}</span></div>
               </div>
             </div>
 
             <div>
               <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-3">AI Classification</h4>
               <div className="bg-bg-input border border-border-default rounded-lg p-4">
-                <div className="text-[14px] text-text-primary font-medium mb-1">{lead.intent}</div>
+                <div className="text-[14px] text-text-primary font-medium mb-1">{lead.intent || 'Unknown'}</div>
                 <div className="text-[12px] text-text-secondary mb-3">Classification confidence based on lead content analysis</div>
                 <div className="flex items-center gap-3">
-                  <div className="text-[28px] font-bold" style={{ color: getScoreColor(lead.score) }}>{lead.score}%</div>
+                  <div className="text-[28px] font-bold" style={{ color: getScoreColor(lead.score || 0) }}>{lead.score || 0}%</div>
                   <div className="flex-1 h-2 bg-border-subtle rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${lead.score}%`, backgroundColor: getScoreColor(lead.score) }} />
+                    <div className="h-full rounded-full transition-all" style={{ width: `${lead.score || 0}%`, backgroundColor: getScoreColor(lead.score || 0) }} />
                   </div>
                 </div>
               </div>
@@ -341,14 +375,46 @@ function LeadDetailDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }
             <div>
               <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-3">Routing Decision</h4>
               <div className="space-y-2">
-                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Routed to</span><span className="text-[13px] font-medium" style={{ color: company.color }}>{company.name}</span></div>
-                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Method</span><span className="text-[13px] text-text-primary flex items-center gap-1"><Cpu className="w-3.5 h-3.5 text-info" /> AI</span></div>
-                <div className="flex justify-between"><span className="text-[13px] text-text-secondary">Confidence</span><span className="text-[13px] text-success font-mono">{lead.score}%</span></div>
+                <div className="flex justify-between">
+                  <span className="text-[13px] text-text-secondary">Routed to</span>
+                  <span className="text-[13px] font-medium" style={{ color: company.color }}>{company.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[13px] text-text-secondary">Method</span>
+                  <span className="text-[13px] text-text-primary flex items-center gap-1">
+                    <Cpu className="w-3.5 h-3.5 text-info" /> AI
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[13px] text-text-secondary">Confidence</span>
+                  <span className="text-[13px] text-success font-mono">{lead.ai_confidence || 'high'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[13px] text-text-secondary">Pipeline</span>
+                  <span className="text-[13px] text-text-primary font-mono">{lead.pipeline_stage || 'scraping'}</span>
+                </div>
               </div>
             </div>
 
+            {/* Re-route section */}
+            <div>
+              <h4 className="text-[12px] font-semibold text-text-tertiary uppercase tracking-wider mb-3">Re-route Lead</h4>
+              <select
+                value={targetCompany}
+                onChange={(e) => setTargetCompany(e.target.value)}
+                className="w-full h-9 px-3 bg-bg-input border border-border-default rounded-md text-[13px] text-text-primary focus:outline-none focus:border-border-focus cursor-pointer mb-2"
+              >
+                {mockCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex gap-3 pt-4">
-              <button className="flex-1 h-10 bg-harbor-blue text-bg-darkest font-semibold text-[13px] rounded-md hover:brightness-110 transition-all flex items-center justify-center gap-2">
+              <button
+                onClick={handleRoute}
+                className="flex-1 h-10 bg-harbor-blue text-bg-darkest font-semibold text-[13px] rounded-md hover:brightness-110 transition-all flex items-center justify-center gap-2"
+              >
                 <GitBranch className="w-4 h-4" /> Re-route Lead
               </button>
               <button className="h-10 px-4 text-danger text-[13px] font-medium rounded-md hover:bg-danger/10 transition-colors">
@@ -365,143 +431,320 @@ function LeadDetailDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function LeadRouter() {
+  const store = useDashboardStore();
+  const { activeCompany, leads, activityFeed } = store;
+
   const [activePeriod, setActivePeriod] = useState('Today');
   const [searchQuery, setSearchQuery] = useState('');
   const [companyFilter, setCompanyFilter] = useState('All Companies');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+  // ── Functional filter state ─────────────────────────────────────────────
+  const [appliedFilters, setAppliedFilters] = useState({
+    company: activeCompany === 'all' ? 'all' : activeCompany,
+    status: '',
+    scoreMin: 0,
+    scoreMax: 100,
+  });
+
+  // Auto-filter when activeCompany changes
+  useEffect(() => {
+    const company = activeCompany === 'all' ? 'all' : activeCompany;
+    setAppliedFilters((prev) => ({ ...prev, company }));
+  }, [activeCompany]);
+
+  // ── Query leads from SQLite via store ───────────────────────────────────
+  const filteredLeads = useMemo(() => {
+    const filters: { company?: string; status?: string; minScore?: number; maxScore?: number } = {};
+    if (appliedFilters.company !== 'all') {
+      filters.company = appliedFilters.company;
+    }
+    if (appliedFilters.status) {
+      filters.status = appliedFilters.status;
+    }
+    filters.minScore = appliedFilters.scoreMin;
+    filters.maxScore = appliedFilters.scoreMax;
+    return store.getLeads(filters);
+  }, [appliedFilters, store, store.leads]);
+
+  // ── Search filtering on top of store query ──────────────────────────────
+  const searchFilteredLeads = useMemo(() => {
+    if (!searchQuery) return filteredLeads;
+    const q = searchQuery.toLowerCase();
+    return filteredLeads.filter(
+      (l) =>
+        l.name.toLowerCase().includes(q) ||
+        (l.email || '').toLowerCase().includes(q) ||
+        (l.source || '').toLowerCase().includes(q)
+    );
+  }, [filteredLeads, searchQuery]);
+
+  // ── Dropdown filter (legacy compatibility) ──────────────────────────────
+  const dropdownFilteredLeads = useMemo(() => {
+    let result = searchFilteredLeads;
+    if (companyFilter !== 'All Companies') {
+      const cid = companyFilter === '31 Harbor' ? 'harbor' : companyFilter === 'Party Favor Photo' ? 'party' : companyFilter === 'XMRT DAO' ? 'xmrt' : '';
+      if (cid) result = result.filter((l) => l.company_routed === cid);
+    }
+    if (statusFilter !== 'All Statuses') {
+      result = result.filter((l) => l.status === statusFilter);
+    }
+    return result;
+  }, [searchFilteredLeads, companyFilter, statusFilter]);
+
   const handleRefresh = () => {
     setRefreshing(true);
+    store.refresh();
     setTimeout(() => setRefreshing(false), 600);
   };
 
-  const filteredLeads = leadRows.filter((l) => {
-    if (searchQuery && !l.name.toLowerCase().includes(searchQuery.toLowerCase()) && !l.email.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    if (companyFilter !== 'All Companies') {
-      const cid = companyFilter === '31 Harbor' ? 'harbor' : companyFilter === 'Party Favor Photo' ? 'party' : companyFilter === 'XMRT DAO' ? 'xmrt' : '';
-      if (l.companyId !== cid) return false;
+  // ── AI Classification Engine: derive from store.leads ───────────────────
+  const intentDistribution = useMemo(() => {
+    const relevantLeads = activeCompany === 'all' ? leads : leads.filter((l) => l.company_routed === activeCompany);
+    const counts: Record<string, number> = {};
+    relevantLeads.forEach((l) => {
+      const intent = l.intent || 'Unclear / Needs Review';
+      // Group intents into categories
+      let category = intent;
+      if (intent.toLowerCase().includes('real estate') || intent.toLowerCase().includes('property') || intent.toLowerCase().includes('condo')) {
+        category = 'Real Estate Interest';
+      } else if (intent.toLowerCase().includes('wedding') || intent.toLowerCase().includes('event') || intent.toLowerCase().includes('photo')) {
+        category = 'Event / Wedding Services';
+      } else if (intent.toLowerCase().includes('crypto') || intent.toLowerCase().includes('blockchain') || intent.toLowerCase().includes('token') || intent.toLowerCase().includes('defi') || intent.toLowerCase().includes('nft') || intent.toLowerCase().includes('web3') || intent.toLowerCase().includes('dao') || intent.toLowerCase().includes('smart contract')) {
+        category = 'Tech / Crypto / Blockchain';
+      } else if (intent.toLowerCase().includes('travel') || intent.toLowerCase().includes('vacation') || intent.toLowerCase().includes('tourism')) {
+        category = 'Travel / Tourism';
+      } else {
+        category = 'Unclear / Needs Review';
+      }
+      counts[category] = (counts[category] || 0) + 1;
+    });
+
+    // Map to company breakdown
+    const categories = Object.keys(counts);
+    const companyTotals: Record<string, Record<string, number>> = {};
+    categories.forEach((cat) => {
+      companyTotals[cat] = { harbor: 0, party: 0, xmrt: 0 };
+    });
+    relevantLeads.forEach((l) => {
+      const intent = l.intent || '';
+      let category = intent;
+      if (intent.toLowerCase().includes('real estate') || intent.toLowerCase().includes('property') || intent.toLowerCase().includes('condo')) {
+        category = 'Real Estate Interest';
+      } else if (intent.toLowerCase().includes('wedding') || intent.toLowerCase().includes('event') || intent.toLowerCase().includes('photo')) {
+        category = 'Event / Wedding Services';
+      } else if (intent.toLowerCase().includes('crypto') || intent.toLowerCase().includes('blockchain') || intent.toLowerCase().includes('token') || intent.toLowerCase().includes('defi') || intent.toLowerCase().includes('nft') || intent.toLowerCase().includes('web3') || intent.toLowerCase().includes('dao') || intent.toLowerCase().includes('smart contract')) {
+        category = 'Tech / Crypto / Blockchain';
+      } else if (intent.toLowerCase().includes('travel') || intent.toLowerCase().includes('vacation') || intent.toLowerCase().includes('tourism')) {
+        category = 'Travel / Tourism';
+      } else {
+        category = 'Unclear / Needs Review';
+      }
+      const cid = l.company_routed || 'unknown';
+      if (companyTotals[category] && (cid === 'harbor' || cid === 'party' || cid === 'xmrt')) {
+        companyTotals[category][cid]++;
+      }
+    });
+
+    return { counts, companyTotals, categories };
+  }, [leads, activeCompany]);
+
+  // ── Confidence distribution derived from actual leads ───────────────────
+  const confidenceData = useMemo(() => {
+    const relevantLeads = activeCompany === 'all' ? leads : leads.filter((l) => l.company_routed === activeCompany);
+    const total = Math.max(relevantLeads.length, 1);
+    const high = relevantLeads.filter((l) => (l.score || 0) >= 80).length;
+    const med = relevantLeads.filter((l) => {
+      const s = l.score || 0;
+      return s >= 50 && s < 80;
+    }).length;
+    const low = relevantLeads.filter((l) => (l.score || 0) < 50).length;
+    return [
+      { name: 'High (>80%)', value: Math.round((high / total) * 100), count: high, color: '#22C55E' },
+      { name: 'Medium (50-80%)', value: Math.round((med / total) * 100), count: med, color: '#F59E0B' },
+      { name: 'Low (<50%)', value: Math.round((low / total) * 100), count: low, color: '#EF4444' },
+    ];
+  }, [leads, activeCompany]);
+
+  const avgConfidence = useMemo(() => {
+    const relevantLeads = activeCompany === 'all' ? leads : leads.filter((l) => l.company_routed === activeCompany);
+    if (relevantLeads.length === 0) return 0;
+    return Math.round(relevantLeads.reduce((s, l) => s + (l.score || 0), 0) / relevantLeads.length);
+  }, [leads, activeCompany]);
+
+  // ── Conversion tracker derived from actual leads ────────────────────────
+  const conversionData = useMemo(() => {
+    return mockCompanies.map((c) => {
+      const companyLeads = activeCompany === 'all'
+        ? leads.filter((l) => l.company_routed === c.id)
+        : leads.filter((l) => l.company_routed === c.id);
+      const total = companyLeads.length;
+      const qualified = companyLeads.filter((l) => l.status === 'Qualified' || l.status === 'qualified').length;
+      const converted = companyLeads.filter((l) => l.status === 'Contracted' || l.status === 'contracted').length;
+      const rate = total > 0 ? ((converted / total) * 100).toFixed(1) : '0.0';
+      return {
+        company: c.name,
+        companyId: c.id,
+        color: c.color,
+        leads: total,
+        qualified,
+        converted,
+        rate: `${rate}%`,
+      };
+    });
+  }, [leads, activeCompany]);
+
+  // ── Routing log from activity feed ──────────────────────────────────────
+  const routingLog = useMemo(() => {
+    const relevant = activeCompany === 'all'
+      ? activityFeed
+      : activityFeed.filter((a) => a.company === activeCompany);
+    return relevant
+      .filter((a) => (a.type || '').toLowerCase() === 'routing' || (a.description || '').toLowerCase().includes('routed') || (a.description || '').toLowerCase().includes('route'))
+      .slice(0, 10)
+      .map((a) => ({
+        time: a.created_at ? new Date(a.created_at).toLocaleTimeString('en-US', { hour12: false }) : '--:--:--',
+        companyId: a.company || 'unknown',
+        leadId: String(a.id),
+        leadName: a.metadata || 'Unknown',
+        intent: a.description || '',
+        confidence: 85,
+        result: (a.type || '').toLowerCase() === 'routing' ? 'routed' : 'flagged',
+      }));
+  }, [activityFeed, activeCompany]);
+
+  // ── Re-route handler with sharing blocked check ─────────────────────────
+  const handleReRoute = (lead: Lead, targetCompany: string) => {
+    const fromCompany = lead.company_routed || 'unknown';
+    const success = store.routeLead(lead.id, targetCompany);
+    if (!success) {
+      toast.error(`Lead sharing blocked between ${getCompany(fromCompany).name} → ${getCompany(targetCompany).name}. Check Settings → Companies.`);
+    } else {
+      toast.success(`Lead routed to ${getCompany(targetCompany).name}`);
     }
-    if (statusFilter !== 'All Statuses' && l.status !== statusFilter) return false;
-    return true;
-  });
+  };
 
   return (
     <Layout>
+      <Toaster />
       <div className="flex h-full">
         {/* Filter Sidebar */}
-        <FilterSidebar />
+        <FilterSidebar
+          onFiltersChange={setAppliedFilters}
+          activeCompany={activeCompany}
+        />
 
         {/* Main Content */}
-        <div className="flex-1 p-6 overflow-auto">
-          {/* Page Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: cardEase }}
-            className="flex items-start justify-between mb-6"
-          >
+        <div className="flex-1 overflow-auto p-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-[28px] font-bold text-text-primary tracking-tight">Cross-Business Lead Router</h1>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#0A84FF22] text-info">CBLR v2.4</span>
-              </div>
-              <p className="text-[14px] text-text-secondary">AI intent-classification and automatic lead routing</p>
+              <h1 className="text-[24px] font-bold text-text-primary">Lead Router</h1>
+              <p className="text-[13px] text-text-secondary mt-0.5">AI-powered lead classification and routing</p>
             </div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              className="flex items-center gap-2"
-            >
-              <button className="flex items-center gap-2 px-4 h-9 bg-harbor-blue text-bg-darkest font-semibold text-[13px] rounded-md hover:brightness-110 transition-all">
-                <Upload className="w-4 h-4" /> Import Leads
-              </button>
+            <div className="flex items-center gap-2">
+              {['Today', '7d', '30d'].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setActivePeriod(p)}
+                  className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
+                    activePeriod === p ? 'bg-harbor-blue text-bg-darkest' : 'bg-bg-hover text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
               <button
                 onClick={handleRefresh}
-                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-bg-hover transition-colors text-text-secondary"
+                className="w-9 h-9 flex items-center justify-center rounded-md bg-bg-hover hover:bg-bg-hover/80 transition-colors"
               >
-                <RefreshCw className={`w-[18px] h-[18px] ${refreshing ? 'animate-spin' : ''}`} style={{ animationDuration: '600ms' }} />
+                <RefreshCw className={`w-4 h-4 text-text-secondary ${refreshing ? 'animate-spin' : ''}`} />
               </button>
-            </motion.div>
-          </motion.div>
-
-          {/* KPI Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <KpiCard caption="Total Leads" metric="124" trend="▲ 8 vs yesterday" trendColor="#22C55E" accentColor="#0EA5E9" index={0} />
-            <KpiCard caption="Qualified" metric="47" trend="▲ 12% this week" trendColor="#22C55E" accentColor="#22C55E" index={1} />
-            <KpiCard caption="Routed Today" metric="18" trend="▲ 4 vs yesterday" trendColor="#22C55E" accentColor="#F5A623" index={2} />
-            <KpiCard caption="Conversion Rate" metric="23.8%" trend="▲ 2.1% vs last week" trendColor="#22C55E" accentColor="#7B61FF" index={3} />
+            </div>
           </div>
 
-          {/* AI Classification Panel */}
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+            <KpiCard
+              caption="Leads Processed"
+              metric={String(dropdownFilteredLeads.length)}
+              trend={`${leads.filter((l) => (l.score || 0) >= 80).length} high-intent`}
+              accentColor="#0A84FF"
+              index={0}
+            />
+            <KpiCard
+              caption="AI Accuracy"
+              metric={`${avgConfidence}%`}
+              trend={avgConfidence >= 80 ? 'High confidence' : avgConfidence >= 50 ? 'Medium confidence' : 'Low confidence'}
+              trendColor={avgConfidence >= 80 ? '#22C55E' : avgConfidence >= 50 ? '#F59E0B' : '#EF4444'}
+              accentColor="#F5A623"
+              index={1}
+            />
+            <KpiCard
+              caption="Avg Response"
+              metric="< 2s"
+              trend="Real-time"
+              accentColor="#22C55E"
+              index={2}
+            />
+            <KpiCard
+              caption="Pending Review"
+              metric={String(leads.filter((l) => l.status === 'Pending' || l.status === 'pending').length)}
+              trend={`${totalApprovalsFromPipeline(store)} need approval`}
+              trendColor="#F59E0B"
+              accentColor="#7B61FF"
+              index={3}
+            />
+          </div>
+
+          {/* Intent Classification Matrix */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4, ease: cardEase }}
+            transition={{ delay: 0.2, duration: 0.4, ease: cardEase }}
             className="bg-bg-elevated border border-border-subtle rounded-lg p-5 mb-6 hover:border-border-default transition-colors"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <h3 className="text-[18px] font-semibold text-text-primary">AI Classification Engine</h3>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-success/10 text-success">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" /> LIVE
-                </span>
-              </div>
-              <div className="flex items-center gap-1 bg-bg-input rounded-md p-0.5">
-                {['Today', 'This Week', 'This Month'].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setActivePeriod(p)}
-                    className={`px-3 py-1.5 rounded text-[12px] font-medium transition-colors ${activePeriod === p ? 'bg-bg-hover text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Panel Content */}
+            <h3 className="text-[18px] font-semibold text-text-primary mb-4">AI Classification Engine</h3>
             <div className="flex gap-6">
-              {/* Left: Intent Classification Matrix (60%) */}
+              {/* Left: Intent Table (60%) */}
               <div className="flex-[60]">
-                <div className="grid grid-cols-4 gap-2">
-                  {/* Column Headers */}
-                  <div />
-                  {companies.map((c) => (
-                    <div key={c.id} className="flex items-center justify-center gap-1.5 py-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
-                      <span className="text-[12px] font-medium" style={{ color: c.color }}>{c.abbreviation}</span>
-                    </div>
-                  ))}
-                  {/* Rows */}
-                  {intentCategories.map((intent, ri) => (
-                    <motion.div
-                      key={intent}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: ri * 0.04, duration: 0.3 }}
-                      className="contents"
-                    >
-                      <div className="text-[13px] text-text-secondary flex items-center py-2">{intent}</div>
-                      {companies.map((c) => {
-                        const count = intentMatrix[intent]?.[c.id] || 0;
-                        const maxVal = Math.max(...Object.values(intentMatrix[intent] || {}));
-                        const barWidth = maxVal > 0 ? (count / maxVal) * 100 : 0;
-                        return (
-                          <div key={c.id} className="flex items-center gap-2 py-2 px-1">
-                            <span className="text-[14px] font-mono font-medium text-text-primary w-6">{count}</span>
-                            <div className="flex-1 h-[6px] bg-bg-input rounded-full overflow-hidden">
-                              <div className="h-full rounded-full" style={{ width: `${barWidth}%`, backgroundColor: c.color }} />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </motion.div>
-                  ))}
+                <div className="grid grid-cols-[1fr_60px_60px_60px] gap-x-3 gap-y-2 text-[13px]">
+                  <div className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider">Intent Category</div>
+                  <div className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider text-center">31H</div>
+                  <div className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider text-center">PFP</div>
+                  <div className="text-[11px] font-semibold text-text-tertiary uppercase tracking-wider text-center">XMRT</div>
+
+                  {intentDistribution.categories.map((cat, ci) => {
+                    const counts = intentDistribution.companyTotals[cat];
+                    const total = intentDistribution.counts[cat];
+                    return (
+                      <motion.div
+                        key={cat}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 + ci * 0.05 }}
+                        className="contents"
+                      >
+                        <div className="flex items-center gap-2 py-1">
+                          <div className="w-2 h-2 rounded-full" style={{
+                            backgroundColor:
+                              cat.includes('Real Estate') ? '#0A84FF' :
+                              cat.includes('Event') || cat.includes('Wedding') ? '#F5A623' :
+                              cat.includes('Tech') || cat.includes('Crypto') ? '#7B61FF' :
+                              cat.includes('Travel') ? '#22C55E' : '#8B95A5'
+                          }} />
+                          <span className="text-text-primary">{cat}</span>
+                          <span className="text-[11px] text-text-tertiary ml-1">({total})</span>
+                        </div>
+                        <div className="text-center text-text-primary font-mono py-1">{counts?.harbor || 0}</div>
+                        <div className="text-center text-text-primary font-mono py-1">{counts?.party || 0}</div>
+                        <div className="text-center text-text-primary font-mono py-1">{counts?.xmrt || 0}</div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -538,18 +781,18 @@ export default function LeadRouter() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="text-[24px] font-bold text-text-primary -mt-4">94.2%</div>
+                <div className="text-[24px] font-bold text-text-primary -mt-4">{avgConfidence}%</div>
                 <div className="text-[11px] text-text-tertiary mb-3">avg confidence</div>
                 <div className="flex items-center gap-4 mb-2">
                   {confidenceData.map((d) => (
                     <div key={d.name} className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
                       <span className="text-[12px] text-text-secondary">{d.name.split(' ')[0]}</span>
-                      <span className="text-[12px] font-mono text-text-primary">{d.value}%</span>
+                      <span className="text-[12px] font-mono text-text-primary">{d.count}</span>
                     </div>
                   ))}
                 </div>
-                <div className="text-[12px] text-text-tertiary italic">AI retrained 2 days ago · 1,247 training samples</div>
+                <div className="text-[12px] text-text-tertiary italic">AI retrained 2 days ago · {leads.length} training samples</div>
               </div>
             </div>
           </motion.div>
@@ -565,7 +808,7 @@ export default function LeadRouter() {
             <div className="flex items-center justify-between p-5 border-b border-border-subtle">
               <div className="flex items-center gap-3">
                 <h3 className="text-[18px] font-semibold text-text-primary">Lead Queue</h3>
-                <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-bg-hover text-text-secondary">{filteredLeads.length} total leads</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-bg-hover text-text-secondary">{dropdownFilteredLeads.length} total leads</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -624,10 +867,10 @@ export default function LeadRouter() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredLeads.map((lead, i) => {
-                    const company = getCompany(lead.companyId);
-                    const badge = getStatusBadge(lead.status);
-                    const scoreColor = getScoreColor(lead.score);
+                  {dropdownFilteredLeads.map((lead, i) => {
+                    const company = getCompany(lead.company_routed);
+                    const badge = getStatusBadge(lead.status || 'New');
+                    const sColor = getScoreColor(lead.score || 0);
                     return (
                       <motion.tr
                         key={lead.id}
@@ -635,7 +878,7 @@ export default function LeadRouter() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 + i * 0.025, duration: 0.3 }}
                         className="border-b border-border-subtle hover:bg-bg-hover transition-colors group cursor-pointer"
-                        onClick={() => setSelectedLead(lead)}
+                        onClick={() => setSelectedLeadId(lead.id)}
                       >
                         <td className="px-4 py-3">
                           <div className="w-4 h-4 rounded border border-border-default bg-transparent" />
@@ -647,7 +890,7 @@ export default function LeadRouter() {
                             </div>
                             <div>
                               <div className="text-[14px] font-semibold text-text-primary">{lead.name}</div>
-                              <div className="text-[12px] text-text-secondary">{lead.email}</div>
+                              <div className="text-[12px] text-text-secondary">{lead.email || '—'}</div>
                             </div>
                           </div>
                         </td>
@@ -658,23 +901,23 @@ export default function LeadRouter() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="text-[13px] text-text-primary">{lead.intent}</div>
+                          <div className="text-[13px] text-text-primary">{lead.intent || '—'}</div>
                           <div className="w-full h-1 bg-bg-input rounded-full mt-1 overflow-hidden">
-                            <div className="h-full rounded-full" style={{ width: `${lead.score}%`, backgroundColor: scoreColor }} />
+                            <div className="h-full rounded-full" style={{ width: `${lead.score || 0}%`, backgroundColor: sColor }} />
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-[20px] font-bold" style={{ color: scoreColor }}>{lead.score}</span>
+                          <span className="text-[20px] font-bold" style={{ color: sColor }}>{lead.score || 0}</span>
                         </td>
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-medium bg-bg-input text-text-secondary">
                             {getSourceIcon(lead.source)}
-                            {lead.source}
+                            {lead.source || '—'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium" style={{ backgroundColor: badge.bg, color: badge.text }}>
-                            {lead.status}
+                            {lead.status || 'New'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -682,31 +925,31 @@ export default function LeadRouter() {
                             <Cpu className="w-3.5 h-3.5" /> AI
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[12px] font-mono text-text-tertiary">{lead.timeAgo}</td>
+                        <td className="px-4 py-3 text-[12px] font-mono text-text-tertiary">{timeAgo(lead.created_at)}</td>
                         <td className="px-4 py-3">
                           <div className="relative">
                             <button
-                              onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === lead.id ? null : lead.id); }}
+                              onClick={(e) => { e.stopPropagation(); setOpenDropdown(openDropdown === String(lead.id) ? null : String(lead.id)); }}
                               className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bg-hover transition-colors opacity-0 group-hover:opacity-100"
                             >
                               <MoreHorizontal className="w-4 h-4 text-text-secondary" />
                             </button>
-                            {openDropdown === lead.id && (
+                            {openDropdown === String(lead.id) && (
                               <motion.div
                                 initial={{ opacity: 0, y: -4 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="absolute right-0 top-10 w-[160px] bg-bg-elevated border border-border-default rounded-lg shadow-xl z-30 overflow-hidden"
                               >
-                                <button onClick={(e) => { e.stopPropagation(); setSelectedLead(lead); setOpenDropdown(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-text-primary hover:bg-bg-hover transition-colors">
+                                <button onClick={(e) => { e.stopPropagation(); setSelectedLeadId(lead.id); setOpenDropdown(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-text-primary hover:bg-bg-hover transition-colors">
                                   <Eye className="w-3.5 h-3.5" /> View Details
                                 </button>
                                 <button onClick={(e) => e.stopPropagation()} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-text-primary hover:bg-bg-hover transition-colors">
                                   <Edit3 className="w-3.5 h-3.5" /> Edit Lead
                                 </button>
-                                <button onClick={(e) => e.stopPropagation()} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-text-primary hover:bg-bg-hover transition-colors">
+                                <button onClick={(e) => { e.stopPropagation(); handleReRoute(lead, lead.company_routed === 'harbor' ? 'party' : 'harbor'); setOpenDropdown(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-text-primary hover:bg-bg-hover transition-colors">
                                   <GitBranch className="w-3.5 h-3.5" /> Re-route
                                 </button>
-                                <button onClick={(e) => e.stopPropagation()} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-danger hover:bg-danger/10 transition-colors">
+                                <button onClick={(e) => { e.stopPropagation(); store.deleteLead(lead.id); setOpenDropdown(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-danger hover:bg-danger/10 transition-colors">
                                   <Trash2 className="w-3.5 h-3.5" /> Delete
                                 </button>
                               </motion.div>
@@ -718,11 +961,14 @@ export default function LeadRouter() {
                   })}
                 </tbody>
               </table>
+              {dropdownFilteredLeads.length === 0 && (
+                <div className="py-12 text-center text-[14px] text-text-secondary">No leads match the selected filters.</div>
+              )}
             </div>
           </motion.div>
 
           {/* Bottom Split: Routing Log + Conversion Tracker */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Routing Log */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -730,23 +976,30 @@ export default function LeadRouter() {
               transition={{ delay: 0.5, duration: 0.4, ease: cardEase }}
               className="bg-bg-elevated border border-border-subtle rounded-lg p-5 hover:border-border-default transition-colors"
             >
-              <div className="mb-4">
-                <h3 className="text-[18px] font-semibold text-text-primary">Routing Log</h3>
-                <p className="text-[12px] text-text-tertiary">Last 50 decisions</p>
-              </div>
-              <div className="space-y-0 max-h-[360px] overflow-y-auto">
+              <h3 className="text-[18px] font-semibold text-text-primary mb-4">Routing Log</h3>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                {routingLog.length === 0 && (
+                  <div className="text-[13px] text-text-secondary py-4 text-center">No routing events recorded yet.</div>
+                )}
                 {routingLog.map((entry, i) => {
                   const company = getCompany(entry.companyId);
                   return (
                     <motion.div
                       key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 + i * 0.03, duration: 0.3 }}
-                      className="flex items-start gap-3 py-2 border-b border-border-subtle last:border-0"
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + i * 0.04, duration: 0.3 }}
+                      className="flex items-center gap-3 py-2 border-b border-border-subtle last:border-b-0"
                     >
-                      <span className="text-[12px] font-mono text-text-tertiary shrink-0 w-[60px]">{entry.time}</span>
-                      <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: company.color }} />
+                      <span className="text-[11px] font-mono text-text-tertiary w-[72px] shrink-0">{entry.time}</span>
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: company.color }} />
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0 ${
+                        entry.result === 'routed' ? 'bg-success/10 text-success' :
+                        entry.result === 'flagged' ? 'bg-warning/10 text-warning' :
+                        'bg-danger/10 text-danger'
+                      }`}>
+                        {entry.result}
+                      </span>
                       <div className="flex-1 min-w-0">
                         <span className="text-[13px] text-text-primary">
                           Lead #{entry.leadId} &lsquo;{entry.leadName}&rsquo; → classified as &lsquo;{entry.intent}&rsquo; →{' '}
@@ -789,16 +1042,16 @@ export default function LeadRouter() {
                     {/* Funnel bars */}
                     <div className="space-y-1.5">
                       {[
-                        { label: 'Leads', count: cd.leads, max: 50 },
-                        { label: 'Qualified', count: cd.qualified, max: 35 },
-                        { label: 'Converted', count: cd.converted, max: 20 },
+                        { label: 'Leads', count: cd.leads, max: Math.max(...conversionData.map((c) => c.leads), 1) },
+                        { label: 'Qualified', count: cd.qualified, max: Math.max(...conversionData.map((c) => c.qualified), 1) },
+                        { label: 'Converted', count: cd.converted, max: Math.max(...conversionData.map((c) => c.converted), 1) },
                       ].map((stage) => (
                         <div key={stage.label} className="flex items-center gap-3">
                           <span className="text-[11px] text-text-secondary w-[60px] text-right">{stage.label}</span>
                           <div className="flex-1 h-5 bg-bg-input rounded overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
-                              animate={{ width: `${(stage.count / stage.max) * 100}%` }}
+                              animate={{ width: `${stage.max > 0 ? (stage.count / stage.max) * 100 : 0}%` }}
                               transition={{ delay: 0.8 + ci * 0.1, duration: 0.5, ease: cardEase }}
                               className="h-full rounded flex items-center justify-end px-2"
                               style={{ backgroundColor: cd.color }}
@@ -814,7 +1067,7 @@ export default function LeadRouter() {
                 ))}
               </div>
               <p className="mt-4 text-[12px] text-text-secondary italic">
-                Party Favor Photo has the highest conversion rate. Consider increasing ad spend.
+                {conversionData.reduce((best, c) => (parseFloat(c.rate) > parseFloat(best.rate) ? c : best), conversionData[0])?.company || 'Party Favor Photo'} has the highest conversion rate. Consider increasing ad spend.
               </p>
             </motion.div>
           </div>
@@ -822,11 +1075,28 @@ export default function LeadRouter() {
       </div>
 
       {/* Lead Detail Drawer */}
-      <AnimatePresence>
-        {selectedLead && (
-          <LeadDetailDrawer lead={selectedLead} onClose={() => setSelectedLead(null)} />
-        )}
-      </AnimatePresence>
+      {selectedLeadId !== null && (
+        <LeadDetailDrawer
+          leadId={selectedLeadId}
+          onClose={() => setSelectedLeadId(null)}
+        />
+      )}
     </Layout>
   );
+}
+
+// ─── Helper: count approvals from pipeline ───────────────────────────────────
+
+type PipelineDataItem = {
+  requires_approval?: number;
+  [key: string]: any;
+};
+
+function totalApprovalsFromPipeline(store: { getPipelineData: () => PipelineDataItem[] }): number {
+  try {
+    const data = store.getPipelineData();
+    return data.reduce((sum: number, s: PipelineDataItem) => sum + (s.requires_approval || 0), 0);
+  } catch {
+    return 0;
+  }
 }
