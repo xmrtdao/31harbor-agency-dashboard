@@ -58,6 +58,34 @@
             font-size: 0.9rem;
         }
         
+        /* ===== COMPANY SECTION ===== */
+        .company-section {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .company-section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-research);
+        }
+        
+        .company-section-header h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin: 0;
+            margin-left: 10px;
+        }
+        
+        .company-section-header .icon {
+            font-size: 2rem;
+        }
+
         /* ===== CONDUCTOR SECTION ===== */
         .conductor {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -68,7 +96,7 @@
             text-align: center;
         }
         
-        .conductor h2 {
+        .conductor h3 {
             font-size: 1.3rem;
             color: var(--accent-research);
             margin-bottom: 10px;
@@ -107,7 +135,7 @@
         .domain-header.community { border-color: var(--accent-community); }
         .domain-header.agency { border-color: var(--accent-agency); }
         
-        .domain-header h3 {
+        .domain-header h4 {
             font-size: 1.1rem;
             margin: 0;
         }
@@ -199,7 +227,7 @@
             margin-bottom: 30px;
         }
         
-        .automation-layer h3 {
+        .automation-layer h4 {
             font-size: 1.1rem;
             margin-bottom: 15px;
             color: #fff;
@@ -240,7 +268,7 @@
             margin-bottom: 30px;
         }
         
-        .memory-vault h3 {
+        .memory-vault h4 {
             font-size: 1.1rem;
             margin-bottom: 15px;
             color: #fff;
@@ -259,7 +287,7 @@
             border: 1px solid var(--border);
         }
         
-        .vault-section h4 {
+        .vault-section h5 {
             color: var(--accent-research);
             font-size: 0.9rem;
             margin-bottom: 10px;
@@ -288,7 +316,7 @@
             margin-bottom: 30px;
         }
         
-        .observability h3 {
+        .observability h4 {
             font-size: 1.1rem;
             margin-bottom: 15px;
             color: #fff;
@@ -308,7 +336,7 @@
             border: 1px solid var(--border);
         }
         
-        .obs-card h4 {
+        .obs-card h5 {
             color: var(--text-secondary);
             font-size: 0.8rem;
             margin-bottom: 10px;
@@ -350,61 +378,6 @@
             background: #2d2d2d;
         }
         
-        /* ===== COMPANY OVERVIEW ===== */
-        .company-overview {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .company-overview h3 {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-        
-        .company-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        
-        .company-card {
-            background: var(--bg-tertiary);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        
-        .company-card h4 {
-            color: #fff;
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-        
-        .company-stat {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .company-stat:last-child {
-            border-bottom: none;
-        }
-        
-        .company-stat-label {
-            color: var(--text-secondary);
-        }
-        
-        .company-stat-value {
-            color: #fff;
-            font-weight: 600;
-        }
-        
         /* ===== ACTIVITY LOG ===== */
         .activity-log {
             background: var(--bg-secondary);
@@ -414,7 +387,7 @@
             margin-bottom: 30px;
         }
         
-        .activity-log h3 {
+        .activity-log h4 {
             font-size: 1.1rem;
             margin-bottom: 15px;
             color: #fff;
@@ -483,10 +456,6 @@
             .obs-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
-            .company-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
         }
         
         @media (min-width: 1024px) {
@@ -496,10 +465,6 @@
             
             .obs-grid {
                 grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .company-grid {
-                grid-template-columns: repeat(3, 1fr);
             }
             
             .container {
@@ -535,268 +500,12 @@
             <p class="subtitle" id="last-update">Last Updated: Loading...</p>
         </header>
 
-        <!-- Conductor Section -->
-        <div class="conductor">
-            <h2>🎼 Claude Code: The Conductor</h2>
-            <p>Central AI engine orchestrating all tasks, automations, and workflows across domains</p>
-        </div>
-
-        <!-- Domains Grid -->
-        <div class="domains-grid">
-            <!-- Research Domain -->
-            <div class="domain">
-                <div class="domain-header research">
-                    <span class="domain-icon">🔍</span>
-                    <h3>Research</h3>
-                </div>
-                <div class="domain-content">
-                    <div class="skills-grid">
-                        <div class="skill-card research">
-                            <div class="skill-info">
-                                <div class="skill-name">YT Pipeline</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card research">
-                            <div class="skill-info">
-                                <div class="skill-name">Deep Research</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card research">
-                            <div class="skill-info">
-                                <div class="skill-name">Competitor Watch</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Content Domain -->
-            <div class="domain">
-                <div class="domain-header content">
-                    <span class="domain-icon">✍️</span>
-                    <h3>Content</h3>
-                </div>
-                <div class="domain-content">
-                    <div class="skills-grid">
-                        <div class="skill-card content">
-                            <div class="skill-info">
-                                <div class="skill-name">Outlines</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card content">
-                            <div class="skill-info">
-                                <div class="skill-name">Content Cascade</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card content">
-                            <div class="skill-info">
-                                <div class="skill-name">Carousel Generator</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Community Domain -->
-            <div class="domain">
-                <div class="domain-header community">
-                    <span class="domain-icon">👥</span>
-                    <h3>Community</h3>
-                </div>
-                <div class="domain-content">
-                    <div class="skills-grid">
-                        <div class="skill-card community">
-                            <div class="skill-info">
-                                <div class="skill-name">Skool Post Drafts</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card community">
-                            <div class="skill-info">
-                                <div class="skill-name">Member Onboarding</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card community">
-                            <div class="skill-info">
-                                <div class="skill-name">Engagement Tracker</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Agency Domain -->
-            <div class="domain">
-                <div class="domain-header agency">
-                    <span class="domain-icon">🏢</span>
-                    <h3>Agency</h3>
-                </div>
-                <div class="domain-content">
-                    <div class="skills-grid">
-                        <div class="skill-card agency">
-                            <div class="skill-info">
-                                <div class="skill-name">Client Onboarding</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card agency">
-                            <div class="skill-info">
-                                <div class="skill-name">Weekly Q&A Digest</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                        <div class="skill-card agency">
-                            <div class="skill-info">
-                                <div class="skill-name">Reporting Suite</div>
-                                <div class="skill-status">projects • context</div>
-                            </div>
-                            <button class="skill-run-btn">▶ Run</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Automation Layer -->
-        <div class="automation-layer">
-            <h3>🔗 Automation Layer</h3>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Connected tools & software assets</p>
-            <div class="automation-grid">
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">🐙</div>
-                    <div>GitHub</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">💬</div>
-                    <div>Slack</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">📧</div>
-                    <div>Email</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">📝</div>
-                    <div>Obsidian</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">🌐</div>
-                    <div>Resend</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">☁️</div>
-                    <div>Cloudflare</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">📊</div>
-                    <div>Analytics</div>
-                </div>
-                <div class="automation-tool">
-                    <div class="automation-tool-icon">🔐</div>
-                    <div>Auth</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Memory Vault -->
-        <div class="memory-vault">
-            <h3>🧠 Memory Vault (Obsidian)</h3>
-            <div class="vault-sections">
-                <div class="vault-section">
-                    <h4>📥 Raw</h4>
-                    <div class="vault-stat" id="vault-raw">-</div>
-                    <div class="vault-label">Initial research & data</div>
-                </div>
-                <div class="vault-section">
-                    <h4>📚 Wiki</h4>
-                    <div class="vault-stat" id="vault-wiki">-</div>
-                    <div class="vault-label">Processed reports</div>
-                </div>
-                <div class="vault-section">
-                    <h4>📤 Output</h4>
-                    <div class="vault-stat" id="vault-output">-</div>
-                    <div class="vault-label">Deliverables ready</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Observability Dashboard -->
-        <div class="observability">
-            <h3>📊 Observability Dashboard</h3>
-            
-            <div class="obs-grid">
-                <div class="obs-card">
-                    <h4>Agentic Activity</h4>
-                    <div class="obs-value" id="activity-count">-</div>
-                    <div class="obs-unit">tasks executed</div>
-                </div>
-                <div class="obs-card">
-                    <h4>Total Usage</h4>
-                    <div class="obs-value" id="usage-count">-</div>
-                    <div class="obs-unit">API calls</div>
-                </div>
-                <div class="obs-card">
-                    <h4>Routines Running</h4>
-                    <div class="obs-value" id="routines-count">-</div>
-                    <div class="obs-unit">active</div>
-                </div>
-                <div class="obs-card">
-                    <h4>Success Rate</h4>
-                    <div class="obs-value" id="success-rate">-</div>
-                    <div class="obs-unit">%</div>
-                </div>
-            </div>
-
-            <h4 style="color: var(--text-secondary); margin: 20px 0 10px; text-transform: uppercase; font-size: 0.8rem;">Quick Skill Execution</h4>
-            <div class="skill-buttons">
-                <button class="skill-btn">🧹 Vault Cleanup</button>
-                <button class="skill-btn">📰 Morning Brief</button>
-                <button class="skill-btn">🔍 YT Search</button>
-                <button class="skill-btn">✍️ Draft Content</button>
-                <button class="skill-btn">📊 Generate Report</button>
-                <button class="skill-btn">🔄 Sync Data</button>
-            </div>
-        </div>
-
-        <!-- Company Overview -->
-        <div class="company-overview">
-            <h3>🏢 Company Operations</h3>
-            <div class="company-grid" id="company-grid">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-
-        <!-- Activity Log -->
-        <div class="activity-log">
-            <h3>📝 Activity Log</h3>
-            <div class="log-entries" id="activity-entries">
-                <div class="log-entry"><span class="log-success">✓</span> Dashboard initialized - Agentic OS v2.0</div>
-                <div class="log-entry"><span class="log-success">✓</span> All domains loaded and ready</div>
-                <div class="log-entry"><span class="log-success">✓</span> Automation layer connected</div>
-                <div class="log-entry"><span class="log-pending">⏳</span> Waiting for skill execution...</div>
-            </div>
+        <div id="company-dashboards">
+            <!-- Company-specific dashboards will be loaded here by JS -->
         </div>
 
         <footer>
-            <p>Agentic OS Dashboard v2.0.0 - Powered by Claude Code</p>
+            <p>Agentic OS Dashboard v2.1.0 - Powered by Claude Code</p>
             <p>Last Updated: <span id="footer-update">-</span></p>
             <p style="margin-top: 10px;">
                 <a href="https://github.com/xmrtdao/31harbor-agency-dashboard">GitHub</a> •
@@ -807,7 +516,6 @@
     </div>
 
     <script>
-        // Load live data
         async function loadDashboard() {
             try {
                 const resp = await fetch('data.json?' + Date.now());
@@ -817,89 +525,279 @@
                 document.getElementById('last-update').textContent = 'Last Updated: ' + updateTime;
                 document.getElementById('footer-update').textContent = updateTime;
                 
-                // Calculate metrics
-                let totalEmails = 0;
-                let totalCompanies = 0;
-                let activeDomains = 0;
-                
-                for (const [name, company] of Object.entries(data.companies)) {
-                    totalEmails += company.emails_total;
-                    totalCompanies++;
-                    if (company.dns_verified) activeDomains++;
-                }
-                
-                // Update observability metrics
-                document.getElementById('activity-count').textContent = totalEmails;
-                document.getElementById('usage-count').textContent = (totalEmails * 2).toString();
-                document.getElementById('routines-count').textContent = activeDomains;
-                document.getElementById('success-rate').textContent = (activeDomains / totalCompanies * 100).toFixed(0);
-                
-                // Update vault stats
-                document.getElementById('vault-raw').textContent = totalCompanies;
-                document.getElementById('vault-wiki').textContent = activeDomains;
-                document.getElementById('vault-output').textContent = (totalEmails / 5).toFixed(0);
-                
-                // Company cards
-                const companyGrid = document.getElementById('company-grid');
-                companyGrid.innerHTML = '';
-                
-                for (const [name, company] of Object.entries(data.companies)) {
-                    const icon = name.includes('31 Harbor') ? '🏠' : name.includes('Party Favor') ? '📸' : '🔐';
-                    const statusText = company.dns_verified ? '✓ Live' : '⏳ Setup';
-                    const statusColor = company.dns_verified ? 'var(--success)' : 'var(--warning)';
-                    
-                    companyGrid.innerHTML += `
-                        <div class="company-card">
-                            <h4>${icon} ${name}</h4>
-                            <div class="company-stat">
-                                <span class="company-stat-label">Status</span>
-                                <span class="company-stat-value" style="color: ${statusColor};">${statusText}</span>
+                const companyDashboardsContainer = document.getElementById('company-dashboards');
+                companyDashboardsContainer.innerHTML = ''; // Clear existing content
+
+                for (const [companyName, companyData] of Object.entries(data.companies)) {
+                    const companyIcon = companyName.includes('31 Harbor') ? '🏠' : companyName.includes('Party Favor') ? '📸' : '🔐';
+                    const statusText = companyData.dns_verified ? '✓ Live' : '⏳ Setup';
+                    const statusColor = companyData.dns_verified ? 'var(--success)' : 'var(--warning)';
+
+                    let companySectionHTML = `
+                        <div class="company-section">
+                            <div class="company-section-header">
+                                <span class="icon">${companyIcon}</span>
+                                <h2>${companyName} - Agentic OS</h2>
                             </div>
-                            <div class="company-stat">
-                                <span class="company-stat-label">Domain</span>
-                                <span class="company-stat-value">${company.domain}</span>
+
+                            <!-- Conductor Section -->
+                            <div class="conductor">
+                                <h3>🎼 Claude Code: The Conductor</h3>
+                                <p>Central AI engine orchestrating all tasks, automations, and workflows for ${companyName}</p>
                             </div>
-                            <div class="company-stat">
-                                <span class="company-stat-label">Today</span>
-                                <span class="company-stat-value">${company.emails_today} emails</span>
+
+                            <!-- Domains Grid -->
+                            <div class="domains-grid">
+                                <!-- Research Domain -->
+                                <div class="domain">
+                                    <div class="domain-header research">
+                                        <span class="domain-icon">🔍</span>
+                                        <h4>Research</h4>
+                                    </div>
+                                    <div class="domain-content">
+                                        <div class="skills-grid">
+                                            <div class="skill-card research">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">YT Pipeline</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card research">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Deep Research</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card research">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Competitor Watch</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Content Domain -->
+                                <div class="domain">
+                                    <div class="domain-header content">
+                                        <span class="domain-icon">✍️</span>
+                                        <h4>Content</h4>
+                                    </div>
+                                    <div class="domain-content">
+                                        <div class="skills-grid">
+                                            <div class="skill-card content">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Outlines</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card content">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Content Cascade</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card content">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Carousel Generator</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Community Domain -->
+                                <div class="domain">
+                                    <div class="domain-header community">
+                                        <span class="domain-icon">👥</span>
+                                        <h4>Community</h4>
+                                    </div>
+                                    <div class="domain-content">
+                                        <div class="skills-grid">
+                                            <div class="skill-card community">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Skool Post Drafts</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card community">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Member Onboarding</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card community">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Engagement Tracker</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Agency Domain -->
+                                <div class="domain">
+                                    <div class="domain-header agency">
+                                        <span class="domain-icon">🏢</span>
+                                        <h4>Agency</h4>
+                                    </div>
+                                    <div class="domain-content">
+                                        <div class="skills-grid">
+                                            <div class="skill-card agency">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Client Onboarding</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card agency">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Weekly Q&A Digest</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                            <div class="skill-card agency">
+                                                <div class="skill-info">
+                                                    <div class="skill-name">Reporting Suite</div>
+                                                    <div class="skill-status">projects • context</div>
+                                                </div>
+                                                <button class="skill-run-btn">▶ Run</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="company-stat">
-                                <span class="company-stat-label">Total</span>
-                                <span class="company-stat-value">${company.emails_total} emails</span>
+
+                            <!-- Automation Layer -->
+                            <div class="automation-layer">
+                                <h4>🔗 Automation Layer</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Connected tools & software assets for ${companyName}</p>
+                                <div class="automation-grid">
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">🐙</div>
+                                        <div>GitHub</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">💬</div>
+                                        <div>Slack</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">📧</div>
+                                        <div>Email</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">📝</div>
+                                        <div>Obsidian</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">🌐</div>
+                                        <div>Resend</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">☁️</div>
+                                        <div>Cloudflare</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">📊</div>
+                                        <div>Analytics</div>
+                                    </div>
+                                    <div class="automation-tool">
+                                        <div class="automation-tool-icon">🔐</div>
+                                        <div>Auth</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="company-stat">
-                                <span class="company-stat-label">Webhooks</span>
-                                <span class="company-stat-value">${company.webhooks}</span>
+
+                            <!-- Memory Vault -->
+                            <div class="memory-vault">
+                                <h4>🧠 Memory Vault (Obsidian)</h4>
+                                <div class="vault-sections">
+                                    <div class="vault-section">
+                                        <h5>📥 Raw</h5>
+                                        <div class="vault-stat">${companyData.emails_total}</div>
+                                        <div class="vault-label">Initial research & data</div>
+                                    </div>
+                                    <div class="vault-section">
+                                        <h5>📚 Wiki</h5>
+                                        <div class="vault-stat">${companyData.dns_verified ? '1' : '0'}</div>
+                                        <div class="vault-label">Processed reports</div>
+                                    </div>
+                                    <div class="vault-section">
+                                        <h5>📤 Output</h5>
+                                        <div class="vault-stat">${(companyData.emails_total / 5).toFixed(0)}</div>
+                                        <div class="vault-label">Deliverables ready</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observability Dashboard -->
+                            <div class="observability">
+                                <h4>📊 Observability Dashboard</h4>
+                                
+                                <div class="obs-grid">
+                                    <div class="obs-card">
+                                        <h5>Agentic Activity</h5>
+                                        <div class="obs-value">${companyData.emails_total}</div>
+                                        <div class="obs-unit">tasks executed</div>
+                                    </div>
+                                    <div class="obs-card">
+                                        <h5>Total Usage</h5>
+                                        <div class="obs-value">${(companyData.emails_total * 2)}</div>
+                                        <div class="obs-unit">API calls</div>
+                                    </div>
+                                    <div class="obs-card">
+                                        <h5>Routines Running</h5>
+                                        <div class="obs-value">${companyData.dns_verified ? '1' : '0'}</div>
+                                        <div class="obs-unit">active</div>
+                                    </div>
+                                    <div class="obs-card">
+                                        <h5>Success Rate</h5>
+                                        <div class="obs-value">${companyData.dns_verified ? '100' : '0'}</div>
+                                        <div class="obs-unit">%</div>
+                                    </div>
+                                </div>
+
+                                <h5 style="color: var(--text-secondary); margin: 20px 0 10px; text-transform: uppercase; font-size: 0.8rem;">Quick Skill Execution</h5>
+                                <div class="skill-buttons">
+                                    <button class="skill-btn">🧹 Vault Cleanup</button>
+                                    <button class="skill-btn">📰 Morning Brief</button>
+                                    <button class="skill-btn">🔍 YT Search</button>
+                                    <button class="skill-btn">✍️ Draft Content</button>
+                                    <button class="skill-btn">📊 Generate Report</button>
+                                    <button class="skill-btn">🔄 Sync Data</button>
+                                </div>
+                            </div>
+
+                            <!-- Activity Log -->
+                            <div class="activity-log">
+                                <h4>📝 Activity Log for ${companyName}</h4>
+                                <div class="log-entries" id="activity-entries-${companyName.replace(/\s/g, '-')}">
+                                    <div class="log-entry"><span class="log-success">✓</span> Dashboard initialized - Agentic OS v2.1</div>
+                                    ${companyData.recent_emails.map(email => {
+                                        const status = email.last_event === 'delivered' ? 'success' : 'pending';
+                                        const statusSymbol = status === 'success' ? '✓' : '⏳';
+                                        const timestamp = new Date(email.created_at).toLocaleString();
+                                        return `<div class="log-entry"><span class="log-${status}">${statusSymbol}</span> ${email.subject.substring(0, 40)}... (${timestamp})</div>`;
+                                    }).join('')}
+                                </div>
                             </div>
                         </div>
                     `;
+                    companyDashboardsContainer.innerHTML += companySectionHTML;
                 }
-                
-                // Update activity log with recent emails
-                const activityEntries = document.getElementById('activity-entries');
-                let allEmails = [];
-                
-                for (const [name, company] of Object.entries(data.companies)) {
-                    company.recent_emails.forEach(email => {
-                        allEmails.push({
-                            ...email,
-                            company: name
-                        });
-                    });
-                }
-                
-                allEmails.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                
-                let logHTML = '<div class="log-entry"><span class="log-success">✓</span> Dashboard initialized - Agentic OS v2.0</div>';
-                
-                allEmails.slice(0, 8).forEach(email => {
-                    const status = email.last_event === 'delivered' ? 'success' : 'pending';
-                    const statusSymbol = status === 'success' ? '✓' : '⏳';
-                    const timestamp = new Date(email.created_at).toLocaleString();
-                    logHTML += `<div class="log-entry"><span class="log-${status}">${statusSymbol}</span> [${email.company}] ${email.subject.substring(0, 40)}... (${timestamp})</div>`;
-                });
-                
-                activityEntries.innerHTML = logHTML;
                 
             } catch (e) {
                 console.error('Failed to load dashboard:', e);
