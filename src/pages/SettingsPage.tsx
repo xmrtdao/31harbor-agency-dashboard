@@ -199,7 +199,7 @@ const integrationData = [
     description: 'Database & backend services',
     status: 'connected' as const,
     color: '#3ECF8E',
-    account: 'agenticos-db',
+    account: 'suiteai-db',
   },
   {
     id: 'resend',
@@ -207,7 +207,7 @@ const integrationData = [
     description: 'Email delivery service',
     status: 'connected' as const,
     color: '#111111',
-    account: 'alex@agenticos.com',
+    account: 'alex@suiteai.com',
   },
   {
     id: 'stripe',
@@ -231,7 +231,7 @@ const integrationData = [
     description: 'Source code & CI/CD',
     status: 'connected' as const,
     color: '#6E5494',
-    account: 'agenticos-org',
+    account: 'suiteai-org',
   },
   {
     id: 'cloudflare',
@@ -239,7 +239,7 @@ const integrationData = [
     description: 'CDN & edge compute',
     status: 'connected' as const,
     color: '#F48120',
-    account: 'agenticos.dev',
+    account: 'suiteai.dev',
   },
   {
     id: 'huggingface',
@@ -265,7 +265,7 @@ const userData = [
   {
     id: 'U-001',
     name: 'Alex Morgan',
-    email: 'alex@agenticos.com',
+    email: 'alex@suiteai.com',
     role: 'OWNER' as const,
     companies: ['harbor', 'party', 'xmrt'],
     lastActive: '2m ago',
@@ -274,7 +274,7 @@ const userData = [
   {
     id: 'U-002',
     name: 'Jordan Lee',
-    email: 'jordan@agenticos.com',
+    email: 'jordan@suiteai.com',
     role: 'ADMIN' as const,
     companies: ['harbor', 'party'],
     lastActive: '1h ago',
@@ -283,7 +283,7 @@ const userData = [
   {
     id: 'U-003',
     name: 'Casey Smith',
-    email: 'casey@agenticos.com',
+    email: 'casey@suiteai.com',
     role: 'MANAGER' as const,
     companies: ['xmrt'],
     lastActive: '3h ago',
@@ -292,7 +292,7 @@ const userData = [
   {
     id: 'U-004',
     name: 'Taylor Reed',
-    email: 'taylor@agenticos.com',
+    email: 'taylor@suiteai.com',
     role: 'VIEWER' as const,
     companies: ['harbor', 'party', 'xmrt'],
     lastActive: '1d ago',
@@ -301,7 +301,7 @@ const userData = [
   {
     id: 'U-005',
     name: 'Riley Park',
-    email: 'riley@agenticos.com',
+    email: 'riley@suiteai.com',
     role: 'ADMIN' as const,
     companies: ['xmrt', 'harbor'],
     lastActive: '5h ago',
@@ -1217,7 +1217,7 @@ function NotificationsSection() {
               <Switch checked={channels.email} onCheckedChange={(v) => setChannels((p) => ({ ...p, email: v }))} />
               <div>
                 <span className="text-[13px] text-text-primary">Email notifications</span>
-                <p className="text-[11px] text-text-tertiary">alex@agenticos.com</p>
+                <p className="text-[11px] text-text-tertiary">alex@suiteai.com</p>
               </div>
             </div>
           </div>
@@ -1226,7 +1226,7 @@ function NotificationsSection() {
               <Switch checked={channels.slack} onCheckedChange={(v) => setChannels((p) => ({ ...p, slack: v }))} />
               <div>
                 <span className="text-[13px] text-text-primary">Slack notifications</span>
-                <p className="text-[11px] text-text-tertiary">#agenticos-alerts</p>
+                <p className="text-[11px] text-text-tertiary">#suiteai-alerts</p>
               </div>
             </div>
           </div>
@@ -1444,7 +1444,7 @@ export default function SettingsPage() {
           <div>
             <h1 className="text-[28px] font-bold text-text-primary tracking-tight">Settings</h1>
             <p className="text-[14px] text-text-secondary mt-1">
-              Configure AgenticOS — companies, agents, integrations, and access
+              Configure SuiteAI — companies, agents, integrations, and access
             </p>
           </div>
 
