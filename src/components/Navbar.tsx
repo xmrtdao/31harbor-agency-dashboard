@@ -7,6 +7,7 @@ import {
   Workflow,
   Megaphone,
   BarChart3,
+  Radio,
   Settings2,
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,7 @@ const navItems = [
   { path: '/pipeline', label: 'Pipeline', icon: Workflow },
   { path: '/marketing', label: 'Marketing', icon: Megaphone },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/gossip', label: 'GossipHub', icon: Radio },
   { path: '/settings', label: 'Settings', icon: Settings2 },
 ];
 

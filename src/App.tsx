@@ -5,6 +5,7 @@ import Pipeline from './pages/Pipeline'
 import Marketing from './pages/Marketing'
 import Analytics from './pages/Analytics'
 import SettingsPage from './pages/SettingsPage'
+import GossipHub from './pages/GossipHub'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <Route path="/pipeline" element={<Pipeline />} />
       <Route path="/marketing" element={<Marketing />} />
       <Route path="/analytics" element={<Analytics />} />
+      <Route path="/gossip" element={<GossipHub />} />
       <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   )

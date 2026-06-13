@@ -10,6 +10,8 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer,
 } from 'recharts';
 import Layout from '@/components/Layout';
+import OllamaStatus from '@/components/OllamaStatus';
+import MuAPIStatus from '@/components/MuAPIStatus';
 import { useDashboardStore } from '@/store/dashboardStore';
 import {
   dailyRevenueData, companyRevenueBreakdown, sparklineDataTotalLeads,
@@ -429,6 +431,12 @@ export default function Home() {
               ))}
             </div>
           </motion.div>
+        </div>
+
+        {/* ─── Section 3.5: AI Service Status Widgets ─────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <OllamaStatus />
+          <MuAPIStatus />
         </div>
 
         {/* ─── Section 4: Three-Column Status Row ───────────────────────────── */}
