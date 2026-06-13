@@ -534,7 +534,7 @@
         </div>
 
         <footer>
-            <p>Agentic OS Dashboard v2.2.0 - Powered by Claude Code</p>
+            <p>Agentic OS Dashboard v2.2.1 - Powered by Claude Code</p>
             <p>Last Updated: <span id="footer-update">-</span></p>
             <p style="margin-top: 10px;">
                 <a href="https://github.com/xmrtdao/31harbor-agency-dashboard">GitHub</a> •
@@ -547,20 +547,21 @@
     <script>
         async function loadDashboard() {
             try {
-                const resp = await fetch(\'data.json?\' + Date.now());
+                const resp = await fetch('data.json?' + Date.now());
                 const data = await resp.json();
                 
                 const updateTime = new Date(data.updated).toLocaleString();
-                document.getElementById(\'last-update\').textContent = \'Last Updated: \' + updateTime;
-                document.getElementById(\'footer-update\').textContent = updateTime;
+                document.getElementById('last-update').textContent = 'Last Updated: ' + updateTime;
+                document.getElementById('footer-update').textContent = updateTime;
                 
-                const companyDashboardsContainer = document.getElementById(\'company-dashboards\');
-                companyDashboardsContainer.innerHTML = \'\'; // Clear existing content
+                const companyDashboardsContainer = document.getElementById('company-dashboards');
+                companyDashboardsContainer.innerHTML = '';
 
                 for (const [companyName, companyData] of Object.entries(data.companies)) {
-                    const companyIcon = companyName.includes(\'31 Harbor\') ? \'🏠\' : companyName.includes(\'Party Favor\') ? \'📸\' : \'🔐\';
-                    const statusText = companyData.dns_verified ? \'✓ Live\' : \'⏳ Setup\';
-                    const statusColor = companyData.dns_verified ? \'var(--success)\' : \'var(--warning)\';
+                    const companyIcon = companyName.includes('31 Harbor') ? '🏠' : companyName.includes('Party Favor') ? '📸' : '🔐';
+                    const statusText = companyData.dns_verified ? '✓ Live' : '⏳ Setup';
+                    const statusColor = companyData.dns_verified ? 'var(--success)' : 'var(--warning)';
+                    const companyId = companyName.replace(/\s/g, '-');
 
                     let companySectionHTML = `
                         <div class="company-section">
@@ -761,12 +762,12 @@
                                     </div>
                                     <div class="vault-section">
                                         <h5>📚 Wiki</h5>
-                                        <div class="vault-stat">${companyData.dns_verified ? \'1\' : \'0\'}</div>
+                                        <div class="vault-stat">${companyData.dns_verified ? '1' : '0'}</div>
                                         <div class="vault-label">Processed reports</div>
                                     </div>
                                     <div class="vault-section">
                                         <h5>📤 Output</h5>
-                                        <div class="vault-stat">${(companyData.emails_total / 5).toFixed(0)}</div>
+                                        <div class="vault-stat">${Math.floor(companyData.emails_total / 5)}</div>
                                         <div class="vault-label">Deliverables ready</div>
                                     </div>
                                 </div>
@@ -784,17 +785,17 @@
                                     </div>
                                     <div class="obs-card">
                                         <h5>Total Usage</h5>
-                                        <div class="obs-value">${(companyData.emails_total * 2)}</div>
+                                        <div class="obs-value">${companyData.emails_total * 2}</div>
                                         <div class="obs-unit">API calls</div>
                                     </div>
                                     <div class="obs-card">
                                         <h5>Routines Running</h5>
-                                        <div class="obs-value">${companyData.dns_verified ? \'1\' : \'0\'}</div>
+                                        <div class="obs-value">${companyData.dns_verified ? '1' : '0'}</div>
                                         <div class="obs-unit">active</div>
                                     </div>
                                     <div class="obs-card">
                                         <h5>Success Rate</h5>
-                                        <div class="obs-value">${companyData.dns_verified ? \'100\' : \'0\'}</div>
+                                        <div class="obs-value">${companyData.dns_verified ? '100' : '0'}</div>
                                         <div class="obs-unit">%</div>
                                     </div>
                                 </div>
@@ -812,48 +813,46 @@
 
                             <!-- Recent Email Activity -->
                             <div class="activity-log">
-                                <h4>📧 Recent Email Activity for ${companyName}</h4>
+                                <h4>📧 Recent Email Activity (Last 5)</h4>
                                 <div class="email-table-wrapper">
                                     <table class="email-table">
                                         <thead>
                                             <tr><th>Time</th><th>From</th><th>To</th><th>Subject</th><th>Status</th></tr>
                                         </thead>
-                                        <tbody id="email-tbody-${companyName.replace(/\s/g, \'-\')}">
-                                            <!-- Email data populated by JS -->
+                                        <tbody id="email-tbody-${companyId}">
+                                            <tr><td colspan="5">Loading emails...</td></tr>
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
-
-                            <!-- Activity Log -->
-                            <div class="activity-log">
-                                <h4>📝 General Activity Log for ${companyName}</h4>
-                                <div class="log-entries" id="activity-entries-${companyName.replace(/\s/g, \'-\'}">
-                                    <div class="log-entry"><span class="log-success">✓</span> Dashboard initialized - Agentic OS v2.2</div>
-                                    <!-- Other log entries can be added here -->
                                 </div>
                             </div>
                         </div>
                     `;
                     companyDashboardsContainer.innerHTML += companySectionHTML;
 
-                    // Populate email table for the current company
-                    const emailTbody = document.getElementById(`email-tbody-${companyName.replace(/\s/g, \'-\'}`);
-                    if (emailTbody) {
-                        emailTbody.innerHTML = companyData.recent_emails.map(email => `
-                            <tr>
-                                <td>${new Date(email.created_at).toLocaleDateString()}</td>
-                                <td>${email.from}</td>
-                                <td>${email.to[0] || \'N/A\'}</td>
-                                <td>${(email.subject || \'N/A\').substring(0, 40)}${(email.subject || \'\').length > 40 ? \'...\' : \'\'}</td>
-                                <td><span class="log-${email.last_event === \'delivered\' ? \'success\' : \'pending\'}">${email.last_event || \'sent\'}</span></td>
-                            </tr>
-                        `).join(\'\');
+                    // Populate email table for the current company - limit to last 5 emails
+                    const emailTbody = document.getElementById('email-tbody-' + companyId);
+                    if (emailTbody && companyData.recent_emails && companyData.recent_emails.length > 0) {
+                        const lastFiveEmails = companyData.recent_emails.slice(0, 5);
+                        const emailRows = lastFiveEmails.map(email => {
+                            const timestamp = new Date(email.created_at).toLocaleDateString();
+                            const from = email.from || 'N/A';
+                            const to = (email.to && email.to[0]) ? email.to[0] : 'N/A';
+                            const subject = (email.subject || 'N/A').substring(0, 40) + ((email.subject || '').length > 40 ? '...' : '');
+                            const statusClass = email.last_event === 'delivered' ? 'log-success' : 'log-pending';
+                            const statusText = email.last_event || 'sent';
+                            
+                            return '<tr><td>' + timestamp + '</td><td>' + from + '</td><td>' + to + '</td><td>' + subject + '</td><td><span class="' + statusClass + '">' + statusText + '</span></td></tr>';
+                        }).join('');
+                        
+                        emailTbody.innerHTML = emailRows;
+                    } else if (emailTbody) {
+                        emailTbody.innerHTML = '<tr><td colspan="5">No emails available</td></tr>';
                     }
                 }
                 
             } catch (e) {
-                console.error(\'Failed to load dashboard:\', e);
+                console.error('Failed to load dashboard:', e);
+                document.getElementById('company-dashboards').innerHTML = '<p style="color: red;">Error loading dashboard. Please refresh the page.</p>';
             }
         }
         
