@@ -2,23 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SuiteAI</title>
     <script>
-      // Route to company-specific dashboard based on subdomain
-      var host = window.location.hostname;
-      var company = null;
-      if (host.indexOf('31harbor') !== -1) company = 'harbor';
-      else if (host.indexOf('partyfavorphoto') !== -1) company = 'party';
-      else if (host.indexOf('mobilemonero') !== -1 || host.indexOf('xmrt') !== -1) company = 'xmrt';
+      (function() {
+        var host = window.location.hostname;
+        var company = null;
+        var color = '#0A84FF';
+        if (host.indexOf('31harbor') !== -1) { company = 'harbor'; color = '#0A84FF'; }
+        else if (host.indexOf('partyfavorphoto') !== -1) { company = 'party'; color = '#F5A623'; }
+        else if (host.indexOf('mobilemonero') !== -1 || host.indexOf('xmrtdao') !== -1) { company = 'xmrt'; color = '#7B61FF'; }
 
-      if (company) {
-        window.location.replace('/' + company + '/');
-      } else {
-        // Default: show company selector
+        if (company) {
+          var path = '/' + company + '/';
+          if (window.location.pathname !== path) {
+            window.location.replace(path);
+            return;
+          }
+        }
+        // Default to harbor
         window.location.replace('/harbor/');
-      }
+      })();
     </script>
-    <style>body{background:#08090E;color:#8B95A5;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}</style>
+    <style>body{background:#08090E;color:#8B95A5;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-size:14px}</style>
   </head>
   <body>Loading SuiteAI...</body>
 </html>
