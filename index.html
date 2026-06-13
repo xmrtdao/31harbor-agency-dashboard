@@ -2,12 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SuiteAI Dashboard</title>
-    <script type="module" crossorigin src="/assets/index-DDJ0WAVb.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Cm4cqFst.css">
+    <title>SuiteAI</title>
+    <script>
+      // Route to company-specific dashboard based on subdomain
+      var host = window.location.hostname;
+      var company = null;
+      if (host.indexOf('31harbor') !== -1) company = 'harbor';
+      else if (host.indexOf('partyfavorphoto') !== -1) company = 'party';
+      else if (host.indexOf('mobilemonero') !== -1 || host.indexOf('xmrt') !== -1) company = 'xmrt';
+
+      if (company) {
+        window.location.replace('/' + company + '/');
+      } else {
+        // Default: show company selector
+        window.location.replace('/harbor/');
+      }
+    </script>
+    <style>body{background:#08090E;color:#8B95A5;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}</style>
   </head>
-  <body>
-    <div id="root"></div>
-  </body>
+  <body>Loading SuiteAI...</body>
 </html>
