@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDashboardStore } from '@/store/dashboardStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -319,6 +320,10 @@ export default function Pipeline() {
   const [selectedStage, setSelectedStage] = useState<StageConfig | null>(null);
   const [pipelineRunning, setPipelineRunning] = useState(true);
   const [approvalsList, setApprovalsList] = useState(approvals);
+  const { activeCompany } = useDashboardStore();
+  const isLocked = activeCompany !== 'all';
+  const cPipeline = isLocked ? pipelineLeads.filter((l: any) => l.companyId === activeCompany) : pipelineLeads;
+  const cApprovals = isLocked ? approvalsList.filter((a: any) => a.companyId === activeCompany) : approvalsList;
   const [chartTab, setChartTab] = useState('Volume');
   const [pipelineFilter, setPipelineFilter] = useState('All Pipelines');
 
@@ -519,7 +524,7 @@ export default function Pipeline() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pipelineLeads.map((lead, i) => {
+                  {cPipeline.map((lead, i) => {
                     const company = getCompany(lead.companyId);
                     const stageBadge = getStageBadge(lead.stageId);
                     const StageIcon = stageBadge.icon;
@@ -595,17 +600,17 @@ export default function Pipeline() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[18px] font-semibold text-text-primary">Approval Queue</h3>
-              <span className="px-2 py-0.5 rounded-full text-[12px] font-medium bg-danger/10 text-danger">{approvalsList.length}</span>
+              <span className="px-2 py-0.5 rounded-full text-[12px] font-medium bg-danger/10 text-danger">{cApprovals.length}</span>
             </div>
 
-            {approvalsList.length === 0 ? (
+            {cApprovals.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <CheckCircle className="w-12 h-12 text-success mb-3" />
                 <p className="text-[14px] text-text-secondary text-center">All caught up! No approvals pending.</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {approvalsList.map((approval, i) => {
+                {cApprovals.map((approval, i) => {
                   const company = getCompany(approval.companyId);
                   return (
                     <motion.div
