@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -35,7 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
+import { getResendApiKey, setResendApiKey, removeResendApiKey } from '@/lib/resend';
+import { ResendClient } from '@/lib/resend';
 
 // ─── Animation Config ───────────────────────────────────────────────────────
 
@@ -62,6 +63,7 @@ const navItems = [
   { id: 'companies', label: 'Companies', icon: Building2 },
   { id: 'agents', label: 'Agents', icon: Bot },
   { id: 'integrations', label: 'Integrations', icon: Plug },
+  { id: 'resend', label: 'Resend Email', icon: Mail },
   { id: 'users', label: 'User Access', icon: Users },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: Palette },
@@ -391,193 +393,188 @@ function CompaniesSection() {
           <motion.div
             key={company.id}
             variants={staggerItem}
-            className="bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden"
+            className="bg-bg-elevated border border-border-subtle rounded-lg p-5"
           >
-            {/* Top accent strip */}
-            <div className="h-1" style={{ backgroundColor: company.color }} />
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Left column - info */}
+              <div className="lg:w-[40%] space-y-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: company.color }}
+                  />
+                  <h3 className="text-[18px] font-bold" style={{ color: company.color }}>
+                    {company.name}
+                  </h3>
+                </div>
 
-            <div className="p-6">
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Left column - info */}
-                <div className="lg:w-[40%] space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: company.color }}
+                <p className="text-[13px] text-text-secondary">{company.industry}</p>
+                <p className="text-[12px] font-mono text-text-tertiary font-tabular">
+                  Active leads: {company.leads}
+                </p>
+
+                {/* Logo placeholder */}
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: company.colorDim }}
+                >
+                  <span className="text-[16px] font-mono font-semibold" style={{ color: company.color }}>
+                    {company.abbreviation}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right column - form */}
+              <div className="lg:w-[60%] space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Display name</label>
+                    <Input
+                      value={company.displayName}
+                      onChange={(e) => updateCompany(company.id, 'displayName', e.target.value)}
+                      className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
                     />
-                    <h3 className="text-[18px] font-bold" style={{ color: company.color }}>
-                      {company.name}
-                    </h3>
                   </div>
 
-                  <p className="text-[13px] text-text-secondary">{company.industry}</p>
-                  <p className="text-[12px] font-mono text-text-tertiary font-tabular">
-                    Active leads: {company.leads}
-                  </p>
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Industry</label>
+                    <select
+                      value={company.industrySelect}
+                      onChange={(e) => updateCompany(company.id, 'industrySelect', e.target.value)}
+                      className="h-9 w-full bg-bg-input border border-border-default rounded-md text-text-primary text-[13px] px-3 outline-none focus:border-border-focus transition-colors"
+                    >
+                      <option>Real Estate</option>
+                      <option>Property Management</option>
+                      <option>Brokerage</option>
+                      <option>Events</option>
+                      <option>Technology</option>
+                    </select>
+                  </div>
 
-                  {/* Logo placeholder */}
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: company.colorDim }}
-                  >
-                    <span className="text-[16px] font-mono font-semibold" style={{ color: company.color }}>
-                      {company.abbreviation}
-                    </span>
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Primary color</label>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-8 h-8 rounded border border-border-default shrink-0"
+                        style={{ backgroundColor: company.color }}
+                      />
+                      <Input
+                        value={company.color}
+                        onChange={(e) => updateCompany(company.id, 'color', e.target.value)}
+                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px] font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Lead score threshold</label>
+                    <Input
+                      type="number"
+                      value={company.scoreThreshold}
+                      onChange={(e) => updateCompany(company.id, 'scoreThreshold', Number(e.target.value))}
+                      className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
+                    />
+                    <p className="text-[11px] text-text-tertiary">Minimum score to route</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary flex items-center gap-1.5">
+                      <Mail className="w-3 h-3" /> Notification email
+                    </label>
+                    <Input
+                      value={company.email}
+                      onChange={(e) => updateCompany(company.id, 'email', e.target.value)}
+                      className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Domain</label>
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-text-tertiary shrink-0" />
+                      <Input
+                        value={company.domain}
+                        onChange={(e) => updateCompany(company.id, 'domain', e.target.value)}
+                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="text-[12px] font-medium text-text-secondary flex items-center gap-1.5">
+                      <Key className="w-3 h-3" /> API Key
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={company.apiKey}
+                        readOnly
+                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px] font-mono"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 px-2 text-text-secondary hover:text-text-primary"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label className="text-[12px] font-medium text-text-secondary">Webhook URL</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="https://..."
+                        value={company.webhook}
+                        onChange={(e) => updateCompany(company.id, 'webhook', e.target.value)}
+                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
+                      />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="h-9 px-3 text-[12px]"
+                      >
+                        <TestTubes className="w-3.5 h-3.5 mr-1" />
+                        Test
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Right column - form */}
-                <div className="lg:w-[60%] space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-text-secondary">Display name</label>
-                      <Input
-                        value={company.displayName}
-                        onChange={(e) => updateCompany(company.id, 'displayName', e.target.value)}
-                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-text-secondary">Industry</label>
-                      <select
-                        value={company.industrySelect}
-                        onChange={(e) => updateCompany(company.id, 'industrySelect', e.target.value)}
-                        className="h-9 w-full bg-bg-input border border-border-default rounded-md text-text-primary text-[13px] px-3 outline-none focus:border-border-focus transition-colors"
-                      >
-                        <option>Real Estate</option>
-                        <option>Property Management</option>
-                        <option>Brokerage</option>
-                        <option>Events</option>
-                        <option>Technology</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-text-secondary">Primary color</label>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-8 h-8 rounded border border-border-default shrink-0"
-                          style={{ backgroundColor: company.color }}
-                        />
-                        <Input
-                          value={company.color}
-                          onChange={(e) => updateCompany(company.id, 'color', e.target.value)}
-                          className="h-9 bg-bg-input border-border-default text-text-primary text-[13px] font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-text-secondary">Lead score threshold</label>
-                      <Input
-                        type="number"
-                        value={company.scoreThreshold}
-                        onChange={(e) => updateCompany(company.id, 'scoreThreshold', Number(e.target.value))}
-                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
-                      />
-                      <p className="text-[11px] text-text-tertiary">Minimum score to route</p>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-text-secondary flex items-center gap-1.5">
-                        <Mail className="w-3 h-3" /> Notification email
-                      </label>
-                      <Input
-                        value={company.email}
-                        onChange={(e) => updateCompany(company.id, 'email', e.target.value)}
-                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-text-secondary">Domain</label>
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-3.5 h-3.5 text-text-tertiary shrink-0" />
-                        <Input
-                          value={company.domain}
-                          onChange={(e) => updateCompany(company.id, 'domain', e.target.value)}
-                          className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <label className="text-[12px] font-medium text-text-secondary flex items-center gap-1.5">
-                        <Key className="w-3 h-3" /> API Key
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={company.apiKey}
-                          readOnly
-                          className="h-9 bg-bg-input border-border-default text-text-primary text-[13px] font-mono"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-9 px-2 text-text-secondary hover:text-text-primary"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <label className="text-[12px] font-medium text-text-secondary">Webhook URL</label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          placeholder="https://..."
-                          value={company.webhook}
-                          onChange={(e) => updateCompany(company.id, 'webhook', e.target.value)}
-                          className="h-9 bg-bg-input border-border-default text-text-primary text-[13px]"
-                        />
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="h-9 px-3 text-[12px]"
-                        >
-                          <TestTubes className="w-3.5 h-3.5 mr-1" />
-                          Test
-                        </Button>
-                      </div>
-                    </div>
+                {/* Status row */}
+                <div className="flex items-center flex-wrap gap-4 pt-2 border-t border-border-subtle">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={company.autoRouting}
+                      onCheckedChange={(v) => updateCompany(company.id, 'autoRouting', v)}
+                    />
+                    <span className="text-[13px] text-text-primary">Auto-routing enabled</span>
                   </div>
 
-                  {/* Status row */}
-                  <div className="flex items-center flex-wrap gap-4 pt-2 border-t border-border-subtle">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={company.autoRouting}
-                        onCheckedChange={(v) => updateCompany(company.id, 'autoRouting', v)}
-                      />
-                      <span className="text-[13px] text-text-primary">Auto-routing enabled</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {company.dnsVerified ? (
-                        <Badge variant="outline" className="bg-success/15 text-success border-success/30 text-[11px]">
-                          <Check className="w-3 h-3 mr-1" /> DNS Verified
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-warning/15 text-warning border-warning/30 text-[11px]">
-                          <X className="w-3 h-3 mr-1" /> DNS Pending
-                        </Badge>
-                      )}
-                    </div>
-
-                    <span className="text-[12px] font-mono text-text-tertiary">
-                      {company.webhookCount} webhook{company.webhookCount !== 1 ? 's' : ''}
-                    </span>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-2 text-[12px] text-text-secondary hover:text-text-primary ml-auto"
-                    >
-                      <Pencil className="w-3.5 h-3.5 mr-1" />
-                      Edit
-                    </Button>
+                  <div className="flex items-center gap-2">
+                    {company.dnsVerified ? (
+                      <Badge variant="outline" className="bg-success/15 text-success border-success/30 text-[11px]">
+                        <Check className="w-3 h-3 mr-1" /> DNS Verified
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-warning/15 text-warning border-warning/30 text-[11px]">
+                        <X className="w-3 h-3 mr-1" /> DNS Pending
+                      </Badge>
+                    )}
                   </div>
+
+                  <span className="text-[12px] font-mono text-text-tertiary">
+                    {company.webhookCount} webhook{company.webhookCount !== 1 ? 's' : ''}
+                  </span>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-[12px] text-text-secondary hover:text-text-primary ml-auto"
+                  >
+                    <Pencil className="w-3.5 h-3.5 mr-1" />
+                    Edit
+                  </Button>
                 </div>
               </div>
             </div>
@@ -602,46 +599,49 @@ function AgentsSection() {
       {/* Section Header */}
       <motion.div variants={staggerItem} className="mb-6">
         <h2 className="text-[18px] font-bold text-text-primary">AI Agent Configuration</h2>
-        <p className="text-[12px] text-text-secondary mt-1">Tune agent behavior, thresholds, and automation levels</p>
+        <p className="text-[12px] text-text-secondary mt-1">Manage autonomous agents and their behaviors</p>
       </motion.div>
 
       {/* Agent Cards */}
       <div className="space-y-4">
-        {agents.map((agent) => {
-          const Icon = agent.icon;
-          return (
-            <motion.div
-              key={agent.id}
-              variants={staggerItem}
-              className="bg-bg-elevated border border-border-subtle rounded-lg p-6"
-            >
-              {/* Agent Header */}
-              <div className="flex items-center gap-4 mb-6">
+        {agents.map((agent) => (
+          <motion.div
+            key={agent.id}
+            variants={staggerItem}
+            className="bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden"
+          >
+            {/* Agent Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border-subtle">
+              <div className="flex items-center gap-3">
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: `${agent.color}22` }}
                 >
-                  <Icon className="w-5 h-5" style={{ color: agent.color }} />
+                  <agent.icon className="w-5 h-5" style={{ color: agent.color }} />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-[18px] font-bold text-text-primary">{agent.name}</h3>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-text-primary">{agent.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-text-tertiary">{agent.version}</span>
                     <Badge
                       variant="outline"
-                      className="bg-success/15 text-success border-success/30 text-[11px]"
+                      className={`text-[10px] ${agent.status === 'ACTIVE' ? 'bg-success/15 text-success border-success/30' : 'bg-warning/15 text-warning border-warning/30'}`}
                     >
                       {agent.status}
                     </Badge>
                   </div>
-                  <p className="text-[12px] font-mono text-text-tertiary mt-0.5">{agent.version}</p>
                 </div>
+              </div>
+              <div className="flex items-center gap-3">
                 <Switch
                   checked={agent.enabled}
                   onCheckedChange={(v) => updateAgent(agent.id, 'enabled', v)}
                 />
               </div>
+            </div>
 
-              {/* Agent-specific settings */}
+            {/* Agent Settings */}
+            <div className="p-5">
               {agent.id === 'cblr' && (
                 <motion.div
                   variants={staggerContainer}
@@ -649,55 +649,50 @@ function AgentsSection() {
                   animate="animate"
                   className="space-y-4"
                 >
-                  <motion.div variants={staggerItem} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[13px] font-medium text-text-primary">Confidence threshold</label>
-                      <span className="text-[13px] font-mono text-info">{agent.confidence}%</span>
-                    </div>
-                    <Slider
-                      value={[(agent as typeof agentData[0]).confidence ?? 50]}
-                      min={0}
-                      max={100}
-                      step={1}
-                      onValueChange={([v]) => updateAgent(agent.id, 'confidence', v)}
-                      className="w-full"
-                    />
-                    <p className="text-[11px] text-text-tertiary">Minimum confidence to auto-route</p>
-                  </motion.div>
-
-                  <motion.div variants={staggerItem} className="space-y-1.5">
-                    <label className="text-[12px] font-medium text-text-secondary">Fallback behavior</label>
-                    <select
-                      value={agent.fallback}
-                      onChange={(e) => updateAgent(agent.id, 'fallback', e.target.value)}
-                      className="h-9 w-full sm:w-[280px] bg-bg-input border border-border-default rounded-md text-text-primary text-[13px] px-3 outline-none focus:border-border-focus"
-                    >
-                      <option>Flag for review</option>
-                      <option>Route to default company</option>
-                      <option>Hold in queue</option>
-                    </select>
-                  </motion.div>
-
                   <motion.div variants={staggerItem} className="flex items-center gap-3">
                     <Switch
                       checked={agent.autoRetrain}
                       onCheckedChange={(v) => updateAgent(agent.id, 'autoRetrain', v)}
                     />
                     <div>
-                      <span className="text-[13px] text-text-primary">Auto-retrain model</span>
-                      <p className="text-[11px] text-text-tertiary">Automatically retrain model weekly</p>
+                      <span className="text-[13px] text-text-primary">Auto-retrain</span>
+                      <p className="text-[11px] text-text-tertiary">Automatically retrain model with new data</p>
                     </div>
                   </motion.div>
 
-                  <motion.div variants={staggerItem} className="flex items-center gap-3 flex-wrap">
-                    <span className="text-[13px] text-text-secondary">
-                      <span className="font-mono font-tabular">{(agent as typeof agentData[0]).trainingSamples?.toLocaleString()}</span>{' '}
-                      samples &middot; Last trained:{" "}
-                      <span className="font-mono">{(agent as typeof agentData[0]).lastTrained}</span>
-                    </span>
-                    <Button variant="secondary" size="sm" className="h-8 text-[12px]">
-                      Retrain Now
-                    </Button>
+                  <motion.div variants={staggerItem} className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Confidence threshold</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] text-text-secondary">{agent.confidence}%</span>
+                      <Slider
+                        value={[agent.confidence]}
+                        min={50}
+                        max={100}
+                        onValueChange={([v]) => updateAgent(agent.id, 'confidence', v)}
+                        className="w-[200px]"
+                      />
+                    </div>
+                  </motion.div>
+
+                  <motion.div variants={staggerItem} className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Fallback action</label>
+                    <select
+                      value={agent.fallback}
+                      onChange={(e) => updateAgent(agent.id, 'fallback', e.target.value)}
+                      className="h-9 w-full sm:w-[280px] bg-bg-input border border-border-default rounded-md text-text-primary text-[13px] px-3 outline-none focus:border-border-focus"
+                    >
+                      <option>Flag for review</option>
+                      <option>Route to default</option>
+                      <option>Reject lead</option>
+                    </select>
+                  </motion.div>
+
+                  <motion.div variants={staggerItem} className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-text-secondary">Training samples</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] text-text-secondary font-mono tabular-nums">{agent.trainingSamples.toLocaleString()}</span>
+                      <span className="text-[11px] text-text-tertiary">Last trained: {agent.lastTrained}</span>
+                    </div>
                   </motion.div>
 
                   <motion.div variants={staggerItem} className="space-y-1.5">
@@ -879,16 +874,15 @@ function AgentsSection() {
                       value={[(agent as typeof agentData[2]).matchScore ?? 70]}
                       min={0}
                       max={100}
-                      step={1}
                       onValueChange={([v]) => updateAgent(agent.id, 'matchScore', v)}
                       className="w-full"
                     />
                   </motion.div>
                 </motion.div>
               )}
-            </motion.div>
-          );
-        })}
+            </div>
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   );
@@ -966,6 +960,218 @@ function IntegrationsSection() {
           </motion.div>
         ))}
       </div>
+    </motion.div>
+  );
+}
+
+// ─── Section: Resend Email ─────────────────────────────────────────────────
+
+function ResendSection() {
+  const [apiKeys, setApiKeys] = useState<Record<string, { key: string; visible: boolean; status: 'unknown' | 'connected' | 'error' }>>({
+    harbor: { key: '', visible: false, status: 'unknown' },
+    party: { key: '', visible: false, status: 'unknown' },
+    xmrt: { key: '', visible: false, status: 'unknown' },
+  });
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setApiKeys({
+      harbor: { key: getResendApiKey('harbor') || '', visible: false, status: 'unknown' },
+      party: { key: getResendApiKey('party') || '', visible: false, status: 'unknown' },
+      xmrt: { key: getResendApiKey('xmrt') || '', visible: false, status: 'unknown' },
+    });
+  }, []);
+
+  const updateKey = (company: string, key: string) => {
+    setApiKeys((prev) => ({ ...prev, [company]: { ...prev[company], key, status: 'unknown' } }));
+  };
+
+  const toggleVisible = (company: string) => {
+    setApiKeys((prev) => ({ ...prev, [company]: { ...prev[company], visible: !prev[company].visible } }));
+  };
+
+  const saveKey = (company: string) => {
+    setSaving((prev) => ({ ...prev, [company]: true }));
+    const key = apiKeys[company]?.key || '';
+    if (key.trim()) {
+      setResendApiKey(company, key.trim());
+    } else {
+      removeResendApiKey(company);
+    }
+    setTimeout(() => setSaving((prev) => ({ ...prev, [company]: false })), 400);
+  };
+
+  const testConnection = async (company: string) => {
+    const key = apiKeys[company]?.key;
+    if (!key) return;
+    setApiKeys((prev) => ({ ...prev, [company]: { ...prev[company], status: 'unknown' } }));
+    try {
+      const client = new ResendClient(key);
+      const ok = await client.testConnection();
+      setApiKeys((prev) => ({ ...prev, [company]: { ...prev[company], status: ok ? 'connected' : 'error' } }));
+    } catch {
+      setApiKeys((prev) => ({ ...prev, [company]: { ...prev[company], status: 'error' } }));
+    }
+  };
+
+  const webhookUrl = typeof window !== 'undefined'
+    ? (window as any).SUITEAI_WEBHOOK_URL || `${window.location.origin}/api/resend-webhook`
+    : 'https://suiteai-resend-worker.agenticos.workers.dev';
+
+  const companies = [
+    { id: 'harbor', name: '31 Harbor', color: '#0A84FF', domain: '31harbor.com' },
+    { id: 'party', name: 'Party Favor Photo', color: '#F5A623', domain: 'partyfavorphoto.com' },
+    { id: 'xmrt', name: 'XMRT DAO', color: '#7B61FF', domain: 'xmrt.io' },
+  ];
+
+  return (
+    <motion.div variants={staggerContainer} initial="initial" animate="animate">
+      {/* Section Header */}
+      <motion.div variants={staggerItem} className="mb-6">
+        <h2 className="text-[18px] font-bold text-text-primary">Resend Email Integration</h2>
+        <p className="text-[12px] text-text-secondary mt-1">
+          Connect per-company Resend accounts for email delivery tracking
+        </p>
+      </motion.div>
+
+      {/* Company Cards */}
+      <div className="space-y-4">
+        {companies.map((company) => {
+          const state = apiKeys[company.id];
+          return (
+            <motion.div
+              key={company.id}
+              variants={staggerItem}
+              className="bg-bg-elevated border border-border-subtle rounded-lg p-5"
+            >
+              {/* Company Header */}
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: company.color }}
+                />
+                <h3 className="text-[15px] font-semibold text-text-primary">{company.name}</h3>
+                {state?.status === 'connected' && (
+                  <Badge variant="outline" className="bg-success/15 text-success border-success/30 text-[11px]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-success mr-1.5" />
+                    Connected
+                  </Badge>
+                )}
+                {state?.status === 'error' && (
+                  <Badge variant="outline" className="bg-danger/15 text-danger border-danger/30 text-[11px]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-danger mr-1.5" />
+                    Failed
+                  </Badge>
+                )}
+              </div>
+
+              {/* API Key Input */}
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-[12px] font-medium text-text-secondary flex items-center gap-1.5">
+                    <Key className="w-3 h-3" />
+                    Resend API Key
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <Input
+                        type={state?.visible ? 'text' : 'password'}
+                        value={state?.key || ''}
+                        onChange={(e) => updateKey(company.id, e.target.value)}
+                        placeholder="re_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        className="h-9 bg-bg-input border-border-default text-text-primary text-[13px] font-mono pr-20"
+                      />
+                      <button
+                        onClick={() => toggleVisible(company.id)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-text-tertiary hover:text-text-primary transition-colors"
+                      >
+                        {state?.visible ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => saveKey(company.id)}
+                      disabled={saving[company.id]}
+                      className="h-9 px-3 text-[12px]"
+                    >
+                      {saving[company.id] ? 'Saved' : 'Save'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => testConnection(company.id)}
+                      disabled={!state?.key}
+                      className="h-9 px-3 text-[12px]"
+                    >
+                      <TestTubes className="w-3.5 h-3.5 mr-1" />
+                      Test
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-text-tertiary">
+                    Your API key is stored locally in the browser. Find it in your{' '}
+                    <a
+                      href="https://resend.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-harbor-blue hover:underline"
+                    >
+                      Resend dashboard
+                    </a>
+                    .
+                  </p>
+                </div>
+
+                {/* Webhook URL (read-only) */}
+                <div className="space-y-1.5 pt-3 border-t border-border-subtle">
+                  <label className="text-[12px] font-medium text-text-secondary flex items-center gap-1.5">
+                    <Globe className="w-3 h-3" />
+                    Webhook URL
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={webhookUrl}
+                      readOnly
+                      className="h-9 bg-bg-input border-border-default text-text-primary text-[13px] font-mono"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigator.clipboard.writeText(webhookUrl)}
+                      className="h-9 px-2 text-[12px] text-text-secondary hover:text-text-primary"
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-text-tertiary">
+                    Add this webhook URL in your Resend dashboard to receive real-time email events.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Instructions */}
+      <motion.div
+        variants={staggerItem}
+        className="mt-6 bg-bg-elevated border border-border-subtle rounded-lg p-5"
+      >
+        <h3 className="text-[14px] font-semibold text-text-primary mb-3">Setup Instructions</h3>
+        <ol className="space-y-2 text-[13px] text-text-secondary list-decimal list-inside">
+          <li>Log in to your{' '}
+            <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-harbor-blue hover:underline">
+              Resend dashboard
+            </a>
+          </li>
+          <li>Go to <strong>API Keys</strong> and create a new API key with <em>sending</em> and <em>analytics</em> permissions</li>
+          <li>Paste the API key above for each company and click <strong>Save</strong></li>
+          <li>Click <strong>Test</strong> to verify the connection</li>
+          <li>Go to <strong>Webhooks</strong> in Resend and add the webhook URL above</li>
+          <li>Select events: <code className="text-[11px] bg-bg-input px-1 py-0.5 rounded">email.sent</code>, <code className="text-[11px] bg-bg-input px-1 py-0.5 rounded">email.delivered</code>, <code className="text-[11px] bg-bg-input px-1 py-0.5 rounded">email.opened</code>, <code className="text-[11px] bg-bg-input px-1 py-0.5 rounded">email.clicked</code></li>
+        </ol>
+      </motion.div>
     </motion.div>
   );
 }
@@ -1199,7 +1405,7 @@ function NotificationsSection() {
                   <span className="text-[13px] text-text-secondary capitalize">
                     {key === 'downtime' && 'Agent downtime'}
                     {key === 'errors' && 'Integration errors'}
-                    {key === 'rateLimit' && 'API rate limit warning'}
+                    {key === 'rateLimit' && 'API rate limit'}
                   </span>
                 </label>
               ))}
@@ -1208,37 +1414,18 @@ function NotificationsSection() {
         </motion.div>
       </div>
 
-      {/* Delivery Methods */}
+      {/* Notification Channels */}
       <motion.div variants={staggerItem} className="bg-bg-elevated border border-border-subtle rounded-lg p-5">
-        <h3 className="text-[15px] font-semibold text-text-primary mb-4">Delivery Channels</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Switch checked={channels.email} onCheckedChange={(v) => setChannels((p) => ({ ...p, email: v }))} />
-              <div>
-                <span className="text-[13px] text-text-primary">Email notifications</span>
-                <p className="text-[11px] text-text-tertiary">alex@agenticos.com</p>
+        <h3 className="text-[14px] font-semibold text-text-primary mb-4">Delivery Channels</h3>
+        <div className="flex flex-wrap gap-4">
+          {Object.entries(channels).map(([key, value]) => (
+            <label key={key} className="flex items-center gap-2.5 cursor-pointer">
+              <div className="w-4 h-4 rounded border border-border-default flex items-center justify-center bg-bg-input">
+                {value && <Check className="w-3 h-3 text-success" />}
               </div>
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Switch checked={channels.slack} onCheckedChange={(v) => setChannels((p) => ({ ...p, slack: v }))} />
-              <div>
-                <span className="text-[13px] text-text-primary">Slack notifications</span>
-                <p className="text-[11px] text-text-tertiary">#agenticos-alerts</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Switch checked={channels.inApp} disabled />
-              <div>
-                <span className="text-[13px] text-text-primary">In-app notifications</span>
-                <p className="text-[11px] text-text-tertiary">Always enabled</p>
-              </div>
-            </div>
-          </div>
+              <span className="text-[13px] text-text-secondary capitalize">{key}</span>
+            </label>
+          ))}
         </div>
       </motion.div>
     </motion.div>
@@ -1444,7 +1631,7 @@ export default function SettingsPage() {
           <div>
             <h1 className="text-[28px] font-bold text-text-primary tracking-tight">Settings</h1>
             <p className="text-[14px] text-text-secondary mt-1">
-              Configure AgenticOS — companies, agents, integrations, and access
+              Configure AgenticOS \u2014 companies, agents, integrations, and access
             </p>
           </div>
 
@@ -1518,6 +1705,7 @@ export default function SettingsPage() {
                 {activeTab === 'companies' && <CompaniesSection />}
                 {activeTab === 'agents' && <AgentsSection />}
                 {activeTab === 'integrations' && <IntegrationsSection />}
+                {activeTab === 'resend' && <ResendSection />}
                 {activeTab === 'users' && <UsersSection />}
                 {activeTab === 'notifications' && <NotificationsSection />}
                 {activeTab === 'appearance' && <AppearanceSection />}
