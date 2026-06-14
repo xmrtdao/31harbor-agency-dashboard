@@ -4,32 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SuiteAI</title>
-    <script>
-      (function() {
-        var path = window.location.pathname;
-        // If already on a company path, do NOT redirect — just inject config
-        if (path === "/harbor/" || path === "/party/" || path === "/xmrt/") {
-          var company = path.replace(/\//g, "");
-          var name = company === "harbor" ? "31 Harbor" : company === "party" ? "Party Favor Photo" : "XMRT DAO";
-          var color = company === "harbor" ? "#0A84FF" : company === "party" ? "#F5A623" : "#7B61FF";
-          window.SUITEAI_COMPANY = company;
-          window.SUITEAI_COMPANY_NAME = name;
-          window.SUITEAI_COMPANY_COLOR = color;
-          return;
-        }
-        // Only redirect from root path
-        if (path !== "/" && path !== "") return;
-
-        var host = window.location.hostname;
-        var company = null;
-        var color = "#0A84FF";
-        if (host.indexOf("partyfavorphoto") !== -1) { company = "party"; color = "#F5A623"; }
-        else if (host.indexOf("mobilemonero") !== -1 || host.indexOf("xmrtdao") !== -1) { company = "xmrt"; color = "#7B61FF"; }
-        else { company = "harbor"; color = "#0A84FF"; }
-
-        window.location.replace("/" + company + "/");
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>
