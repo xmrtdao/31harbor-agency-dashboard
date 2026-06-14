@@ -388,7 +388,7 @@ export default function LeadRouter() {
 
   const companyFilteredLeads = isLocked ? leadRows.filter((l) => l.companyId === activeCompany) : leadRows;
   const companyFilteredLog = isLocked ? routingLog.filter((e) => e.companyId === activeCompany) : routingLog;
-  const companyFilteredStats = isLocked ? conversionStats.filter((s) => s.companyId === activeCompany) : conversionStats;
+  const companyFilteredStats = isLocked ? conversionData.filter((s) => s.companyId === activeCompany) : conversionStats;
 
   const filteredLeads = companyFilteredLeads.filter((l) => {
     if (searchQuery && !l.name.toLowerCase().includes(searchQuery.toLowerCase()) && !l.email.toLowerCase().includes(searchQuery.toLowerCase())) return false;
