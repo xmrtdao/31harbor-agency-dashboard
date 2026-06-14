@@ -1,5 +1,5 @@
 import initSqlJs from 'sql.js';
-import { seedData } from './seed';
+import { seedData, seedEmailDataOnly } from './seed';
 
 // ─── Database Singleton ──────────────────────────────────────────────────────
 
