@@ -11,6 +11,8 @@ export async function initDB(): Promise<void> {
 
   SQL = await initSqlJs({ locateFile: (file: string) => `/${file}` });
 
+  let isFresh = false;
+
   // Try to load from localStorage
   const saved = localStorage.getItem('suiteai_db');
   if (saved) {
@@ -20,6 +22,7 @@ export async function initDB(): Promise<void> {
       db = new SQL.Database(uint8);
       // Verify DB is valid by running a simple query
       db.exec("SELECT 1");
+      console.log('[SuiteAI] Loaded existing database from localStorage');
     } catch (e) {
       console.warn('[SuiteAI] Failed to load saved DB, creating fresh:', e);
       db = null;
@@ -28,9 +31,36 @@ export async function initDB(): Promise<void> {
 
   if (!db) {
     db = new SQL.Database();
+    isFresh = true;
     createSchema();
     seedData();
     saveDB();
+    console.log('[SuiteAI] Created fresh database');
+    return;
+  }
+
+  // ─── Schema Migration ───────────────────────────────────────────────────
+  // For existing DBs: create any missing tables (like email_activity)
+  // and seed new data without overwriting existing data.
+  try {
+    // Check if email_activity table exists
+    const checkStmt = db.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='email_activity'"
+    );
+    const hasEmailTable = checkStmt.step();
+    checkStmt.free();
+
+    if (!hasEmailTable) {
+      console.log('[SuiteAI] Migrating: adding email_activity table');
+      createSchema(); // CREATE TABLE IF NOT EXISTS is idempotent
+
+      // Seed email data for existing companies
+      seedEmailDataOnly();
+      saveDB();
+      console.log('[SuiteAI] Migration complete: email_activity added');
+    }
+  } catch (e) {
+    console.warn('[SuiteAI] Migration check failed:', e);
   }
 }
 
