@@ -37,39 +37,29 @@ jobs:
         run: |
           mkdir -p dist/harbor dist/party dist/xmrt
 
-          python3 << 'PYEOF'
-          import os
+          # Harbor
+          sed \
+            -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; 31 Harbor</title>|' \
+            -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#0A84FF" />|' \
+            -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "harbor"; window.SUITEAI_COMPANY_NAME = "31 Harbor"; window.SUITEAI_COMPANY_COLOR = "#0A84FF";</script>|' \
+            dist/index.html > dist/harbor/index.html
 
-          companies = [
-              ("harbor", "31 Harbor", "#0A84FF"),
-              ("party", "Party Favor Photo", "#F5A623"),
-              ("xmrt", "XMRT DAO", "#7B61FF"),
-          ]
+          # Party
+          sed \
+            -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; Party Favor Photo</title>|' \
+            -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#F5A623" />|' \
+            -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "party"; window.SUITEAI_COMPANY_NAME = "Party Favor Photo"; window.SUITEAI_COMPANY_COLOR = "#F5A623";</script>|' \
+            dist/index.html > dist/party/index.html
 
-          with open('dist/index.html', 'r') as f:
-              base_html = f.read()
+          # XMRT
+          sed \
+            -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; XMRT DAO</title>|' \
+            -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#7B61FF" />|' \
+            -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "xmrt"; window.SUITEAI_COMPANY_NAME = "XMRT DAO"; window.SUITEAI_COMPANY_COLOR = "#7B61FF";</script>|' \
+            dist/index.html > dist/xmrt/index.html
 
-          for company_id, company_name, company_color in companies:
-              html = base_html
-
-              company_script = f'''<script>
-      window.SUITEAI_COMPANY = "{company_id}";
-      window.SUITEAI_COMPANY_NAME = "{company_name}";
-      window.SUITEAI_COMPANY_COLOR = "{company_color}";
-    </script>'''
-
-              html = html.replace('<head>', f'<head>\n    {company_script}')
-              html = html.replace('<title>SuiteAI</title>', f'<title>SuiteAI — {company_name}</title>')
-              html = html.replace(
-                  '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-                  f'<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="{company_color}" />'
-              )
-
-              with open(f'dist/{company_id}/index.html', 'w') as f:
-                  f.write(html)
-
-              print(f"Generated dist/{company_id}/index.html for {company_name}")
-          PYEOF
+          echo "Generated company entry files:"
+          ls -la dist/harbor/index.html dist/party/index.html dist/xmrt/index.html
 
       - name: Copy support files
         run: |
