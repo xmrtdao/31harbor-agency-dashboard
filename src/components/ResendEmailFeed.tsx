@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { EmailActivity } from '@/db/types';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { ResendClient, getResendApiKey } from '@/lib/resend';
+import * as queries from '@/db/queries';
 
 // ─── Status Badge ────────────────────────────────────────────────────────────
 
