@@ -665,7 +665,7 @@ function AgentsSection() {
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] text-text-secondary">{agent.confidence}%</span>
                       <Slider
-                        value={[agent.confidence]}
+                        value={[agent.confidence ?? 75]}
                         min={50}
                         max={100}
                         onValueChange={([v]) => updateAgent(agent.id, 'confidence', v)}
@@ -690,7 +690,7 @@ function AgentsSection() {
                   <motion.div variants={staggerItem} className="space-y-1.5">
                     <label className="text-[12px] font-medium text-text-secondary">Training samples</label>
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] text-text-secondary font-mono tabular-nums">{agent.trainingSamples.toLocaleString()}</span>
+                      <span className="text-[13px] text-text-secondary font-mono tabular-nums">{agent.trainingSamples?.toLocaleString() ?? '0'}</span>
                       <span className="text-[11px] text-text-tertiary">Last trained: {agent.lastTrained}</span>
                     </div>
                   </motion.div>
