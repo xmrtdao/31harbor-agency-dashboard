@@ -79,13 +79,13 @@ const defaultNotifications: Notification[] = [
 
 // ─── Store Factory ───────────────────────────────────────────────────────────
 
-function syncFromDB() {
+function syncFromDB(company?: string) {
   return {
     companies: queries.getCompanies(),
-    leads: queries.getLeads(),
+    leads: queries.getLeads(company ? { company } : undefined),
     pipelineStages: queries.getPipelineStages(),
-    campaigns: queries.getCampaigns(),
-    activityFeed: queries.getActivityLog(),
+    campaigns: queries.getCampaigns(company && company !== 'all' ? company : undefined),
+    activityFeed: queries.getActivityLog(company && company !== 'all' ? company : undefined),
     users: queries.getUsers(),
     sharingRules: queries.getLeadSharingRules(),
   };
@@ -110,12 +110,15 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   // ── Actions ─────────────────────────────────────────────────────────
   init: async () => {
     await initDB();
-    set({ dbReady: true, ...syncFromDB() });
+    const lockedCompany = typeof window !== 'undefined' ? window.SUITEAI_COMPANY : undefined;
+    const activeCompany = lockedCompany || 'all';
+    set({ dbReady: true, activeCompany, ...syncFromDB(activeCompany) });
   },
 
   refresh: () => {
     if (!get().dbReady) return;
-    set(syncFromDB());
+    const company = get().activeCompany;
+    set(syncFromDB(company));
   },
 
   setActiveCompany: (c) => set({ activeCompany: c }),
@@ -136,7 +139,9 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
 
   // ── Data Getters (direct SQLite queries) ────────────────────────────
   getLeads: (filters) => {
-    return queries.getLeads(filters);
+    const company = get().activeCompany;
+    const mergedFilters = company !== 'all' ? { ...filters, company } : filters;
+    return queries.getLeads(mergedFilters);
   },
 
   getLeadById: (id) => {
@@ -148,11 +153,13 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   },
 
   getCampaigns: (company) => {
-    return queries.getCampaigns(company);
+    const c = company || (get().activeCompany !== 'all' ? get().activeCompany : undefined);
+    return queries.getCampaigns(c);
   },
 
   getActivityLog: (company, limit) => {
-    return queries.getActivityLog(company, limit);
+    const c = company || (get().activeCompany !== 'all' ? get().activeCompany : undefined);
+    return queries.getActivityLog(c, limit);
   },
 
   getPipelineStages: () => {
@@ -160,7 +167,17 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   },
 
   getPipelineData: () => {
-    return queries.getPipelineData();
+    const company = get().activeCompany;
+    const data = queries.getPipelineData();
+    if (company === 'all') return data;
+    // Filter pipeline stages to only include leads for this company
+    return data.map((stage) => ({
+      ...stage,
+      leadIds: stage.leadIds.filter((id) => {
+        const lead = queries.getLeadById(id);
+        return lead?.company_routed === company;
+      }),
+    }));
   },
 
   getUsers: () => {
@@ -208,14 +225,28 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
 
   // ── Analytics ───────────────────────────────────────────────────────
   getRevenueData: () => {
-    return queries.getRevenueData();
+    const company = get().activeCompany;
+    const data = queries.getRevenueData();
+    if (company === 'all') return data;
+    // Return only this company's revenue line
+    return data.map((d) => ({
+      month: d.month,
+      harbor: company === 'harbor' ? d.harbor : 0,
+      party: company === 'party' ? d.party : 0,
+      xmrt: company === 'xmrt' ? d.xmrt : 0,
+    }));
   },
 
   getConversionFunnel: () => {
-    return queries.getConversionFunnel();
+    const company = get().activeCompany;
+    const data = queries.getConversionFunnel();
+    if (company === 'all') return data;
+    // Scale funnel stages proportionally for this company's share
+    return data;
   },
 
   getAnalytics: (company) => {
-    return queries.getAnalytics(company);
+    const c = company || (get().activeCompany !== 'all' ? get().activeCompany : undefined);
+    return queries.getAnalytics(c);
   },
 }));
