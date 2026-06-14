@@ -33,14 +33,58 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Copy company entry files to dist
+      - name: Generate company entry files
         run: |
-          mkdir -p dist/harbor dist/party dist/xmrt
-          cp harbor/index.html dist/harbor/index.html
-          cp party/index.html dist/party/index.html
-          cp xmrt/index.html dist/xmrt/index.html
-          cp 404.html dist/404.html
-          cp .nojekyll dist/.nojekyll
+          # Company configurations
+          declare -A COMPANIES=(
+            ["harbor"]='{"id":"harbor","name":"31 Harbor","color":"#0A84FF"}'
+            ["party"]='{"id":"party","name":"Party Favor Photo","color":"#F5A623"}'
+            ["xmrt"]='{"id":"xmrt","name":"XMRT DAO","color":"#7B61FF"}'
+          )
+
+          for key in "${!COMPANIES[@]}"; do
+            config="${COMPANIES[$key]}"
+            company_id=$(echo "$config" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+            company_name=$(echo "$config" | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])")
+            company_color=$(echo "$config" | python3 -c "import sys,json; print(json.load(sys.stdin)['color'])")
+
+            mkdir -p "dist/$company_id"
+
+            # Read the built index.html and inject company config
+            python3 << PYEOF
+          import re
+
+          with open('dist/index.html', 'r') as f:
+              html = f.read()
+
+          # Inject company config after <head>
+          company_script = f'''<script>
+            window.SUITEAI_COMPANY = "{company_id}";
+            window.SUITEAI_COMPANY_NAME = "{company_name}";
+            window.SUITEAI_COMPANY_COLOR = "{company_color}";
+          </script>'''
+
+          # Insert after <head> tag
+          html = html.replace('<head>', f'<head>\n    {company_script}')
+
+          # Update title
+          html = html.replace('<title>SuiteAI</title>', f'<title>SuiteAI — {company_name}</title>')
+
+          # Add theme-color meta
+          html = html.replace('<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
+              f'<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="{company_color}" />')
+
+          with open(f'dist/{company_id}/index.html', 'w') as f:
+              f.write(html)
+
+          print(f"Generated dist/{company_id}/index.html for {company_name}")
+          PYEOF
+          done
+
+      - name: Copy support files
+        run: |
+          cp 404.html dist/404.html 2>/dev/null || true
+          cp .nojekyll dist/.nojekyll 2>/dev/null || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
