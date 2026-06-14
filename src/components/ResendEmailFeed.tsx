@@ -67,8 +67,7 @@ export default function ResendEmailFeed({ limit = 10, showSync = true }: ResendE
   // Load emails from local SQLite
   const loadEmails = () => {
     if (!dbReady) return;
-    const { getEmailActivity } = // require('@/db/queries');
-    const rows = getEmailActivity(companyId, limit);
+    const rows = queries.getEmailActivity(companyId, limit);
     setEmails(rows);
   };
 
