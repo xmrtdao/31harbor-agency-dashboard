@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDashboardStore } from '@/store/dashboardStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -316,13 +317,14 @@ function KpiCard({ caption, metric, trend, trendColor, accentColor, subContent, 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Pipeline() {
-  const { activeCompany } = useDashboardStore();
-  const isLocked = activeCompany !== 'all';
-  const companyFilteredPipeline = isLocked ? pipelineLeads.filter((l) => l.companyId === activeCompany) : pipelineLeads;
-  const companyFilteredApprovals = isLocked ? approvalsList.filter((a) => a.companyId === activeCompany) : approvalsList;
   const [selectedStage, setSelectedStage] = useState<StageConfig | null>(null);
   const [pipelineRunning, setPipelineRunning] = useState(true);
   const [approvalsList, setApprovalsList] = useState(approvals);
+
+  // Company-locked filtering
+  const isLocked = activeCompany !== 'all';
+  const companyFilteredPipeline = isLocked ? pipelineLeads.filter((l: any) => l.companyId === activeCompany) : pipelineLeads;
+  const companyFilteredApprovals = isLocked ? approvalsList.filter((a: any) => a.companyId === activeCompany) : approvalsList;
   const [chartTab, setChartTab] = useState('Volume');
   const [pipelineFilter, setPipelineFilter] = useState('All Pipelines');
 
