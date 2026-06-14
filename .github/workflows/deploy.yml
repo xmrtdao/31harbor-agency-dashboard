@@ -35,51 +35,41 @@ jobs:
 
       - name: Generate company entry files
         run: |
-          # Company configurations
-          declare -A COMPANIES=(
-            ["harbor"]='{"id":"harbor","name":"31 Harbor","color":"#0A84FF"}'
-            ["party"]='{"id":"party","name":"Party Favor Photo","color":"#F5A623"}'
-            ["xmrt"]='{"id":"xmrt","name":"XMRT DAO","color":"#7B61FF"}'
-          )
+          mkdir -p dist/harbor dist/party dist/xmrt
 
-          for key in "${!COMPANIES[@]}"; do
-            config="${COMPANIES[$key]}"
-            company_id=$(echo "$config" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
-            company_name=$(echo "$config" | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])")
-            company_color=$(echo "$config" | python3 -c "import sys,json; print(json.load(sys.stdin)['color'])")
+          python3 << 'PYEOF'
+          import os
 
-            mkdir -p "dist/$company_id"
-
-            # Read the built index.html and inject company config
-            python3 << PYEOF
-          import re
+          companies = [
+              ("harbor", "31 Harbor", "#0A84FF"),
+              ("party", "Party Favor Photo", "#F5A623"),
+              ("xmrt", "XMRT DAO", "#7B61FF"),
+          ]
 
           with open('dist/index.html', 'r') as f:
-              html = f.read()
+              base_html = f.read()
 
-          # Inject company config after <head>
-          company_script = f'''<script>
-            window.SUITEAI_COMPANY = "{company_id}";
-            window.SUITEAI_COMPANY_NAME = "{company_name}";
-            window.SUITEAI_COMPANY_COLOR = "{company_color}";
-          </script>'''
+          for company_id, company_name, company_color in companies:
+              html = base_html
 
-          # Insert after <head> tag
-          html = html.replace('<head>', f'<head>\n    {company_script}')
+              company_script = f'''<script>
+      window.SUITEAI_COMPANY = "{company_id}";
+      window.SUITEAI_COMPANY_NAME = "{company_name}";
+      window.SUITEAI_COMPANY_COLOR = "{company_color}";
+    </script>'''
 
-          # Update title
-          html = html.replace('<title>SuiteAI</title>', f'<title>SuiteAI — {company_name}</title>')
+              html = html.replace('<head>', f'<head>\n    {company_script}')
+              html = html.replace('<title>SuiteAI</title>', f'<title>SuiteAI — {company_name}</title>')
+              html = html.replace(
+                  '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
+                  f'<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="{company_color}" />'
+              )
 
-          # Add theme-color meta
-          html = html.replace('<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-              f'<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="{company_color}" />')
+              with open(f'dist/{company_id}/index.html', 'w') as f:
+                  f.write(html)
 
-          with open(f'dist/{company_id}/index.html', 'w') as f:
-              f.write(html)
-
-          print(f"Generated dist/{company_id}/index.html for {company_name}")
+              print(f"Generated dist/{company_id}/index.html for {company_name}")
           PYEOF
-          done
 
       - name: Copy support files
         run: |
