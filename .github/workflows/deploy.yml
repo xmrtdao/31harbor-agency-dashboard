@@ -34,34 +34,30 @@ jobs:
         run: npm run build
 
       - name: Copy sql.js WASM to dist
-        run: cp node_modules/sql.js/dist/sql-wasm.wasm dist/sql-wasm.wasm
+        run: |
+          cp node_modules/sql.js/dist/sql-wasm-browser.wasm dist/sql-wasm-browser.wasm
+          ls -la dist/*.wasm
 
       - name: Generate company entry files
         run: |
           mkdir -p dist/harbor dist/party dist/xmrt
 
-          # Harbor
-          sed \
-            -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; 31 Harbor</title>|' \
-            -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#0A84FF" />|' \
-            -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "harbor"; window.SUITEAI_COMPANY_NAME = "31 Harbor"; window.SUITEAI_COMPANY_COLOR = "#0A84FF";</script>|' \
-            dist/index.html > dist/harbor/index.html
+          sed -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; 31 Harbor</title>|' \
+              -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#0A84FF" />|' \
+              -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "harbor"; window.SUITEAI_COMPANY_NAME = "31 Harbor"; window.SUITEAI_COMPANY_COLOR = "#0A84FF";</script>|' \
+              dist/index.html > dist/harbor/index.html
 
-          # Party
-          sed \
-            -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; Party Favor Photo</title>|' \
-            -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#F5A623" />|' \
-            -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "party"; window.SUITEAI_COMPANY_NAME = "Party Favor Photo"; window.SUITEAI_COMPANY_COLOR = "#F5A623";</script>|' \
-            dist/index.html > dist/party/index.html
+          sed -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; Party Favor Photo</title>|' \
+              -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#F5A623" />|' \
+              -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "party"; window.SUITEAI_COMPANY_NAME = "Party Favor Photo"; window.SUITEAI_COMPANY_COLOR = "#F5A623";</script>|' \
+              dist/index.html > dist/party/index.html
 
-          # XMRT
-          sed \
-            -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; XMRT DAO</title>|' \
-            -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#7B61FF" />|' \
-            -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "xmrt"; window.SUITEAI_COMPANY_NAME = "XMRT DAO"; window.SUITEAI_COMPANY_COLOR = "#7B61FF";</script>|' \
-            dist/index.html > dist/xmrt/index.html
+          sed -e 's|<title>SuiteAI</title>|<title>SuiteAI \&mdash; XMRT DAO</title>|' \
+              -e 's|<meta name="viewport" content="width=device-width, initial-scale=1.0" />|<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="#7B61FF" />|' \
+              -e 's|<head>|<head>\n    <script>window.SUITEAI_COMPANY = "xmrt"; window.SUITEAI_COMPANY_NAME = "XMRT DAO"; window.SUITEAI_COMPANY_COLOR = "#7B61FF";</script>|' \
+              dist/index.html > dist/xmrt/index.html
 
-          echo "Generated company entry files:"
+          echo "Generated company entry files"
           ls -la dist/harbor/index.html dist/party/index.html dist/xmrt/index.html
 
       - name: Copy support files
