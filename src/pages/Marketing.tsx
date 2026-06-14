@@ -185,7 +185,7 @@ function CampaignsTab({ campaigns, activeCompany }: { campaigns: Campaign[]; act
     <motion.div variants={staggerContainer80} initial="hidden" animate="visible" className="space-y-6">
       {/* Campaign Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {cCampaigns.map((c) => {
+        {campaigns.map((c) => {
           const comp = companyMap[c.company || ''] || { name: 'Unknown', color: '#8B95A5' };
           const isPaused = activeCards[String(c.id)] || c.status === 'Paused';
           const budgetUsed = c.budget > 0 ? Math.round((c.spend / c.budget) * 100) : 0;
@@ -263,7 +263,7 @@ function CampaignsTab({ campaigns, activeCompany }: { campaigns: Campaign[]; act
       <motion.div variants={fadeUp} transition={cardTransition} className="bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden">
         <div className="px-5 py-4 border-b border-border-subtle flex items-center gap-3">
           <h3 className="text-[16px] font-semibold text-text-primary">All Campaigns</h3>
-          <span className="text-[11px] text-text-secondary bg-bg-hover px-2 py-0.5 rounded-full">{cCampaigns.length} campaigns</span>
+          <span className="text-[11px] text-text-secondary bg-bg-hover px-2 py-0.5 rounded-full">{campaigns.length} campaigns</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
@@ -275,7 +275,7 @@ function CampaignsTab({ campaigns, activeCompany }: { campaigns: Campaign[]; act
               </tr>
             </thead>
             <tbody>
-              {cCampaigns.map((c, i) => {
+              {campaigns.map((c, i) => {
                 const budgetUsed = c.budget > 0 ? Math.round((c.spend / c.budget) * 100) : 0;
                 const roas = c.roi > 0 ? c.roi : (c.spend > 0 ? c.revenue / c.spend : 0);
                 const platforms = c.platform ? c.platform.split(',').map((p: string) => p.trim()) : [];
@@ -908,12 +908,6 @@ function CrossSellTab({ leads, activeCompany }: { leads: any[]; activeCompany: s
 /* ─── Main Marketing Page ─────────────────────────────────────────────────── */
 
 export default function Marketing() {
-  const { activeCompany } = useDashboardStore();
-  const isLocked = activeCompany !== 'all';
-  const cCampaigns = isLocked ? campaigns.filter((c: any) => c.companyId === activeCompany) : campaigns;
-  const cQueue = isLocked ? contentQueue.filter((q: any) => q.companyId === activeCompany) : contentQueue;
-  const cPerf = isLocked ? platformPerformance.filter((p: any) => p.companyId === activeCompany) : platformPerformance;
-  const cCross = isLocked ? crossSellOpportunities.filter((o: any) => o.sourceCompany === activeCompany || o.targetCompany === activeCompany) : crossSellOpportunities;
   const [activeTab, setActiveTab] = useState('campaigns');
   const store = useDashboardStore();
   const { activeCompany, leads, campaigns } = store;
