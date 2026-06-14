@@ -1,5 +1,4 @@
-// Generate company-specific entry pages for GitHub Pages
-const fs = require("fs");
+import fs from "fs";
 const companies = [
   ["harbor", "31 Harbor", "#0A84FF"],
   ["party", "Party Favor Photo", "#F5A623"],
