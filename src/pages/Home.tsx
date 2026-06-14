@@ -12,6 +12,7 @@ import {
 import Layout from '@/components/Layout';
 import OllamaStatus from '@/components/OllamaStatus';
 import MuAPIStatus from '@/components/MuAPIStatus';
+import ResendEmailFeed from '@/components/ResendEmailFeed';
 import { useDashboardStore } from '@/store/dashboardStore';
 import {
   dailyRevenueData, companyRevenueBreakdown, sparklineDataTotalLeads,
@@ -593,6 +594,11 @@ export default function Home() {
               Manage Campaigns →
             </a>
           </motion.div>
+        </div>
+
+        {/* ─── Section 4.5: Email Activity Widget ──────────────────────────── */}
+        <div className="mb-4">
+          <ResendEmailFeed limit={5} showSync={true} />
         </div>
 
         {/* ─── Section 5: Recent Leads Table ────────────────────────────────── */}
