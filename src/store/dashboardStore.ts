@@ -111,7 +111,7 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   init: async () => {
     await initDB();
     const lockedCompany = typeof window !== 'undefined' ? window.SUITEAI_COMPANY : undefined;
-    const activeCompany = lockedCompany || 'all';
+    const activeCompany = (lockedCompany as 'harbor' | 'party' | 'xmrt') || 'all';
     set({ dbReady: true, activeCompany, ...syncFromDB(activeCompany) });
   },
 
