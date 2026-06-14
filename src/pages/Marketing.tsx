@@ -276,7 +276,6 @@ function CampaignsTab() {
     <motion.div variants={staggerContainer80} initial="hidden" animate="visible" className="space-y-6">
       {/* Campaign Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {companyFilteredCampaigns.map((c) => {
           const comp = companyMap[c.companyId];
           const isPaused = activeCards[c.id] || c.status === 'Paused';
           return (
@@ -363,7 +362,6 @@ function CampaignsTab() {
               </tr>
             </thead>
             <tbody>
-              {companyFilteredCampaigns.map((c, i) => (
                 <motion.tr
                   key={c.id}
                   initial={{ opacity: 0, y: 8 }}
@@ -600,7 +598,7 @@ function PerformanceTab() {
               </tr>
             </thead>
             <tbody>
-              {platformPerformance.map((p, i) => {
+              {companyFilteredPerformance.map((p, i) => {
                 const ctrColor = p.ctr >= 2 ? 'text-success' : p.ctr >= 1 ? 'text-warning' : 'text-danger';
                 return (
                   <motion.tr
@@ -636,7 +634,7 @@ function CrossSellTab() {
     <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
       {/* AI Recommendations Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {crossSellOpportunities.map((opp, i) => {
+        {companyFilteredCrossSell.map((opp, i) => {
           const source = companyMap[opp.sourceCompany];
           return (
             <motion.div
@@ -766,10 +764,10 @@ function CrossSellTab() {
 export default function Marketing() {
   const { activeCompany } = useDashboardStore();
   const isLocked = activeCompany !== 'all';
-  const companyFilteredCampaigns = isLocked ? campaigns.filter((c) => c.companyId === activeCompany) : campaigns;
-  const companyFilteredQueue = isLocked ? contentQueue.filter((q) => q.companyId === activeCompany) : contentQueue;
-  const companyFilteredPerformance = isLocked ? performanceData.filter((p) => p.companyId === activeCompany) : performanceData;
-  const companyFilteredCrossSell = isLocked ? crossSellOpps.filter((o) => o.sourceCompany === activeCompany || o.targetCompany === activeCompany) : crossSellOpps;
+  const companyFilteredCampaigns = isLocked ? campaigns.filter((c: any) => c.companyId === activeCompany) : campaigns;
+  const companyFilteredQueue = isLocked ? contentQueue.filter((q: any) => q.companyId === activeCompany) : contentQueue;
+  const companyFilteredPerformance = isLocked ? platformPerformance.filter((p: any) => p.companyId === activeCompany) : platformPerformance;
+  const companyFilteredCrossSell = isLocked ? crossSellOpportunities.filter((o: any) => o.sourceCompany === activeCompany || o.targetCompany === activeCompany) : crossSellOpportunities;
   const [activeTab, setActiveTab] = useState('campaigns');
 
   return (
