@@ -200,13 +200,9 @@ export default function Home() {
   const aiDecisionsDisplay = useCountUp(1847, 1200, '');
 
   // Filtered data based on active company
-  const filteredLeads = activeCompany === 'all'
-    ? leads.slice(0, 10)
-    : leads.filter((l) => l.companyId === activeCompany).slice(0, 10);
-
-  const filteredActivity = activeCompany === 'all'
-    ? activityFeed.slice(0, 20)
-    : activityFeed.filter((a) => a.companyId === activeCompany).slice(0, 20);
+  // Data is already filtered by store when activeCompany is locked
+  const filteredLeads = leads.slice(0, 10);
+  const filteredActivity = activityFeed.slice(0, 20);
 
   const totalRevenue = companyRevenueBreakdown.reduce((s, c) => s + c.value, 0);
 
@@ -233,7 +229,7 @@ export default function Home() {
           <div>
             <h1 className="text-[28px] font-bold text-text-primary tracking-tight">SuiteAI Command Center</h1>
             <p className="text-[14px] text-text-secondary mt-0.5">
-              Unified intelligence for 31 Harbor · Party Favor Photo · XMRT DAO
+              {activeCompany === 'all' ? "Unified intelligence for 31 Harbor · Party Favor Photo · XMRT DAO" : activeCompany === 'harbor' ? "31 Harbor Real Estate Intelligence" : activeCompany === 'party' ? "Party Favor Photo Event Marketing" : "XMRT DAO Blockchain Operations"}
             </p>
             <div className="flex items-center gap-2 mt-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-dot" />
