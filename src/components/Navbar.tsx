@@ -62,7 +62,7 @@ export default function Navbar() {
               exit={{ opacity: 0 }}
               className="text-[18px] font-bold text-text-primary tracking-tight whitespace-nowrap"
             >
-              AgenticOS
+              SuiteAI
             </motion.span>
           )}
         </div>
