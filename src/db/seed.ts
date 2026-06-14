@@ -77,22 +77,22 @@ export function seedData(): void {
     ['Smile Station Inc', 'info@smilestation.com', '555-0217', 'Organic', 'grand opening event', 'party', 59, 'Pending', 'medium', 'Retail store grand opening', 'scraping', 900, '2025-06-03T08:00:00Z', '2025-06-03T08:00:00Z'],
 
     // XMRT DAO leads (16)
-    ['CryptoVentures LLC', 'contact@cryptov.com', '555-0301', 'Referral', 'token partnership inquiry', 'xmrt', 64, 'Pending', 'medium', 'Token integration partnership discussion', 'scraping', 50000, '2025-06-10T06:30:00Z', '2025-06-10T06:30:00Z'],
-    ['DeFi Labs', 'partners@defilabs.io', '555-0302', 'Paid', 'smart contract audit', 'xmrt', 95, 'Contracted', 'high', 'Full smart contract audit for lending protocol', 'contract', 125000, '2025-06-10T04:00:00Z', '2025-06-10T04:00:00Z'],
-    ['Blockchain Summit Org', 'team@bcsummit.org', '555-0303', 'Paid', 'sponsorship inquiry', 'xmrt', 88, 'Routed', 'high', 'Tier-1 sponsorship for blockchain summit', 'qualify', 75000, '2025-06-09T15:00:00Z', '2025-06-09T15:00:00Z'],
-    ['Web3 Collective', 'hello@web3coll.org', '555-0304', 'Organic', 'consulting inquiry', 'xmrt', 59, 'Low Match', 'medium', 'Vague consulting inquiry, unclear scope', 'scraping', 5000, '2025-06-09T11:00:00Z', '2025-06-09T11:00:00Z'],
-    ['TokenForge Inc', 'dev@tokenforge.io', '555-0305', 'Referral', 'NFT marketplace dev', 'xmrt', 73, 'Qualified', 'high', 'NFT marketplace development project', 'qualify', 180000, '2025-06-09T06:00:00Z', '2025-06-09T06:00:00Z'],
-    ['DAO Masters', 'info@daomasters.xyz', '555-0306', 'Paid', 'governance tooling', 'xmrt', 84, 'Qualified', 'high', 'DAO governance platform integration', 'qualify', 95000, '2025-06-08T17:00:00Z', '2025-06-08T17:00:00Z'],
-    ['ChainSec Solutions', 'security@chainsec.io', '555-0307', 'Organic', 'security audit', 'xmrt', 97, 'Contracted', 'high', 'Multi-contract security audit engagement', 'contract', 220000, '2025-06-08T12:30:00Z', '2025-06-08T12:30:00Z'],
-    ['MetaVerse Builders', 'contact@mvbuilders.com', '555-0308', 'Referral', 'metaverse integration', 'xmrt', 69, 'Pending', 'medium', 'Metaverse land integration project', 'scraping', 45000, '2025-06-07T14:00:00Z', '2025-06-07T14:00:00Z'],
-    ['Yield Protocol', 'partners@yieldproto.io', '555-0309', 'Paid', 'liquidity partnership', 'xmrt', 80, 'Qualified', 'high', 'Liquidity mining partnership proposal', 'qualify', 80000, '2025-06-07T08:00:00Z', '2025-06-07T08:00:00Z'],
-    ['BlockVentures Capital', 'deal@blockvc.com', '555-0310', 'Organic', 'investment inquiry', 'xmrt', 91, 'Contracted', 'high', 'Series A investment discussion', 'contract', 500000, '2025-06-06T16:00:00Z', '2025-06-06T16:00:00Z'],
-    ['Crypto Academy', 'learn@cryptoacademy.com', '555-0311', 'Referral', 'education partnership', 'xmrt', 55, 'Low Match', 'low', 'Educational content partnership, low revenue', 'scraping', 3000, '2025-06-06T10:00:00Z', '2025-06-06T10:00:00Z'],
-    ['NFT Gallery DAO', 'curator@nftgallery.io', '555-0312', 'Paid', 'NFT curation platform', 'xmrt', 78, 'Qualified', 'high', 'NFT curation and marketplace platform', 'qualify', 65000, '2025-06-05T15:30:00Z', '2025-06-05T15:30:00Z'],
-    ['Staking Hub', 'info@stakinghub.io', '555-0313', 'Organic', 'staking integration', 'xmrt', 83, 'Routed', 'high', 'Cross-chain staking integration', 'qualify', 40000, '2025-06-05T09:00:00Z', '2025-06-05T09:00:00Z'],
-    ['Layer2 Solutions', 'dev@layer2.io', '555-0314', 'Referral', 'L2 scaling solution', 'xmrt', 87, 'Quoted', 'high', 'Layer 2 scaling integration for mainnet', 'quote', 150000, '2025-06-04T14:00:00Z', '2025-06-04T14:00:00Z'],
-    ['CryptoTax Pro', 'api@cryptotaxpro.com', '555-0315', 'Paid', 'tax API integration', 'xmrt', 66, 'Pending', 'medium', 'Tax reporting API integration', 'scraping', 18000, '2025-06-04T08:00:00Z', '2025-06-04T08:00:00Z'],
-    ['Decentral Games', 'partners@dgames.io', '555-0316', 'Organic', 'gaming partnership', 'xmrt', 72, 'Qualified', 'medium', 'GameFi platform integration', 'qualify', 60000, '2025-06-03T13:00:00Z', '2025-06-03T13:00:00Z'],
+    ['CryptoVentures LLC', 'contact@cryptov.com', '555-0301', 'Organic', 'DAO governance tooling', 'xmrt', 85, 'Routed', 'high', 'Enterprise DAO tooling inquiry — 200+ members', 'qualify', 75000, '2025-06-10T09:00:00Z', '2025-06-10T09:00:00Z'],
+    ['DeFi Labs', 'hello@defilabs.io', '555-0302', 'Referral', 'smart contract audit', 'xmrt', 92, 'Qualified', 'high', 'Referred by existing partner — urgent timeline', 'qualify', 45000, '2025-06-10T06:30:00Z', '2025-06-10T06:30:00Z'],
+    ['BlockBuilders Inc', 'admin@blockbuilders.io', '555-0303', 'Organic', 'API integration', 'xmrt', 67, 'Pending', 'medium', 'Multi-chain API integration request', 'scraping', 28000, '2025-06-09T15:00:00Z', '2025-06-09T15:00:00Z'],
+    ['TokenForge', 'support@tokenforge.dev', '555-0304', 'Paid', 'token launch platform', 'xmrt', 78, 'Quoted', 'high', 'Token launchpad integration — custom requirements', 'quote', 120000, '2025-06-09T11:00:00Z', '2025-06-09T11:00:00Z'],
+    ['ChainGuardians', 'team@chainguardians.io', '555-0305', 'Referral', 'security audit', 'xmrt', 88, 'Contracted', 'high', 'Comprehensive security audit — 3 month engagement', 'contract', 95000, '2025-06-09T08:00:00Z', '2025-06-09T08:00:00Z'],
+    ['Web3 Creators', 'hello@web3creators.co', '555-0306', 'Organic', 'education platform', 'xmrt', 54, 'Low Match', 'medium', 'Online course platform — budget TBD', 'scraping', 15000, '2025-06-08T17:00:00Z', '2025-06-08T17:00:00Z'],
+    ['MetaLaunch DAO', 'launch@metalaunch.dao', '555-0307', 'Paid', 'launchpad partnership', 'xmrt', 81, 'Routed', 'high', 'Cross-DAO launchpad partnership proposal', 'qualify', 200000, '2025-06-08T13:00:00Z', '2025-06-08T13:00:00Z'],
+    ['NFT Collective', 'creators@nftcollective.io', '555-0308', 'Organic', 'marketplace integration', 'xmrt', 73, 'Pending', 'medium', 'NFT marketplace integration — 10k collection', 'scraping', 55000, '2025-06-08T07:00:00Z', '2025-06-08T07:00:00Z'],
+    ['Staking Solutions', 'info@stakingsol.io', '555-0309', 'Referral', 'staking protocol', 'xmrt', 90, 'Qualified', 'high', 'Liquid staking protocol — $50M TVL target', 'qualify', 180000, '2025-06-07T16:00:00Z', '2025-06-07T16:00:00Z'],
+    ['DAO Governance Institute', 'research@daogov.io', '555-0310', 'Paid', 'governance research', 'xmrt', 62, 'Pending', 'medium', 'Governance framework research project', 'scraping', 35000, '2025-06-07T11:00:00Z', '2025-06-07T11:00:00Z'],
+    ['CryptoTax Pro', 'support@cryptotax.pro', '555-0311', 'Organic', 'tax integration', 'xmrt', 76, 'Routed', 'high', 'DeFi tax reporting integration — API access needed', 'qualify', 42000, '2025-06-06T15:00:00Z', '2025-06-06T15:00:00Z'],
+    ['Bridge Protocol', 'dev@bridgeproto.io', '555-0312', 'Referral', 'bridge integration', 'xmrt', 83, 'Qualified', 'high', 'Cross-chain bridge — ETH/SOL integration', 'qualify', 135000, '2025-06-06T10:00:00Z', '2025-06-06T10:00:00Z'],
+    ['ZeroKnowledge Labs', 'hello@zklabs.io', '555-0313', 'Paid', 'ZK proof system', 'xmrt', 95, 'Contracted', 'high', 'ZK-rollup implementation — 6 month project', 'contract', 320000, '2025-06-05T14:00:00Z', '2025-06-05T14:00:00Z'],
+    ['GameFi Studios', 'team@gamefi.gg', '555-0314', 'Organic', 'gamefi platform', 'xmrt', 69, 'Pending', 'medium', 'GameFi platform — tokenomics consultation', 'scraping', 68000, '2025-06-05T08:00:00Z', '2025-06-05T08:00:00Z'],
+    ['Solana Ventures', 'deals@solventures.io', '555-0315', 'Referral', 'ecosystem grant', 'xmrt', 87, 'Contracted', 'high', 'Ecosystem grant — DeFi infrastructure', 'contract', 250000, '2025-06-04T12:00:00Z', '2025-06-04T12:00:00Z'],
+    ['Oracle Network', 'dev@oraclenet.io', '555-0316', 'Paid', 'oracle integration', 'xmrt', 79, 'Pending', 'medium', 'Price oracle integration — 50+ trading pairs', 'scraping', 89000, '2025-06-03T10:00:00Z', '2025-06-03T10:00:00Z'],
   ];
 
   const insertLead = database.prepare(
@@ -103,34 +103,18 @@ export function seedData(): void {
   }
   insertLead.free();
 
-  // ─── Pipeline Stages ───────────────────────────────────────────────────
-  const stagesData = [
-    ['scraping', 'SCRAPING', 0, 0, 0, 48],
-    ['qualify', 'QUALIFY', 1, 0, 1, 24],
-    ['quote', 'QUOTE', 2, 1, 0, 72],
-    ['contract', 'CONTRACT', 3, 1, 0, 168],
-    ['paid', 'PAID', 4, 0, 1, 48],
-    ['fulfilled', 'FULFILLED', 5, 0, 1, 0],
-  ];
-
-  const insertStage = database.prepare(
-    `INSERT INTO pipeline_stages (id, name, order_index, requires_approval, auto_advance, timeout_hours) VALUES (?, ?, ?, ?, ?, ?)`
-  );
-  for (const s of stagesData) {
-    insertStage.run(s);
-  }
-  insertStage.free();
-
   // ─── Campaigns ─────────────────────────────────────────────────────────
   const campaignsData = [
-    ['Wedding Season Boost', 'party', 'Active', 5000, 4200, 16800, 4.0, 125000, 3400, 42, 'Instagram', '2025-05-01', '2025-08-31'],
-    ['Harbor Waterfront', 'harbor', 'Active', 8000, 6800, 20400, 3.0, 98000, 2100, 28, 'Google Ads', '2025-04-15', '2025-07-15'],
-    ['XMRT Token Launch', 'xmrt', 'Pending', 15000, 3500, 0, 0, 0, 0, 0, 'Twitter/X', '2025-07-01', '2025-09-30'],
-    ['Spring Photo Special', 'party', 'Active', 3500, 2800, 11200, 4.0, 87000, 1900, 35, 'Facebook', '2025-03-01', '2025-06-30'],
-    ['Luxury Condos Campaign', 'harbor', 'Active', 7000, 5500, 17600, 3.2, 76000, 1800, 22, 'Google Ads', '2025-05-01', '2025-08-15'],
-    ['DeFi Integration Push', 'xmrt', 'Active', 6000, 4200, 12600, 3.0, 54000, 1500, 18, 'LinkedIn', '2025-04-01', '2025-07-31'],
-    ['Beach House Rentals', 'harbor', 'Pending', 3000, 1800, 0, 0, 0, 0, 0, 'Airbnb Ads', '2025-07-01', '2025-09-15'],
-    ['Holiday Event Booking', 'party', 'Draft', 4000, 0, 0, 0, 0, 0, 0, 'Instagram', '2025-10-01', '2025-12-31'],
+    ['Wedding Season Boost', 'party', 'active', 15000, 4200, 18500, 3.4, 45000, 3200, 145, 'meta', '2025-05-01', '2025-08-31'],
+    ['Luxury Condo Launch', 'harbor', 'active', 25000, 8900, 42000, 4.7, 28000, 1800, 92, 'google', '2025-04-15', '2025-07-15'],
+    ['DAO Governance Push', 'xmrt', 'active', 8000, 2100, 9500, 4.5, 12000, 890, 67, 'twitter', '2025-05-15', '2025-06-30'],
+    ['Photo Booth Retargeting', 'party', 'active', 5000, 1500, 6200, 4.1, 18000, 2100, 178, 'meta', '2025-06-01', '2025-06-30'],
+    ['Waterfront SEO', 'harbor', 'active', 3000, 800, 4500, 5.6, 8000, 340, 28, 'google', '2025-03-01', '2025-09-01'],
+    ['DeFi Integration', 'xmrt', 'paused', 12000, 5400, 18000, 3.3, 9000, 670, 45, 'twitter', '2025-05-01', '2025-06-15'],
+    ['Holiday Special', 'party', 'draft', 8000, 0, 0, 0, 0, 0, 0, 'meta', '2025-11-01', '2026-01-15'],
+    ['Commercial Leads', 'harbor', 'active', 6000, 1200, 8500, 7.1, 6000, 180, 15, 'linkedin', '2025-06-01', '2025-08-31'],
+    ['ZK Summit', 'xmrt', 'active', 5000, 1800, 7200, 4.0, 5500, 420, 34, 'twitter', '2025-06-01', '2025-07-15'],
+    ['Bridal Fair Follow-up', 'party', 'completed', 4000, 3800, 11200, 2.9, 22000, 1800, 156, 'meta', '2025-04-01', '2025-05-31'],
   ];
 
   const insertCampaign = database.prepare(
@@ -141,28 +125,64 @@ export function seedData(): void {
   }
   insertCampaign.free();
 
+  // ─── Pipeline Stages ───────────────────────────────────────────────────
+  const pipelineStagesData = [
+    ['scraping', 'Scraping', 1, 0, 0, 24],
+    ['qualify', 'Qualify', 2, 0, 1, 48],
+    ['quote', 'Quote', 3, 1, 0, 72],
+    ['contract', 'Contract', 4, 1, 0, 168],
+    ['paid', 'Paid', 5, 0, 1, 24],
+  ];
+
+  const insertStage = database.prepare(
+    `INSERT INTO pipeline_stages (id, name, order_index, requires_approval, auto_advance, timeout_hours) VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  for (const s of pipelineStagesData) {
+    insertStage.run(s);
+  }
+  insertStage.free();
+
   // ─── Activity Log ──────────────────────────────────────────────────────
   const activityData = [
-    ['lead', 'harbor', 'New lead routed to 31 Harbor — Sarah M. interested in waterfront property', '{"lead_id": 1, "score": 87}', '2m ago'],
-    ['content', 'party', 'AI generated 3 Instagram posts for Party Favor Photo', '{"platform": "Instagram", "posts": 3}', '5m ago'],
-    ['pipeline', 'xmrt', 'Pipeline stage completed: Contract signed — XMRT DAO', '{"stage": "contract", "company": "xmrt"}', '8m ago'],
-    ['system', 'harbor', 'Lead classifier retrained — accuracy 94.2%', '{"accuracy": 94.2}', '12m ago'],
-    ['campaign', 'party', 'Campaign ROAS hit 4.1x — wedding season promo', '{"roas": 4.1, "campaign": "Wedding Season Boost"}', '18m ago'],
-    ['approval', 'xmrt', 'Human approval needed: Quote $12,500 — XMRT DAO', '{"amount": 12500, "type": "quote"}', '24m ago'],
-    ['automation', 'harbor', 'Automated follow-up sent — 31 Harbor lead #2847', '{"lead_id": 1}', '31m ago'],
-    ['lead', 'party', 'New lead: James & Linda Chen — wedding photo booth inquiry', '{"lead_id": 2, "score": 92}', '38m ago'],
-    ['analytics', 'xmrt', 'Weekly analytics report generated for XMRT DAO', '{"report_type": "weekly"}', '45m ago'],
-    ['pipeline', 'harbor', 'Pipeline stage completed: Quote accepted — Harbor View', '{"stage": "quote", "company": "harbor"}', '52m ago'],
-    ['campaign', 'party', 'Ad spend optimized: -12% CPC improvement', '{"change": -12, "metric": "CPC"}', '1h ago'],
-    ['automation', 'xmrt', 'Smart contract deployed for DeFi Labs partnership', '{"contract": "DeFi Labs"}', '1h ago'],
-    ['lead', 'harbor', 'Lead score updated: Marina Residences +8 points', '{"lead_id": 5, "change": 8}', '1h ago'],
-    ['content', 'party', 'AI drafted email sequence for Birthday Bash Events', '{"lead_id": 12, "emails": 3}', '2h ago'],
-    ['system', 'xmrt', 'Routing rule updated: crypto leads now score +15%', '{"change": "+15%", "category": "crypto"}', '2h ago'],
-    ['approval', 'harbor', 'Low match alert: Roberto Alvarado — manual review suggested', '{"lead_id": 3, "score": 45}', '2h ago'],
-    ['content', 'party', 'Content published: 2 Instagram Reels, 1 TikTok', '{"reels": 2, "tiktoks": 1}', '3h ago'],
-    ['lead', 'xmrt', 'New lead: Blockchain Summit Org — sponsorship inquiry', '{"lead_id": 19, "score": 88}', '3h ago'],
-    ['analytics', 'harbor', 'Revenue target 68% complete — ahead of schedule', '{"progress": 68}', '4h ago'],
-    ['automation', 'party', 'Automated SMS campaign sent to 47 leads', '{"recipients": 47, "type": "SMS"}', '4h ago'],
+    ['lead', 'harbor', 'New lead: Sarah Mitchell scored 87 — waterfront property inquiry', '{\"lead_id\": 1, \"score\": 87}', '2m ago'],
+    ['lead', 'party', 'Lead routed: Emily\\'s Wedding Planning to Party Favor Photo', '{\"lead_id\": 18, \"target\": \"party\"}', '5m ago'],
+    ['automation', 'xmrt', 'AMA agent created draft proposal for CryptoVentures LLC', '{\"lead_id\": 34, \"agent\": \"AMA\"}', '8m ago'],
+    ['pipeline', 'harbor', 'Pipeline stage advanced: James & Linda Chen → Qualify', '{\"lead_id\": 2, \"stage\": \"qualify\"}', '12m ago'],
+    ['analytics', 'party', 'Campaign ROAS hit 4.1x — Wedding Season Boost', '{\"campaign\": \"Wedding Season Boost\", \"roas\": 4.1}', '15m ago'],
+    ['lead', 'xmrt', 'DeFi Labs lead score updated: 88 (+6)', '{\"lead_id\": 35, \"score\": 88}', '18m ago'],
+    ['system', 'harbor', 'DNS verification completed for 31harbor.com', '{\"domain\": \"31harbor.com\"}', '22m ago'],
+    ['content', 'party', 'AI generated 3 Instagram Reels for Birthday Bash Events', '{\"lead_id\": 19, \"reels\": 3}', '25m ago'],
+    ['approval', 'xmrt', 'Governance proposal #47 requires approval — $200K allocation', '{\"proposal\": 47, \"amount\": 200000}', '28m ago'],
+    ['lead', 'party', 'New lead: Grand Gala Planners — charity event scored 86', '{\"lead_id\": 30, \"score\": 86}', '30m ago'],
+    ['pipeline', 'xmrt', 'Smart contract deployment stage completed for ZeroKnowledge Labs', '{\"lead_id\": 48, \"stage\": \"contract\"}', '35m ago'],
+    ['analytics', 'harbor', 'Luxury Condo Launch campaign reach exceeded 25K impressions', '{\"campaign\": \"Luxury Condo Launch\", \"reach\": 25000}', '38m ago'],
+    ['automation', 'party', 'Follow-up email sequence sent to 12 pending leads', '{\"recipients\": 12, \"type\": \"follow_up\"}', '42m ago'],
+    ['lead', 'xmrt', 'Bridge Protocol inquiry — cross-chain integration scored 83', '{\"lead_id\": 45, \"score\": 83}', '45m ago'],
+    ['system', 'party', 'Lead classifier accuracy: 94.2% — model v2.4.1 active', '{\"accuracy\": 94.2, \"version\": \"2.4.1\"}', '48m ago'],
+    ['content', 'harbor', 'Property listing video generated for Marina Residences', '{\"lead_id\": 5, \"type\": \"video\"}', '50m ago'],
+    ['lead', 'harbor', 'New lead: Pacific Rim Capital — bulk purchase inquiry scored 96', '{\"lead_id\": 16, \"score\": 96}', '52m ago'],
+    ['pipeline', 'party', 'Quote approved: Wedding Planners R Us — $4,800 package', '{\"lead_id\": 21, \"value\": 4800}', '55m ago'],
+    ['analytics', 'xmrt', 'Weekly report: XMRT DAO pipeline value up 18%', '{\"change\": 18, \"metric\": \"pipeline_value\"}', '1h ago'],
+    ['automation', 'harbor', 'Auto-routing rule triggered: 3 leads → 31 Harbor', '{\"count\": 3, \"target\": \"harbor\"}', '1h ago'],
+    ['lead', 'party', 'SnapHappy Photobooth — graduation event scored 68', '{\"lead_id\": 20, \"score\": 68}', '1h ago'],
+    ['system', 'xmrt', 'New integration connected: Solana RPC node', '{\"integration\": \"solana_rpc\"}', '1h ago'],
+    ['approval', 'harbor', 'Quote approval required: Peninsula Developments — $2.5M', '{\"lead_id\": 9, \"value\": 2500000}', '1h ago'],
+    ['content', 'xmrt', 'AMA agent published thread: ZK-rollup benefits for enterprise', '{\"agent\": \"AMA\", \"platform\": \"twitter\"}', '1h ago'],
+    ['lead', 'xmrt', 'New lead: MetaLaunch DAO — partnership inquiry scored 81', '{\"lead_id\": 40, \"score\": 81}', '1h ago'],
+    ['pipeline', 'harbor', 'Contract signed: Coastal Realty Group — property management', '{\"lead_id\": 6, \"value\": 36000}', '2h ago'],
+    ['analytics', 'party', 'Photo Booth Retargeting campaign CTR: 11.7%', '{\"campaign\": \"Photo Booth Retargeting\", \"ctr\": 11.7}', '2h ago'],
+    ['automation', 'xmrt', 'Governance vote completed: Proposal #46 passed (87%)', '{\"proposal\": 46, \"result\": \"passed\"}', '2h ago'],
+    ['lead', 'harbor', 'Bayside Investors LLC — multi-property portfolio scored 88', '{\"lead_id\": 11, \"score\": 88}', '2h ago'],
+    ['system', 'party', 'Webhook configured: partyfavorphoto.com → SuiteAI', '{\"domain\": \"partyfavorphoto.com\"}', '2h ago'],
+    ['content', 'harbor', 'Blog post drafted: Top 10 Waterfront Investment Tips', '{\"type\": \"blog\", \"topic\": \"waterfront_investment\"}', '3h ago'],
+    ['lead', 'xmrt', 'CryptoTax Pro integration request — scored 76', '{\"lead_id\": 44, \"score\": 76}', '3h ago'],
+    ['pipeline', 'party', 'Lead qualification: Fiesta Moments Co — quinceañera package', '{\"lead_id\": 24, \"stage\": \"qualify\"}', '3h ago'],
+    ['analytics', 'xmrt', 'DAO Governance Push: 1,200 new community members', '{\"campaign\": \"DAO Governance Push\", \"members\": 1200}', '3h ago'],
+    ['automation', 'harbor', 'Email nurture sequence triggered: 5 new subscribers', '{\"count\": 5, \"type\": \"nurture\"}', '3h ago'],
+    ['lead', 'party', 'New lead: Pro Pix Events — school event scored 65', '{\"lead_id\": 33, \"score\": 65}', '4h ago'],
+    ['system', 'xmrt', 'Blockchain index sync completed: 99.8% uptime', '{\"uptime\": 99.8}', '4h ago'],
+    ['approval', 'party', 'Custom backdrop approval needed: Wedding Planners R Us', '{\"lead_id\": 21, \"type\": \"custom_backdrop\"}', '4h ago'],
+    ['content', 'xmrt', 'AMA agent created comparison guide: XMRT vs competitors', '{\"agent\": \"AMA\", \"type\": \"comparison\"}', '4h ago'],
   ];
 
   const insertActivity = database.prepare(
@@ -172,6 +192,33 @@ export function seedData(): void {
     insertActivity.run(a);
   }
   insertActivity.free();
+
+  // ─── Email Activity (Resend integration seed data) ─────────────────────
+  const emailActivityData = [
+    ['re_001_harbor', 'harbor', 'leads@31harbor.com', 'sarah@email.com', 'Welcome to 31 Harbor \u2014 Your Waterfront Property Inquiry', 'delivered', 1, 2, '2025-06-10T14:23:00Z', '2025-06-10T14:23:00Z'],
+    ['re_002_harbor', 'harbor', 'listings@31harbor.com', 'jlchen@events.com', 'New Luxury Listings \u2014 Marina Residences', 'opened', 0, 3, '2025-06-10T11:45:00Z', '2025-06-10T11:45:00Z'],
+    ['re_003_harbor', 'harbor', 'agent@31harbor.com', 'ralvarado@email.com', 'Follow-up: Property Viewing Scheduled', 'sent', 0, 0, '2025-06-09T16:30:00Z', '2025-06-09T16:30:00Z'],
+    ['re_004_harbor', 'harbor', 'listings@31harbor.com', 'sales@marinares.com', 'Commercial Lease Proposal \u2014 Harbor View Retail', 'clicked', 2, 1, '2025-06-09T09:15:00Z', '2025-06-09T09:15:00Z'],
+    ['re_005_harbor', 'harbor', 'leads@31harbor.com', 'info@baysideinv.com', 'Investment Portfolio Opportunities', 'delivered', 0, 1, '2025-06-08T13:00:00Z', '2025-06-08T13:00:00Z'],
+    ['re_006_party', 'party', 'bookings@partyfavorphoto.com', 'emily@ewp.com', 'Your Wedding Photo Booth Quote \u2014 Package C', 'opened', 1, 4, '2025-06-10T15:30:00Z', '2025-06-10T15:30:00Z'],
+    ['re_007_party', 'party', 'events@partyfavorphoto.com', 'hello@bbevents.com', 'Kids Party Package Availability Confirmed', 'delivered', 0, 1, '2025-06-10T08:00:00Z', '2025-06-10T08:00:00Z'],
+    ['re_008_party', 'party', 'bookings@partyfavorphoto.com', 'wp@wprus.com', 'Premium Wedding Package \u2014 Custom Backdrop Details', 'clicked', 1, 2, '2025-06-09T14:20:00Z', '2025-06-09T14:20:00Z'],
+    ['re_009_party', 'party', 'events@partyfavorphoto.com', 'book@photogenic.com', 'Corporate Event Booth \u2014 500+ Attendees', 'sent', 0, 0, '2025-06-08T10:45:00Z', '2025-06-08T10:45:00Z'],
+    ['re_010_party', 'party', 'bookings@partyfavorphoto.com', 'events@grandgala.com', 'Charity Gala Photo Booth Confirmation', 'delivered', 0, 1, '2025-06-07T18:00:00Z', '2025-06-07T18:00:00Z'],
+    ['re_011_xmrt', 'xmrt', 'contact@xmrt.io', 'contact@cryptov.com', 'XMRT DAO \u2014 Developer Grant Application Update', 'opened', 1, 3, '2025-06-10T12:00:00Z', '2025-06-10T12:00:00Z'],
+    ['re_012_xmrt', 'xmrt', 'dev@xmrt.io', 'admin@blockbuilders.io', 'API Access Credentials \u2014 XMRT Protocol v2.1', 'delivered', 0, 1, '2025-06-10T07:15:00Z', '2025-06-10T07:15:00Z'],
+    ['re_013_xmrt', 'xmrt', 'contact@xmrt.io', 'dao@governance.sol', 'Governance Proposal #47 \u2014 Voting Reminder', 'clicked', 2, 2, '2025-06-09T11:30:00Z', '2025-06-09T11:30:00Z'],
+    ['re_014_xmrt', 'xmrt', 'marketing@xmrt.io', 'partners@defitrading.io', 'Partnership Deck \u2014 XMRT DAO Ecosystem', 'sent', 0, 0, '2025-06-08T16:45:00Z', '2025-06-08T16:45:00Z'],
+    ['re_015_xmrt', 'xmrt', 'dev@xmrt.io', 'deploy@smartcontracts.dev', 'Smart Contract Audit Report \u2014 Complete', 'delivered', 1, 1, '2025-06-07T09:00:00Z', '2025-06-07T09:00:00Z'],
+  ];
+
+  const insertEmail = database.prepare(
+    `INSERT INTO email_activity (resend_id, company_id, email_from, email_to, subject, status, clicks, opens, sent_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  for (const e of emailActivityData) {
+    insertEmail.run(e);
+  }
+  insertEmail.free();
 
   // ─── Users ─────────────────────────────────────────────────────────────
   const usersData = [
