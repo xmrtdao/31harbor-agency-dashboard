@@ -27,12 +27,6 @@ import {
 } from 'recharts';
 import Layout from '@/components/Layout';
 import { useDashboardStore } from '@/store/dashboardStore';
-
-// Company-locked filter helper
-const useCompanyLock = () => {
-  const { activeCompany } = useDashboardStore();
-  return activeCompany;
-};
 import { companies } from '@/data/mockData';
 import type { Lead } from '@/data/mockData';
 
@@ -373,6 +367,9 @@ function LeadDetailDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }
 export default function LeadRouter() {
   const { activeCompany } = useDashboardStore();
   const isLocked = activeCompany !== 'all';
+  const cLeads = isLocked ? leadRows.filter((l: any) => l.companyId === activeCompany) : leadRows;
+  const cLog = isLocked ? routingLog.filter((e: any) => e.companyId === activeCompany) : routingLog;
+  const cStats = isLocked ? conversionData.filter((s: any) => s.companyId === activeCompany) : conversionData;
   const [activePeriod, setActivePeriod] = useState('Today');
   const [searchQuery, setSearchQuery] = useState('');
   const [companyFilter, setCompanyFilter] = useState('All Companies');
@@ -386,11 +383,7 @@ export default function LeadRouter() {
     setTimeout(() => setRefreshing(false), 600);
   };
 
-  const companyFilteredLeads = isLocked ? leadRows.filter((l) => l.companyId === activeCompany) : leadRows;
-  const companyFilteredLog = isLocked ? routingLog.filter((e) => e.companyId === activeCompany) : routingLog;
-  const companyFilteredStats = isLocked ? conversionData.filter((s) => s.companyId === activeCompany) : conversionStats;
-
-  const filteredLeads = companyFilteredLeads.filter((l) => {
+  const filteredLeads = cLeads.filter((l) => {
     if (searchQuery && !l.name.toLowerCase().includes(searchQuery.toLowerCase()) && !l.email.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (companyFilter !== 'All Companies') {
       const cid = companyFilter === '31 Harbor' ? 'harbor' : companyFilter === 'Party Favor Photo' ? 'party' : companyFilter === 'XMRT DAO' ? 'xmrt' : '';
@@ -577,7 +570,7 @@ export default function LeadRouter() {
             <div className="flex items-center justify-between p-5 border-b border-border-subtle">
               <div className="flex items-center gap-3">
                 <h3 className="text-[18px] font-semibold text-text-primary">Lead Queue</h3>
-                <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-bg-hover text-text-secondary">{companyFilteredLeads.length} total leads</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-bg-hover text-text-secondary">{filteredLeads.length} total leads</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -747,7 +740,7 @@ export default function LeadRouter() {
                 <p className="text-[12px] text-text-tertiary">Last 50 decisions</p>
               </div>
               <div className="space-y-0 max-h-[360px] overflow-y-auto">
-                {companyFilteredLog.map((entry, i) => {
+                {cLog.map((entry, i) => {
                   const company = getCompany(entry.companyId);
                   return (
                     <motion.div
@@ -787,7 +780,7 @@ export default function LeadRouter() {
             >
               <h3 className="text-[18px] font-semibold text-text-primary mb-4">Conversion by Company</h3>
               <div className="space-y-5">
-                {conversionData.map((cd, ci) => (
+                {cStats.map((cd, ci) => (
                   <motion.div
                     key={cd.companyId}
                     initial={{ opacity: 0 }}
