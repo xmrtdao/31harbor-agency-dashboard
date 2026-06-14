@@ -152,6 +152,21 @@ function createSchema(): void {
     status TEXT DEFAULT 'active',
     last_active TEXT
   )`);
+
+  // Email Activity — Resend integration
+  database.run(`CREATE TABLE IF NOT EXISTS email_activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    resend_id TEXT UNIQUE,
+    company_id TEXT NOT NULL,
+    email_from TEXT,
+    email_to TEXT,
+    subject TEXT,
+    status TEXT DEFAULT 'sent',
+    clicks INTEGER DEFAULT 0,
+    opens INTEGER DEFAULT 0,
+    sent_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  )`);
 }
 
 // ─── Seed Data is in seed.ts ─────────────────────────────────────────────────
