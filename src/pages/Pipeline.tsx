@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useDashboardStore } from '@/store/dashboardStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
@@ -159,7 +158,7 @@ function getStageBadge(stageId: string) {
 
 function StageDetailModal({ stage, onClose }: { stage: StageConfig; onClose: () => void }) {
   const stats = stageDetailStats[stage.id] || { active: 0, completed: 0, avgTime: '-', successRate: '-' };
-  const stageLeads = cPipeline.filter((l: any) => l.stageId === stage.id);
+  const stageLeads = pipelineLeads.filter((l) => l.stageId === stage.id);
 
   return (
     <motion.div
@@ -317,9 +316,6 @@ function KpiCard({ caption, metric, trend, trendColor, accentColor, subContent, 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Pipeline() {
-  const { activeCompany } = useDashboardStore();
-  const isLocked = activeCompany !== 'all';
-  const cPipeline = isLocked ? pipelineLeads.filter((l: any) => l.companyId === activeCompany) : pipelineLeads;
   const [selectedStage, setSelectedStage] = useState<StageConfig | null>(null);
   const [pipelineRunning, setPipelineRunning] = useState(true);
   const [approvalsList, setApprovalsList] = useState(approvals);
