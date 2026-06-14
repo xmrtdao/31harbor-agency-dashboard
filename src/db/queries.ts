@@ -9,6 +9,7 @@ import type {
   ActivityEntry,
   User,
   AnalyticsData,
+  EmailActivity,
 } from './types';
 
 // ─── Companies ───────────────────────────────────────────────────────────────
@@ -253,7 +254,6 @@ export function updateCampaign(id: number, updates: Partial<Campaign>): void {
   if (updates.start_date !== undefined) { fields.push("start_date = ?"); values.push(updates.start_date); }
   if (updates.end_date !== undefined) { fields.push("end_date = ?"); values.push(updates.end_date); }
 
-  if (!fields.length) return;
   values.push(id);
   db.run(`UPDATE campaigns SET ${fields.join(", ")} WHERE id = ?`, values);
   saveDB();
@@ -272,47 +272,28 @@ export function getPipelineStages(): PipelineStage[] {
   }));
 }
 
-// Get pipeline data with lead counts per stage
-export function getPipelineData(): Array<PipelineStage & { count: number; leadIds: number[] }> {
+export function getPipelineData(): Array<{ id: string; label: string; count: number; leadIds: number[]; needsApproval: number }> {
   const db = getDB();
   const stages = getPipelineStages();
-
   return stages.map((stage) => {
     const result = db.exec(
-      "SELECT id FROM leads WHERE pipeline_stage = ?",
+      "SELECT id FROM leads WHERE pipeline_stage = ? ORDER BY created_at DESC",
       [stage.id]
     );
-    const leadIds = result.length ? result[0].values.map((r: any) => r[0]) : [];
+    const leadIds: number[] = result.length ? result[0].values.map((r: any) => r[0] as number) : [];
     return {
-      ...stage,
+      id: stage.id,
+      label: stage.name,
       count: leadIds.length,
       leadIds,
+      needsApproval: stage.requires_approval,
     };
   });
 }
 
-// Get leads needing approval at a stage
-export function getPendingApprovals(stageId?: string): Lead[] {
-  const db = getDB();
-  const sql = stageId
-    ? "SELECT id, name, email, phone, source, intent, company_routed, score, status, ai_confidence, ai_reasoning, pipeline_stage, value, created_at, updated_at FROM leads WHERE pipeline_stage = ? AND status = 'Pending' ORDER BY created_at DESC"
-    : "SELECT id, name, email, phone, source, intent, company_routed, score, status, ai_confidence, ai_reasoning, pipeline_stage, value, created_at, updated_at FROM leads WHERE status = 'Pending' ORDER BY created_at DESC";
-  const params = stageId ? [stageId] : [];
-  const result = db.exec(sql, params);
-  if (!result.length) return [];
-
-  const rows: any[] = result[0].values;
-  return rows.map((r) => ({
-    id: r[0], name: r[1], email: r[2], phone: r[3], source: r[4],
-    intent: r[5], company_routed: r[6], score: r[7], status: r[8],
-    ai_confidence: r[9], ai_reasoning: r[10], pipeline_stage: r[11],
-    value: r[12], created_at: r[13], updated_at: r[14],
-  }));
-}
-
 // ─── Activity Log ────────────────────────────────────────────────────────────
 
-export function getActivityLog(company?: string, limit = 50): ActivityEntry[] {
+export function getActivityLog(company?: string, limit: number = 50): ActivityEntry[] {
   const db = getDB();
   const sql = company
     ? "SELECT id, type, company, description, metadata, created_at FROM activity_log WHERE company = ? ORDER BY created_at DESC LIMIT ?"
@@ -327,17 +308,11 @@ export function getActivityLog(company?: string, limit = 50): ActivityEntry[] {
   }));
 }
 
-export function addActivity(entry: Partial<ActivityEntry>): void {
+export function addActivityEntry(entry: Omit<ActivityEntry, 'id'>): void {
   const db = getDB();
   db.run(
-    "INSERT INTO activity_log (type, company, description, metadata, created_at) VALUES (?, ?, ?, ?, ?)",
-    [
-      entry.type ?? 'system',
-      entry.company ?? null,
-      entry.description ?? '',
-      entry.metadata ?? null,
-      new Date().toISOString(),
-    ]
+    `INSERT INTO activity_log (type, company, description, metadata, created_at) VALUES (?, ?, ?, ?, ?)`,
+    [entry.type ?? null, entry.company ?? null, entry.description, entry.metadata ?? null, entry.created_at ?? new Date().toISOString()]
   );
   saveDB();
 }
@@ -355,24 +330,6 @@ export function getUsers(): User[] {
   }));
 }
 
-export function updateUser(id: number, updates: Partial<User>): void {
-  const db = getDB();
-  const fields: string[] = [];
-  const values: any[] = [];
-
-  if (updates.name !== undefined) { fields.push("name = ?"); values.push(updates.name); }
-  if (updates.email !== undefined) { fields.push("email = ?"); values.push(updates.email); }
-  if (updates.role !== undefined) { fields.push("role = ?"); values.push(updates.role); }
-  if (updates.companies !== undefined) { fields.push("companies = ?"); values.push(updates.companies); }
-  if (updates.status !== undefined) { fields.push("status = ?"); values.push(updates.status); }
-  if (updates.last_active !== undefined) { fields.push("last_active = ?"); values.push(updates.last_active); }
-
-  if (!fields.length) return;
-  values.push(id);
-  db.run(`UPDATE users SET ${fields.join(", ")} WHERE id = ?`, values);
-  saveDB();
-}
-
 // ─── Analytics ───────────────────────────────────────────────────────────────
 
 export function getAnalytics(company?: string): AnalyticsData {
@@ -385,12 +342,12 @@ export function getAnalytics(company?: string): AnalyticsData {
   );
   const totalLeads = leadsResult.length ? (leadsResult[0].values[0][0] as number) : 0;
 
-  // Total revenue from campaigns
-  const revenueResult = db.exec(
+  // Total revenue
+  const revResult = db.exec(
     company ? "SELECT COALESCE(SUM(revenue), 0) FROM campaigns WHERE company = ?" : "SELECT COALESCE(SUM(revenue), 0) FROM campaigns",
     company ? [company] : []
   );
-  const totalRevenue = revenueResult.length ? (revenueResult[0].values[0][0] as number) : 0;
+  const totalRevenue = revResult.length ? (revResult[0].values[0][0] as number) : 0;
 
   // Total spend
   const spendResult = db.exec(
@@ -466,6 +423,79 @@ export function getConversionFunnel(): Array<{ stage: string; count: number }> {
       count: result.length ? (result[0].values[0][0] as number) : 0,
     };
   });
+}
+
+// ─── Email Activity ─────────────────────────────────────────────────────────
+
+export function getEmailActivity(company?: string, limit: number = 20): EmailActivity[] {
+  const db = getDB();
+  const sql = company && company !== 'all'
+    ? `SELECT id, resend_id, company_id, email_from, email_to, subject, status, clicks, opens, sent_at, created_at FROM email_activity WHERE company_id = ? ORDER BY sent_at DESC LIMIT ?`
+    : `SELECT id, resend_id, company_id, email_from, email_to, subject, status, clicks, opens, sent_at, created_at FROM email_activity ORDER BY sent_at DESC LIMIT ?`;
+  const params = company && company !== 'all' ? [company, limit] : [limit];
+  const result = db.exec(sql, params);
+  if (!result.length) return [];
+
+  const rows: any[] = result[0].values;
+  return rows.map((r) => ({
+    id: r[0], resend_id: r[1], company_id: r[2], email_from: r[3], email_to: r[4],
+    subject: r[5], status: r[6], clicks: r[7], opens: r[8], sent_at: r[9], created_at: r[10],
+  }));
+}
+
+export function insertEmailActivity(email: Omit<EmailActivity, 'id' | 'created_at'>): void {
+  const db = getDB();
+  db.run(
+    `INSERT OR IGNORE INTO email_activity (resend_id, company_id, email_from, email_to, subject, status, clicks, opens, sent_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      email.resend_id,
+      email.company_id,
+      email.email_from ?? null,
+      email.email_to ?? null,
+      email.subject ?? null,
+      email.status ?? 'sent',
+      email.clicks ?? 0,
+      email.opens ?? 0,
+      email.sent_at ?? new Date().toISOString(),
+      new Date().toISOString(),
+    ]
+  );
+  saveDB();
+}
+
+export function updateEmailActivityStatus(resendId: string, status: string, opens?: number, clicks?: number): void {
+  const db = getDB();
+  const fields: string[] = ['status = ?'];
+  const values: any[] = [status];
+  if (opens !== undefined) { fields.push('opens = ?'); values.push(opens); }
+  if (clicks !== undefined) { fields.push('clicks = ?'); values.push(clicks); }
+  values.push(resendId);
+  db.run(`UPDATE email_activity SET ${fields.join(', ')} WHERE resend_id = ?`, values);
+  saveDB();
+}
+
+export function getEmailStats(company?: string): { total: number; sent: number; delivered: number; opened: number; bounced: number } {
+  const db = getDB();
+  const where = company && company !== 'all' ? 'WHERE company_id = ?' : '';
+  const params = company && company !== 'all' ? [company] : [];
+
+  const totalResult = db.exec(`SELECT COUNT(*) FROM email_activity ${where}`, params);
+  const total = totalResult.length ? (totalResult[0].values[0][0] as number) : 0;
+
+  const sentResult = db.exec(`SELECT COUNT(*) FROM email_activity ${where} ${where ? 'AND' : 'WHERE'} status = 'sent'`, params);
+  const sent = sentResult.length ? (sentResult[0].values[0][0] as number) : 0;
+
+  const deliveredResult = db.exec(`SELECT COUNT(*) FROM email_activity ${where} ${where ? 'AND' : 'WHERE'} status = 'delivered'`, params);
+  const delivered = deliveredResult.length ? (deliveredResult[0].values[0][0] as number) : 0;
+
+  const openedResult = db.exec(`SELECT COUNT(*) FROM email_activity ${where} ${where ? 'AND' : 'WHERE'} status IN ('opened','clicked')`, params);
+  const opened = openedResult.length ? (openedResult[0].values[0][0] as number) : 0;
+
+  const bouncedResult = db.exec(`SELECT COUNT(*) FROM email_activity ${where} ${where ? 'AND' : 'WHERE'} status IN ('bounced','complained')`, params);
+  const bounced = bouncedResult.length ? (bouncedResult[0].values[0][0] as number) : 0;
+
+  return { total, sent, delivered, opened, bounced };
 }
 
 // ─── Stats ───────────────────────────────────────────────────────────────────
