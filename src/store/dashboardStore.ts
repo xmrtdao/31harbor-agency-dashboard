@@ -11,6 +11,7 @@ import type {
   ActivityEntry,
   User,
   Notification,
+  EmailActivity,
 } from '@/db/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -32,6 +33,7 @@ interface DashboardStore {
   activityFeed: ActivityEntry[];
   users: User[];
   sharingRules: LeadSharingRule[];
+  emailActivity: EmailActivity[];
 
   // ── Actions ─────────────────────────────────────────────────────────
   init: () => Promise<void>;
@@ -47,6 +49,7 @@ interface DashboardStore {
   getCompanies: () => Company[];
   getCampaigns: (company?: string) => Campaign[];
   getActivityLog: (company?: string, limit?: number) => ActivityEntry[];
+  getEmailActivity: (company?: string, limit?: number) => EmailActivity[];
   getPipelineStages: () => PipelineStage[];
   getPipelineData: () => ReturnType<typeof queries.getPipelineData>;
   getUsers: () => User[];
@@ -74,7 +77,7 @@ const defaultNotifications: Notification[] = [
   { id: 'N-001', title: 'Pipeline Alert', message: '2 approvals pending in XMRT DAO pipeline', type: 'warning', read: false, timeAgo: '5m ago' },
   { id: 'N-002', title: 'Lead Routed', message: 'New high-intent lead: Sarah Mitchell (87)', type: 'success', read: false, timeAgo: '12m ago' },
   { id: 'N-003', title: 'Campaign Milestone', message: 'Wedding Season Boost hit 4.0x ROAS', type: 'success', read: true, timeAgo: '1h ago' },
-  { id: 'N-004', title: 'System Update', message: 'Lead classifier retrained — 94.2% accuracy', type: 'info', read: true, timeAgo: '2h ago' },
+  { id: 'N-004', title: 'System Update', message: 'Lead classifier retrained \u2014 94.2% accuracy', type: 'info', read: true, timeAgo: '2h ago' },
 ];
 
 // ─── Store Factory ───────────────────────────────────────────────────────────
@@ -88,6 +91,7 @@ function syncFromDB(company?: string) {
     activityFeed: queries.getActivityLog(company && company !== 'all' ? company : undefined),
     users: queries.getUsers(),
     sharingRules: queries.getLeadSharingRules(),
+    emailActivity: queries.getEmailActivity(company && company !== 'all' ? company : undefined, 20),
   };
 }
 
@@ -106,6 +110,7 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   activityFeed: [],
   users: [],
   sharingRules: [],
+  emailActivity: [],
 
   // ── Actions ─────────────────────────────────────────────────────────
   init: async () => {
@@ -160,6 +165,11 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   getActivityLog: (company, limit) => {
     const c = company || (get().activeCompany !== 'all' ? get().activeCompany : undefined);
     return queries.getActivityLog(c, limit);
+  },
+
+  getEmailActivity: (company, limit) => {
+    const c = company || (get().activeCompany !== 'all' ? get().activeCompany : undefined);
+    return queries.getEmailActivity(c, limit ?? 20);
   },
 
   getPipelineStages: () => {
