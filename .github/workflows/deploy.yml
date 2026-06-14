@@ -3,7 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,8 +23,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -39,50 +38,27 @@ jobs:
       - name: Generate company entry files
         run: |
           mkdir -p dist/harbor dist/party dist/xmrt
+          for dir in harbor party xmrt; do
+            cp dist/index.html "dist/$dir/index.html"
+          done
 
-          # Read the built index.html, strip the redirect script, inject company config
-          python3 << 'PYEOF'
-          import re
+          # Harbor
+          sed -i "s|<title>SuiteAI</title>|<title>SuiteAI \&mdash; 31 Harbor</title>|" dist/harbor/index.html
+          sed -i "s|<meta name=\"viewport"|<meta name=\"theme-color\" content=\"#0A84FF\" />\n    <meta name=\"viewport"|" dist/harbor/index.html
+          sed -i "s|<head>|<head>\n    <script>window.SUITEAI_COMPANY=\"harbor\";window.SUITEAI_COMPANY_NAME=\"31 Harbor\";window.SUITEAI_COMPANY_COLOR=\"#0A84FF\";</script>|" dist/harbor/index.html
 
-          with open('dist/index.html', 'r') as f:
-              html = f.read()
+          # Party
+          sed -i "s|<title>SuiteAI</title>|<title>SuiteAI \&mdash; Party Favor Photo</title>|" dist/party/index.html
+          sed -i "s|<meta name=\"viewport"|<meta name=\"theme-color\" content=\"#F5A623\" />\n    <meta name=\"viewport"|" dist/party/index.html
+          sed -i "s|<head>|<head>\n    <script>window.SUITEAI_COMPANY=\"party\";window.SUITEAI_COMPANY_NAME=\"Party Favor Photo\";window.SUITEAI_COMPANY_COLOR=\"#F5A623\";</script>|" dist/party/index.html
 
-          # Strip the entire redirect <script> block (the IIFE in <head>)
-          html = re.sub(
-              r'<script>\s*\(function\(\)\s*\{.*?</script>\s*',
-              '',
-              html,
-              count=1,
-              flags=re.DOTALL
-          )
+          # XMRT
+          sed -i "s|<title>SuiteAI</title>|<title>SuiteAI \&mdash; XMRT DAO</title>|" dist/xmrt/index.html
+          sed -i "s|<meta name=\"viewport"|<meta name=\"theme-color\" content=\"#7B61FF\" />\n    <meta name=\"viewport"|" dist/xmrt/index.html
+          sed -i "s|<head>|<head>\n    <script>window.SUITEAI_COMPANY=\"xmrt\";window.SUITEAI_COMPANY_NAME=\"XMRT DAO\";window.SUITEAI_COMPANY_COLOR=\"#7B61FF\";</script>|" dist/xmrt/index.html
 
-          companies = [
-              ("harbor", "31 Harbor", "#0A84FF"),
-              ("party", "Party Favor Photo", "#F5A623"),
-              ("xmrt", "XMRT DAO", "#7B61FF"),
-          ]
-
-          for company_id, company_name, company_color in companies:
-              ch = html
-
-              # Inject company config right after <head>
-              company_script = f'''<script>
-      window.SUITEAI_COMPANY = "{company_id}";
-      window.SUITEAI_COMPANY_NAME = "{company_name}";
-      window.SUITEAI_COMPANY_COLOR = "{company_color}";
-    </script>'''
-              ch = ch.replace('<head>', f'<head>\n    {company_script}')
-              ch = ch.replace('<title>SuiteAI</title>', f'<title>SuiteAI — {company_name}</title>')
-              ch = ch.replace(
-                  '<meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-                  f'<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <meta name="theme-color" content="{company_color}" />'
-              )
-
-              with open(f'dist/{company_id}/index.html', 'w') as f:
-                  f.write(ch)
-
-              print(f"Generated dist/{company_id}/index.html ({len(ch)} bytes)")
-          PYEOF
+          echo "Generated company entries:"
+          ls -la dist/harbor/index.html dist/party/index.html dist/xmrt/index.html
 
       - name: Copy support files
         run: |
@@ -92,7 +68,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: "./dist"
 
   deploy:
     environment:
