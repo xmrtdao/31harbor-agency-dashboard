@@ -15,7 +15,7 @@ import MuAPIStatus from '@/components/MuAPIStatus';
 import { useDashboardStore } from '@/store/dashboardStore';
 import {
   dailyRevenueData, companyRevenueBreakdown, sparklineDataTotalLeads,
-  sparklineDataPipeline, activityFeed, pipelineStages, campaigns, leads,
+  sparklineDataPipeline, activityFeed, pipelineStages, campaigns,
 } from '@/data/mockData';
 
 // ─── Animation Variants ──────────────────────────────────────────────────────
@@ -36,6 +36,20 @@ const rowVariants = {
     transition: { delay: i * 0.03, duration: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   }),
 };
+
+// ─── Time Ago Helper ─────────────────────────────────────────────────────────
+
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return '—';
+  const then = new Date(dateStr).getTime();
+  const now = Date.now();
+  const mins = Math.floor((now - then) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
 
 // ─── Count-Up Hook ───────────────────────────────────────────────────────────
 
@@ -191,7 +205,7 @@ function DonutTooltip({ active, payload }: { active?: boolean; payload?: Array<{
 // ─── Main Overview Page ──────────────────────────────────────────────────────
 
 export default function Home() {
-  const { activeCompany } = useDashboardStore();
+  const { dbReady, activeCompany, campaigns: storeCampaigns, activityFeed: storeActivity, leads } = useDashboardStore();
 
   // Count-up values
   const totalLeadsDisplay = useCountUp(247, 1200, '');
@@ -629,8 +643,8 @@ export default function Home() {
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-2">
-                        {getCompanyDot(lead.companyId)}
-                        <span className="text-[13px] text-text-primary">{getCompanyName(lead.companyId)}</span>
+                        {getCompanyDot(lead.company_routed || '')}
+                        <span className="text-[13px] text-text-primary">{getCompanyName(lead.company_routed || '')}</span>
                       </div>
                     </td>
                     <td className="px-3 py-3">
@@ -647,11 +661,11 @@ export default function Home() {
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-xmrt-purple" />
-                        <span className="text-[13px] text-text-secondary">{lead.routedBy}</span>
+                        <span className="text-[13px] text-text-secondary">{(lead.ai_confidence === 'high' || lead.ai_confidence === 'medium') ? 'AI' : 'Manual'}</span>
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      <span className="text-[12px] text-text-tertiary font-mono">{lead.timeAgo}</span>
+                      <span className="text-[12px] text-text-tertiary font-mono">{timeAgo(lead.created_at)}</span>
                     </td>
                     <td className="px-3 py-3 text-right">
                       <button className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-bg-hover transition-colors">
