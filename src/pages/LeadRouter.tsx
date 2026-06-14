@@ -365,11 +365,6 @@ function LeadDetailDrawer({ lead, onClose }: { lead: Lead; onClose: () => void }
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function LeadRouter() {
-  const { activeCompany } = useDashboardStore();
-  const isLocked = activeCompany !== 'all';
-  const cLeads = isLocked ? leadRows.filter((l: any) => l.companyId === activeCompany) : leadRows;
-  const cLog = isLocked ? routingLog.filter((e: any) => e.companyId === activeCompany) : routingLog;
-  const cStats = isLocked ? conversionData.filter((s: any) => s.companyId === activeCompany) : conversionData;
   const [activePeriod, setActivePeriod] = useState('Today');
   const [searchQuery, setSearchQuery] = useState('');
   const [companyFilter, setCompanyFilter] = useState('All Companies');
@@ -377,6 +372,11 @@ export default function LeadRouter() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const { activeCompany } = useDashboardStore();
+  const isLocked = activeCompany !== 'all';
+  const cLeads = isLocked ? leadRows.filter((l: any) => l.companyId === activeCompany) : leadRows;
+  const cLog = isLocked ? routingLog.filter((e: any) => e.companyId === activeCompany) : routingLog;
+  const cStats = isLocked ? conversionData.filter((s: any) => s.companyId === activeCompany) : conversionData;
 
   const handleRefresh = () => {
     setRefreshing(true);
