@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -26,19 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: cp node_modules/sql.js/dist/sql-wasm-browser.wasm dist/
-      - name: Company entries
-        run: |
-          mkdir -p dist/harbor dist/party dist/xmrt
-          python3 -c "
-import os
-for cid, cname, ccolor in [('harbor','31 Harbor','#0A84FF'),('party','Party Favor Photo','#F5A623'),('xmrt','XMRT DAO','#7B61FF')]:
-    with open('dist/index.html') as f: html = f.read()
-    html = html.replace('<head>', '<head>\n    <script>window.SUITEAI_COMPANY="'+cid+'";window.SUITEAI_COMPANY_NAME="'+cname+'";window.SUITEAI_COMPANY_COLOR="'+ccolor+'";</script>')
-    html = html.replace('<title>SuiteAI</title>', '<title>SuiteAI — '+cname+'</title>')
-    html = html.replace('<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />', '<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <meta name=\"theme-color\" content=\"'+ccolor+'\" />')
-    with open('dist/'+cid+'/index.html', 'w') as f: f.write(html)
-    print(cid, 'done')
-"
+      - run: node gen-companies.js
       - run: cp 404.html dist/ 2>/dev/null || true; cp .nojekyll dist/ 2>/dev/null || true
       - uses: actions/upload-pages-artifact@v3
         with:
