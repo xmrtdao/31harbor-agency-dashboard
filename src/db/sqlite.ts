@@ -9,7 +9,7 @@ let SQL: any = null;
 export async function initDB(): Promise<void> {
   if (db) return;
 
-  SQL = await initSqlJs({ locateFile: (file: string) => `https://sql.js.org/dist/${file}` });
+  SQL = await initSqlJs({ locateFile: (file: string) => `/${file}` });
 
   // Try to load from localStorage
   const saved = localStorage.getItem('suiteai_db');
