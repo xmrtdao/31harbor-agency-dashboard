@@ -276,7 +276,7 @@ function CampaignsTab() {
     <motion.div variants={staggerContainer80} initial="hidden" animate="visible" className="space-y-6">
       {/* Campaign Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          const comp = companyMap[c.companyId];
+        {companyFilteredCampaigns.map((c) => {
           const isPaused = activeCards[c.id] || c.status === 'Paused';
           return (
             <motion.div
@@ -350,7 +350,7 @@ function CampaignsTab() {
       <motion.div variants={fadeUp} transition={cardTransition} className="bg-bg-elevated border border-border-subtle rounded-lg overflow-hidden">
         <div className="px-5 py-4 border-b border-border-subtle flex items-center gap-3">
           <h3 className="text-[16px] font-semibold text-text-primary">All Campaigns</h3>
-          <span className="text-[11px] text-text-secondary bg-bg-hover px-2 py-0.5 rounded-full">{campaigns.length} campaigns</span>
+          <span className="text-[11px] text-text-secondary bg-bg-hover px-2 py-0.5 rounded-full">{companyFilteredCampaigns.length} campaigns</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
