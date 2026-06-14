@@ -39,8 +39,10 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { sidebarCollapsed, toggleSidebar, activeCompany, setActiveCompany } = useDashboardStore();
   const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
+  const lockedCompany = typeof window !== 'undefined' ? window.SUITEAI_COMPANY : undefined;
+  const lockedCompanyData = lockedCompany ? companyOptions.find((c) => c.value === lockedCompany) : null;
 
-  const activeCompanyData = companyOptions.find((c) => c.value === activeCompany);
+  const activeCompanyData = lockedCompanyData || companyOptions.find((c) => c.value === activeCompany);
 
   return (
     <motion.aside
@@ -71,8 +73,8 @@ export default function Navbar() {
       {/* Company Selector */}
       <div className="px-3 pt-4 pb-2 shrink-0">
         <button
-          onClick={() => setCompanyDropdownOpen(!companyDropdownOpen)}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md bg-bg-input border border-border-default hover:border-border-focus transition-colors text-left"
+          onClick={lockedCompany ? undefined : () => setCompanyDropdownOpen(!companyDropdownOpen)}
+          className={"w-full flex items-center gap-2.5 px-3 py-2 rounded-md border text-left " + (lockedCompany ? "bg-bg-elevated border-border-subtle cursor-default" : "bg-bg-input border-border-default hover:border-border-focus transition-colors")}
         >
           <div
             className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -91,13 +93,13 @@ export default function Navbar() {
         </button>
 
         {/* Dropdown */}
-        {companyDropdownOpen && !sidebarCollapsed && (
+        {companyDropdownOpen && !sidebarCollapsed && !lockedCompany && (
           <motion.div
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-1 bg-bg-elevated border border-border-default rounded-md shadow-lg overflow-hidden"
           >
-            {companyOptions.map((opt) => (
+            {companyOptions.filter((o) => !lockedCompany || o.value !== 'all').map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => {
