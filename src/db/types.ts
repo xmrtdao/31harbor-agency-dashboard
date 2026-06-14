@@ -115,6 +115,20 @@ export interface User {
   last_active: string | null;
 }
 
+export interface EmailActivity {
+  id: number;
+  resend_id: string;
+  company_id: string;
+  email_from: string | null;
+  email_to: string | null;
+  subject: string | null;
+  status: string;
+  clicks: number;
+  opens: number;
+  sent_at: string | null;
+  created_at: string | null;
+}
+
 export interface AnalyticsData {
   totalLeads: number;
   totalRevenue: number;
