@@ -208,3 +208,24 @@ export function seedData(): void {
   insertEmail.free();
 
 }
+
+// ─── Email-only seed (for DB migration) ────────────────────────────────────
+export function seedEmailDataOnly(): void {
+  const database = getDB();
+  const emailActivityData = [
+    ['re_001_harbor', 'harbor', 'agent@31harbor.com', 'sarah@email.com', 'Welcome to 31 Harbor', 'delivered', 1, 1, '2025-06-10T14:30:00Z', '2025-06-10T14:30:00Z'],
+    ['re_002_harbor', 'harbor', 'listings@31harbor.com', 'ralvarado@email.com', 'New Listings This Week', 'sent', 0, 0, '2025-06-10T12:00:00Z', '2025-06-10T12:00:00Z'],
+    ['re_003_harbor', 'harbor', 'concierge@31harbor.com', 'info@harborview.com', 'Your Viewing Appointment', 'delivered', 1, 0, '2025-06-09T10:00:00Z', '2025-06-09T10:00:00Z'],
+    ['re_004_party', 'party', 'bookings@partyfavorphoto.com', 'jlchen@events.com', 'Your Event is Confirmed!', 'delivered', 1, 1, '2025-06-10T15:00:00Z', '2025-06-10T15:00:00Z'],
+    ['re_005_party', 'party', 'gallery@partyfavorphoto.com', 'emily@weddingplanning.com', 'Your Photo Gallery is Ready', 'delivered', 2, 1, '2025-06-09T09:00:00Z', '2025-06-09T09:00:00Z'],
+    ['re_006_party', 'party', 'promo@partyfavorphoto.com', 'events@birthdaybash.com', 'Summer Special: 20% Off', 'sent', 0, 0, '2025-06-08T16:00:00Z', '2025-06-08T16:00:00Z'],
+    ['re_007_xmrt', 'xmrt', 'security@xmrt.io', 'contact@cryptomining.com', 'Security Audit Results', 'delivered', 1, 1, '2025-06-10T11:00:00Z', '2025-06-10T11:00:00Z'],
+    ['re_008_xmrt', 'xmrt', 'node@xmrt.io', 'admin@smartnodes.org', 'Node Sync Complete', 'delivered', 0, 1, '2025-06-09T08:00:00Z', '2025-06-09T08:00:00Z'],
+    ['re_009_xmrt', 'xmrt', 'security@xmrt.io', 'alerts@chaindefender.com', 'Threat Alert: Block 48291', 'sent', 0, 0, '2025-06-08T14:00:00Z', '2025-06-08T14:00:00Z'],
+  ];
+  const insertEmail = database.prepare(
+    `INSERT OR IGNORE INTO email_activity (resend_id, company_id, email_from, email_to, subject, status, clicks, opens, sent_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  for (const e of emailActivityData) { insertEmail.run(e); }
+  insertEmail.free();
+}
