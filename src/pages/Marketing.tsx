@@ -276,7 +276,7 @@ function CampaignsTab() {
     <motion.div variants={staggerContainer80} initial="hidden" animate="visible" className="space-y-6">
       {/* Campaign Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {campaigns.map((c) => {
+        {companyFilteredCampaigns.map((c) => {
           const comp = companyMap[c.companyId];
           const isPaused = activeCards[c.id] || c.status === 'Paused';
           return (
@@ -363,7 +363,7 @@ function CampaignsTab() {
               </tr>
             </thead>
             <tbody>
-              {campaigns.map((c, i) => (
+              {companyFilteredCampaigns.map((c, i) => (
                 <motion.tr
                   key={c.id}
                   initial={{ opacity: 0, y: 8 }}
@@ -764,6 +764,12 @@ function CrossSellTab() {
 /* ─── Main Marketing Page ─────────────────────────────────────────────────── */
 
 export default function Marketing() {
+  const { activeCompany } = useDashboardStore();
+  const isLocked = activeCompany !== 'all';
+  const companyFilteredCampaigns = isLocked ? campaigns.filter((c) => c.companyId === activeCompany) : campaigns;
+  const companyFilteredQueue = isLocked ? contentQueue.filter((q) => q.companyId === activeCompany) : contentQueue;
+  const companyFilteredPerformance = isLocked ? performanceData.filter((p) => p.companyId === activeCompany) : performanceData;
+  const companyFilteredCrossSell = isLocked ? crossSellOpps.filter((o) => o.sourceCompany === activeCompany || o.targetCompany === activeCompany) : crossSellOpps;
   const [activeTab, setActiveTab] = useState('campaigns');
 
   return (
