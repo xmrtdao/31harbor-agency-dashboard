@@ -6,6 +6,30 @@
 
 @layer base {
   :root {
+    /* ─── SuiteAI Theme Variables (overridden per-company) ──────────── */
+    --su-bg: #0F1923;
+    --su-bg-card: #1B2838;
+    --su-bg-sidebar: #152030;
+    --su-bg-input: #1B2838;
+    --su-bg-elevated: #223040;
+    --su-bg-hover: rgba(201,168,76,0.08);
+    --su-accent: #C9A84C;
+    --su-accent-dim: rgba(201,168,76,0.15);
+    --su-accent-glow: rgba(201,168,76,0.3);
+    --su-accent-secondary: #C9A84C;
+    --su-text: #E8E0D0;
+    --su-text-muted: #8A7E6B;
+    --su-text-dim: #5A5040;
+    --su-border: rgba(201,168,76,0.2);
+    --su-border-focus: rgba(201,168,76,0.5);
+    --su-gold: #C9A84C;
+    --su-navy: #1B2838;
+    --su-gradient: linear-gradient(135deg, #1B2838 0%, #0F1923 100%);
+    --su-scrollbar-track: #1A2235;
+    --su-scrollbar-thumb: #4A5568;
+    --su-scrollbar-thumb-hover: #5A6578;
+
+    /* ─── shadcn/ui variables (kept for component compatibility) ────── */
     --background: 220 20% 4%;
     --foreground: 216 20% 93%;
     --card: 220 18% 6%;
@@ -37,13 +61,14 @@
   }
 
   html, body, #root {
-    @apply bg-bg-darkest text-text-primary;
+    background: var(--su-bg);
+    color: var(--su-text);
     font-family: 'Inter', system-ui, sans-serif;
     min-height: 100dvh;
   }
 
   * {
-    @apply border-border-subtle;
+    border-color: var(--su-border);
   }
 }
 
@@ -53,21 +78,8 @@
   }
 }
 
-/* Custom scrollbar for dark theme */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1A2235;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #4A5568;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #5A6578;
-}
+/* ─── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--su-scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--su-scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--su-scrollbar-thumb-hover); }
