@@ -177,8 +177,7 @@ function CampaignsTab({ campaigns, activeCompany }: { campaigns: Campaign[]; act
 
   const toggleStatus = (id: number, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Paused' : 'Active';
-    store.updateCampaign(id, { status: newStatus });
-    store.refresh();
+    setActiveCards((prev) => ({ ...prev, [String(id)]: newStatus === 'Paused' }));
   };
 
   return (
