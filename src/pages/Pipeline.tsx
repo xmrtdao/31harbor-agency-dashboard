@@ -159,7 +159,7 @@ function getStageBadge(stageId: string) {
 
 function StageDetailModal({ stage, onClose }: { stage: StageConfig; onClose: () => void }) {
   const stats = stageDetailStats[stage.id] || { active: 0, completed: 0, avgTime: '-', successRate: '-' };
-  const stageLeads = companyFilteredPipeline.filter((l) => l.stageId === stage.id);
+  const stageLeads = cPipeline.filter((l: any) => l.stageId === stage.id);
 
   return (
     <motion.div
@@ -317,14 +317,12 @@ function KpiCard({ caption, metric, trend, trendColor, accentColor, subContent, 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function Pipeline() {
+  const { activeCompany } = useDashboardStore();
+  const isLocked = activeCompany !== 'all';
+  const cPipeline = isLocked ? pipelineLeads.filter((l: any) => l.companyId === activeCompany) : pipelineLeads;
   const [selectedStage, setSelectedStage] = useState<StageConfig | null>(null);
   const [pipelineRunning, setPipelineRunning] = useState(true);
   const [approvalsList, setApprovalsList] = useState(approvals);
-
-  // Company-locked filtering
-  const isLocked = activeCompany !== 'all';
-  const companyFilteredPipeline = isLocked ? pipelineLeads.filter((l: any) => l.companyId === activeCompany) : pipelineLeads;
-  const companyFilteredApprovals = isLocked ? approvalsList.filter((a: any) => a.companyId === activeCompany) : approvalsList;
   const [chartTab, setChartTab] = useState('Volume');
   const [pipelineFilter, setPipelineFilter] = useState('All Pipelines');
 
@@ -611,7 +609,7 @@ export default function Pipeline() {
               </div>
             ) : (
               <div className="space-y-3">
-                {companyFilteredApprovals.map((approval, i) => {
+                {approvalsList.map((approval, i) => {
                   const company = getCompany(approval.companyId);
                   return (
                     <motion.div
